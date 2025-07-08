@@ -14,6 +14,7 @@
     "build-storybook": "storybook build",
     "clean": "rm -rf dist"
   },
+  "files": ["dist"],
   "dependencies": {
     "@mindfield/logic": "file:../../core/logic",
     "@mindfield/ui": "file:../../core/ui",
