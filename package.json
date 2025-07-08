@@ -5,19 +5,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:prod": "turbo run build:prod",
+    "build:prod": "turbo run build:prod --filter=apps/** --filter=services/**",
     "build:android": "turbo run build:android --filter=@mindfield/mobile",
-    "dev": "turbo run dev --parallel",
-    "lint": "turbo run lint",
-    "test": "turbo run test",
-    "type-check": "turbo run type-check",
-    "clean": "turbo run clean && rm -rf node_modules",
+    "dev": "turbo run dev --parallel --filter=apps/** --filter=services/**",
+    "lint": "turbo run lint --filter=apps/** --filter=services/**",
+    "test": "turbo run test --filter=apps/** --filter=services/**",
+    "type-check": "turbo run type-check --filter=apps/** --filter=services/**",
+    "clean": "turbo run clean  --filter=apps/** --filter=services/** && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "storybook": "turbo run storybook --filter=@mindfield/web",
     "build-storybook": "turbo run build-storybook --filter=@mindfield/web",
-    "web": "pnpm --filter apps/web dev",
-    "mobile": "pnpm --filter apps/mobile start",
-    "api": "pnpm --filter services/ingestion-api dev"
+    "web": "turbo run dev --filter=apps/web",
+    "mobile": "turbo run dev --filter=apps/mobile",
+    "api": "turbo run dev --filter=services/api"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
