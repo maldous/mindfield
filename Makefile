@@ -22,7 +22,7 @@ help:
 	@echo "make restart    - Stop and start all services"
 	@echo "make reset      - Reset everything"
 
-setup: ; @./scripts/setup.sh
+setup: ; @./setup.sh
 build: ; @pnpm turbo run build
 test: ; @pnpm test
 lint: ; @pnpm lint
