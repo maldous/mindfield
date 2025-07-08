@@ -1,0 +1,51 @@
+{
+  "name": "mindfield",
+  "version": "1.0.0",
+  "description": "MindField is a playful personality profiling app.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:prod": "turbo run build:prod",
+    "build:android": "turbo run build:android --filter=@mindfield/mobile",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "storybook": "turbo run storybook --filter=@mindfield/web",
+    "build-storybook": "turbo run build-storybook --filter=@mindfield/web",
+    "web": "pnpm --filter apps/web dev",
+    "mobile": "pnpm --filter apps/mobile start",
+    "api": "pnpm --filter services/ingestion-api dev"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@next/eslint-plugin-next": "^15.3.4",
+    "@rushstack/eslint-patch": "^1.10.4",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
+    "eslint": "^9.29.0",
+    "eslint-config-next": "^15.3.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-native": "^5.0.0",
+    "eslint-plugin-storybook": "^0.11.1",
+    "jest": "^30.0.2",
+    "jest-environment-jsdom": "^30.0.2",
+    "jest-util": "^30.0.2",
+    "prettier": "^3.6.0",
+    "ts-jest": "^29.4.0",
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=24.3.0",
+    "pnpm": ">=10.12.4"
+  },
+  "packageManager": "pnpm@10.12.4",
+  "dependencies": {
+    "react-native-reanimated": "^3.18.0"
+  }
+}
