@@ -9,7 +9,7 @@ RUN mkdir -p core/logic core/ui services/${SERVICE}
 COPY core/logic/package.json ./core/logic/
 COPY core/ui/package.json ./core/ui/
 COPY services/${SERVICE}/package.json ./services/${SERVICE}/
-RUN --mount=type=cache,id=pnpm-store-${NODE_MAJOR}-full,target=/root/.pnpm-store,sharing=locked pnpm install --prefer-offline
+RUN --mount=type=cache,id=pnpm-store-${NODE_MAJOR}-full,target=/root/.pnpm-store,sharing=locked pnpm install --filter @mindfield/${SERVICE} --prefer-offline
 FROM deps AS build
 ARG SERVICE
 COPY core/logic core/logic/
