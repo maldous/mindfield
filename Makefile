@@ -23,7 +23,7 @@ help:
 	@echo "make reset      - Reset everything"
 
 setup: ; @./setup.sh
-build: ; @pnpm turbo run build
+build: ; @pnpm turbo run build build-storybook
 test: ; @pnpm turbo run test
 lint: ; @pnpm turbo run lint
 format: ; @pnpm format
