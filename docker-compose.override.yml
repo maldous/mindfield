@@ -1,0 +1,27 @@
+services:
+
+  grafana:
+    volumes:
+      - grafana_dashboards:/var/lib/grafana/dashboards
+      - grafana_provisioning:/etc/grafana/provisioning
+
+  storybook:
+    volumes:
+      - ./:/app:delegated
+      - storybook_next:/app/.next
+      - storybook_node_modules:/app/apps/web/node_modules
+
+  web:
+    volumes:
+      - ./:/repo:delegated
+      - web_next:/repo/.next
+      - web_node_modules:/repo/apps/web/node_modules
+
+volumes:
+
+  grafana_dashboards: {}
+  grafana_provisioning: {}
+  storybook_next: {}
+  storybook_node_modules: {}
+  web_next: {}
+  web_node_modules: {}
