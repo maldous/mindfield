@@ -19,6 +19,7 @@
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
+  "files": ["dist"],
   "dependencies": {
     "@mindfield/logic": "file:../../core/logic",
     "@nestjs/common": "^11.0.0",
