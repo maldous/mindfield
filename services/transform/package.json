@@ -1,0 +1,40 @@
+{
+  "name": "@mindfield/transform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "build:prod": "tsc",
+    "start": "node dist/main.js",
+    "dev": "ts-node src/main.ts",
+    "lint": "eslint src",
+    "test": "jest",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "@mindfield/logic": "file:../../core/logic",
+    "@types/express": "^5.0.3",
+    "ajv": "^8.17.1",
+    "bull": "^4.16.5",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "helmet": "^7.0.0",
+    "redis": "^5.5.6"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
+    "eslint": "^9.29.0",
+    "jest": "^30.0.2",
+    "prettier": "^3.6.0",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "pnpm@10.12.4"
+}

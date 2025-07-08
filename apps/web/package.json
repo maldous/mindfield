@@ -14,7 +14,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@mindfield/core": "file:../../core/logic",
+    "@mindfield/logic": "file:../../core/logic",
     "@mindfield/ui": "file:../../core/ui",
     "@tanstack/react-query": "^5.81.2",
     "autoprefixer": "^10.4.21",

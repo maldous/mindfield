@@ -14,7 +14,7 @@ receivers:
     email_configs:
       - to: 'admin@lixit.local'
         html: |
-          LIXIT Alert: {{ .GroupLabels.alertname }}
+          MindField Alert: {{ .GroupLabels.alertname }}
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Description: {{ .Annotations.description }}

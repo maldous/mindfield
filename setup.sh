@@ -56,7 +56,7 @@ fi
 
 if [ ! -f .env.local ]; then
     cat > .env.local << EOF
-# LIXIT Local Development Environment
+# MindField Local Development Environment
 NODE_ENV=development
 DATABASE_URL=postgresql://mindfield:mindfield_dev_password@localhost:5432/mindfield
 REDIS_URL=redis://localhost:6379
