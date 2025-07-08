@@ -20,7 +20,7 @@
     },
     "build-storybook": {
       "dependsOn": ["^build"],
-      "outputs": ["storybook-static/**"]
+      "outputs": ["storybook/**"]
     },
     "dev": {
       "cache": false,

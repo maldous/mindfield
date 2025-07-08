@@ -1,0 +1,35 @@
+{
+  "name": "@mindfield/core",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:prod": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src",
+    "test": "jest",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "date-fns": "^4.1.0",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
+    "eslint": "^9.29.0",
+    "jest": "^30.0.2",
+    "jest-util": "^30.0.2",
+    "prettier": "^3.6.0",
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "pnpm@10.12.4"
+}

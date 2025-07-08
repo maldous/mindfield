@@ -29,17 +29,6 @@ fi
 mkdir -p .buildx_cache
 mkdir -p backups
 mkdir -p keys
-mkdir -p database/migrations
-mkdir -p database/seeds
-mkdir -p observability/prometheus
-mkdir -p observability/grafana/provisioning/datasources
-mkdir -p observability/grafana/provisioning/dashboards
-mkdir -p observability/grafana/dashboards
-mkdir -p observability/alertmanager
-mkdir -p observability/promtail
-mkdir -p docs
-mkdir -p LICENSES
-mkdir -p plugins
 
 if command -v mkcert &> /dev/null; then
     cd keys
@@ -88,7 +77,7 @@ docker run -d \
   --restart=always \
   -p 5000:5000 \
   -v registry_data:/var/lib/registry \
-  -v "$PWD/registry.yaml":/etc/docker/registry/config.yml:ro \
+  -v "$PWD/registry.yml":/etc/docker/registry/config.yml:ro \
   registry:2
 
 docker volume create registry_write_data >/dev/null 2>&1 || true
