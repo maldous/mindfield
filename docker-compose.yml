@@ -192,7 +192,7 @@ services:
     cpus: 0.5
     ports: [ "3004:3000" ]
 
-  grapesjs-server:
+  grapesjs:
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.grapesjs
@@ -211,7 +211,7 @@ services:
       S3_BUCKET: mindfield-uploads
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: mindfield
-      KEYCLOAK_CLIENT_ID: grapesjs-editor
+      KEYCLOAK_CLIENT_ID: grapesjs
       PORT: 3000
     depends_on:
       pgbouncer: { condition: service_healthy }

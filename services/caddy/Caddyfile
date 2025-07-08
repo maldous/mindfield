@@ -20,7 +20,7 @@ localhost, 127.0.0.1 {
 		}
 
 		handle_path /grapesjs/* {
-			reverse_proxy grapesjs-server:3000
+			reverse_proxy grapesjs:3000
 		}
 
 		handle {
@@ -59,7 +59,7 @@ localhost, 127.0.0.1 {
 		}
 
 		handle_path /grapesjs/* {
-			reverse_proxy grapesjs-server:3000
+			reverse_proxy grapesjs:3000
 		}
 
 		handle {
