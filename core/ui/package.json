@@ -1,5 +1,5 @@
 {
-  "name": "@mindfield/ui-kit",
+  "name": "@mindfield/ui",
   "type": "module",
   "version": "0.1.0",
   "main": "dist/index.js",
