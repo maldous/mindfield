@@ -24,10 +24,10 @@ help:
 
 setup: ; @./setup.sh
 build: ; @pnpm turbo run build
-test: ; @pnpm test
-lint: ; @pnpm lint
-format: ; @pnpm format
-type-check: ; @pnpm type-check
+test: ; @pnpm turbo run test
+lint: ; @pnpm turbo run lint
+format: ; @pnpm turbo run format
+type-check: ; @pnpm turbo run type-check
 logs: ; @docker compose logs -f
 stop: ; @docker compose down
 install: ; @if [ -d node_modules ]; then pnpm install --offline; else pnpm install; fi
@@ -53,7 +53,7 @@ base-image: docker-config
 	  -t $(REGISTRY_CACHE)/base-deps:$(NODE_MAJOR) .
 
 clean: stop
-	@pnpm clean || true
+	@pnpm turbo run clean || true
 	@docker image prune -af || true
 	@docker buildx prune -af || true
 	@rm -rf .buildx_cache || true
