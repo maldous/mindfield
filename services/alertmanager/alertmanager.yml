@@ -1,6 +1,6 @@
 global:
   smtp_smarthost: 'mailhog:1025'
-  smtp_from: 'alerts@lixit.local'
+  smtp_from: 'alerts@mindfield.local'
 
 route:
   group_by: ['alertname']
@@ -12,7 +12,7 @@ route:
 receivers:
   - name: 'web.hook'
     email_configs:
-      - to: 'admin@lixit.local'
+      - to: 'admin@mindfield.local'
         html: |
           MindField Alert: {{ .GroupLabels.alertname }}
           {{ range .Alerts }}

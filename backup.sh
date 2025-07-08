@@ -9,7 +9,7 @@ echo "Starting database backup..."
 
 mkdir -p "${BACKUP_DIR}"
 
-pg_dumpall -h postgres -U lixit > "${BACKUP_FILE}"
+pg_dumpall -h postgres -U mindfield > "${BACKUP_FILE}"
 
 if [ $? -eq 0 ]; then
     echo "Backup completed: ${BACKUP_FILE}"
