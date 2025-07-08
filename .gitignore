@@ -143,3 +143,4 @@ vite.config.ts.timestamp-*
 lixit
 keys
 pnpm-lock.yaml
+**/storybook-static
