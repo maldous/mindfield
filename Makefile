@@ -26,7 +26,7 @@ setup: ; @./setup.sh
 build: ; @pnpm turbo run build
 test: ; @pnpm turbo run test
 lint: ; @pnpm turbo run lint
-format: ; @pnpm turbo run format
+format: ; @pnpm format
 type-check: ; @pnpm turbo run type-check
 logs: ; @docker compose logs -f
 stop: ; @docker compose down
