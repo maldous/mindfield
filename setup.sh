@@ -27,6 +27,7 @@ if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/
 fi
 
 mkdir -p .buildx_cache
+mkdir -p backups
 
 if [ ! -f .env.local ]; then
     cat > .env.local << EOF

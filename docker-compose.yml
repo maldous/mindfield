@@ -423,7 +423,7 @@ services:
     environment: {PGPASSWORD: mindfield_dev_password}
     volumes:
       - ./backups:/backups
-      - ./scripts/backup.sh:/backup.sh
+      - ./backup.sh:/backup.sh
     command: >
       sh -c "while true; do
                sleep 86400 &&
