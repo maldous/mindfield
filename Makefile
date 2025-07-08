@@ -16,7 +16,7 @@ help:
 	@echo "make lint       - ESLint across workspace"
 	@echo "make format     - Prettier formatting"
 	@echo "make type-check - TypeScript checks"
-	@echo "make logs       - Tail docker-compose logs"
+	@echo "make logs       - Tail docker logs"
 	@echo "make stop       - Stop all services"
 	@echo "make clean      - Tear down & clean images"
 	@echo "make restart    - Stop and start all services"
@@ -30,7 +30,7 @@ format: ; @pnpm format
 type-check: ; @pnpm turbo run type-check
 logs: ; @docker compose logs -f
 stop: ; @docker compose down
-install: ; @if [ -d node_modules ]; then pnpm install --offline; else pnpm install; fi
+install: ; @if [ -d node_modules ]; then pnpm install --frozen-lockfile; else pnpm install; fi
 start: base-image; @docker compose --profile dev build --pull --parallel && docker compose --profile dev up -d --remove-orphans
 prod: base-image; @docker compose --profile prod build --pull --parallel && docker compose --profile prod up -d --remove-orphans
 restart: stop start
