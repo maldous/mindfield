@@ -12,8 +12,8 @@ RUN pnpm --filter @mindfield/ui run build-storybook
 FROM node:${NODE_MAJOR}-alpine AS runtime
 RUN addgroup -S nodejs && adduser -S storybook -G nodejs -u1001
 WORKDIR /app
-COPY --from=build /app/node_modules /app/node_modules
+RUN npm install -g serve
 COPY --from=build /app/core/ui/storybook-static ./storybook
 USER storybook
 EXPOSE 6006
-CMD ["npx", "serve", "-s", "storybook", "-l", "6006"]
+CMD ["serve", "-s", "storybook", "-l", "6006"]
