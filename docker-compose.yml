@@ -12,7 +12,6 @@ services:
     image: postgres:15-alpine
     command: [
       "postgres",
-      "-c", "password_encryption=md5",
       "-c", "shared_buffers=256MB",
       "-c", "effective_cache_size=1GB",
       "-c", "maintenance_work_mem=64MB",
@@ -26,6 +25,7 @@ services:
       POSTGRES_DB: mindfield
       POSTGRES_USER: mindfield
       POSTGRES_PASSWORD: mindfield_dev_password
+      POSTGRES_HOST_AUTH_METHOD: md5
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init:/docker-entrypoint-initdb.d
