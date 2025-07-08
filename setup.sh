@@ -51,7 +51,7 @@ docker run -d \
   --name registry-proxy \
   --restart=always \
   -p 5000:5000 \
-  -v registry_data:/var/lib/registry \
+  -v registry_proxy_data:/var/lib/registry \
   -v "$PWD/registry.yml":/etc/docker/registry/config.yml:ro \
   registry:2
 
