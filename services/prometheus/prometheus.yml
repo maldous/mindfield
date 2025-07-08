@@ -17,29 +17,29 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # LIXIT API
-  - job_name: 'lixit-api'
+  # MindField API
+  - job_name: 'api'
     static_configs:
       - targets: ['api:3000']
     metrics_path: '/metrics'
     scrape_interval: 10s
 
-  # LIXIT Web App
-  - job_name: 'lixit-web'
+  # MindField Web App
+  - job_name: 'web'
     static_configs:
       - targets: ['web:3000']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # LIXIT Services
-  - job_name: 'lixit-services'
+  # MindField Services
+  - job_name: 'services'
     static_configs:
       - targets: 
-        - 'doc-renderer:3000'
-        - 'lixi-transform:3000'
-        - 'submission-broker:3000'
-        - 'grapesjs-server:3000'
-        - 'pii-redaction:3000'
+        - 'render:3000'
+        - 'transform:3000'
+        - 'submission:3000'
+        - 'grapesjs:3000'
+        - 'redaction:3000'
     metrics_path: '/metrics'
     scrape_interval: 30s
 

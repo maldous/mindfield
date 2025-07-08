@@ -38,7 +38,7 @@ localhost, 127.0.0.1 {
 	}
 }
 
-{$DOMAIN:lixit.local} {
+{$DOMAIN:mindfield.local} {
 
 	@http protocol http
 	redir @http https://{host}{uri} 308
