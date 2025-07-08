@@ -45,7 +45,7 @@ services:
       - DB_PORT=5432
       - DB_USER=mindfield
       - DB_PASSWORD=mindfield_dev_password
-      - DB_DBNAME=mindfield
+      - DB_NAME=mindfield
       - POOL_MODE=transaction
       - MAX_CLIENT_CONN=100
       - DEFAULT_POOL_SIZE=25
@@ -755,7 +755,6 @@ volumes:
   prometheus_data:
   rabbitmq_data:
   redis_data:
-  registry_data:
   sonarqube_db_data:
   sonarqube_es7:
   sonarqube_extensions:
