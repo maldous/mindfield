@@ -1,7 +1,7 @@
 {
   "name": "mindfield",
   "version": "1.0.0",
-  "description": "MindField is a playful personality profiling app.",
+  "description": "MindField is a personality profiling app.",
   "private": true,
   "type": "module",
   "scripts": {
