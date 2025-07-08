@@ -27,32 +27,6 @@ if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/
 fi
 
 mkdir -p .buildx_cache
-mkdir -p backups
-mkdir -p keys
-
-if command -v mkcert &> /dev/null; then
-    cd keys
-    mkcert -install
-    mkcert localhost 127.0.0.1 ::1
-    cd ..
-else
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
-        chmod +x mkcert-v*-linux-amd64
-        sudo mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        brew install mkcert
-    else
-        echo "Please install mkcert manually for your OS"
-    fi
-    
-    if command -v mkcert &> /dev/null; then
-        cd keys
-        mkcert -install
-        mkcert localhost 127.0.0.1 ::1
-        cd ..
-    fi
-fi
 
 if [ ! -f .env.local ]; then
     cat > .env.local << EOF
