@@ -30,10 +30,10 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { Queue, Worker } from 'bullmq';
-import requirePino = require('pino');
-import requirePinoHttp = require('pino-http');
-const pino = requirePino;
-const pinoHttp = requirePinoHttp;
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const pino      = require('pino');          
+const pinoHttp: any = require('pino-http'); 
 
 /* ────────── OpenTelemetry ────────── */
 import { NodeSDK } from '@opentelemetry/sdk-node';
@@ -86,13 +86,19 @@ export async function startExpress(opts: Options) {
   });
 
   /* ── Pino HTTP logger ── */
-  app.use(pinoHttp({ logger: rootLogger, serializers: {
-        req: (req: express.Request) => ({        
-          id: als.getStore()?.get('requestId'),
-          method: req.method,
-          url: req.url,
-        }),
-      }, }));
+
+app.use(
+  pinoHttp({
+    logger: rootLogger,
+    serializers: {
+      req: (req: express.Request) => ({
+        id: als.getStore()?.get('requestId'),
+        method: req.method,
+        url: req.url,
+      }),
+    },
+  }),
+);
 
   /* ── Rate-limit & slow-down ── */
   const limiter = rateLimit({
