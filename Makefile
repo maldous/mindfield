@@ -32,8 +32,8 @@ format: ; @pnpm format
 type-check: ; @pnpm turbo run type-check
 logs: ; @docker compose logs -f
 stop: ; @docker compose down
-start: install base-image build; @docker compose --profile dev build --pull --parallel && docker compose --profile dev up -d --remove-orphans
-prod: install base-image build; @docker compose --profile prod build --pull --parallel && docker compose --profile prod up -d --remove-orphans
+start: install build base-image ; @docker compose --profile dev build --pull --parallel && docker compose --profile dev up -d --remove-orphans
+prod: install build base-image ; @docker compose --profile prod build --pull --parallel && docker compose --profile prod up -d --remove-orphans
 restart: stop start
 
 sonar:
