@@ -148,7 +148,13 @@ export async function startExpress(opts: Options) {
       "/whoami",
       keycloak.protect(),
       (req: express.Request, res: express.Response) =>
-        res.json({ user: (req as express.Request & { kauth?: { grant?: { access_token?: { content?: unknown } } } }).kauth?.grant?.access_token?.content }),
+        res.json({
+          user: (
+            req as express.Request & {
+              kauth?: { grant?: { access_token?: { content?: unknown } } };
+            }
+          ).kauth?.grant?.access_token?.content,
+        }),
     );
   }
 

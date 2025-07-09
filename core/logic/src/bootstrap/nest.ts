@@ -141,7 +141,8 @@ export async function startNest(AppRoot: Type<unknown>) {
     );
 
     // Expose queue on Express locals (handy for tests / health)
-    (app.getHttpAdapter().getInstance() as express.Application).locals.queue = queue;
+    (app.getHttpAdapter().getInstance() as express.Application).locals.queue =
+      queue;
   }
 
   /* ── Listen & graceful shutdown ── */
