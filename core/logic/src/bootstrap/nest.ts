@@ -108,7 +108,7 @@ export async function startNest(AppRoot: Type<unknown>) {
   app
     .getHttpAdapter()
     .getInstance()
-    .get("/metrics", async (_req: unknown, res: any) => {
+    .get("/metrics", async (_req: unknown, res: express.Response) => {
       res.set("Content-Type", registry.contentType);
       res.end(await registry.metrics());
     });
@@ -129,7 +129,7 @@ export async function startNest(AppRoot: Type<unknown>) {
   let _worker: Worker | undefined; // intentionally unused variable
 
   if (process.env.REDIS_URL) {
-    const connection = { connection: { url: process.env.REDIS_URL } as any };
+    const connection = { connection: { url: process.env.REDIS_URL } };
 
     queue = new Queue("api-q", connection);
 
@@ -141,7 +141,7 @@ export async function startNest(AppRoot: Type<unknown>) {
     );
 
     // Expose queue on Express locals (handy for tests / health)
-    (app.getHttpAdapter().getInstance() as any).locals.queue = queue;
+    (app.getHttpAdapter().getInstance() as express.Application).locals.queue = queue;
   }
 
   /* ── Listen & graceful shutdown ── */
