@@ -1,7 +1,17 @@
 FROM caddy:builder AS builder
-RUN --mount=type=cache,id=go-mod,target=/go/pkg/mod --mount=type=cache,id=go-build,target=/root/.cache/go-build xcaddy build --with github.com/RussellLuo/caddy-ext/ratelimit
+RUN \
+    --mount=type=cache,id=go-build,target=/root/.cache/go-build \
+    --mount=type=cache,id=go-mod,target=/go/pkg/mod \
+    xcaddy build \
+    --with github.com/RussellLuo/caddy-ext/ratelimit
+
 FROM caddy:alpine
-RUN apk add --no-cache curl && curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64" && chmod +x mkcert-v*-linux-amd64 && mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert
+RUN \
+    apk add --no-cache curl && \
+    curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64" && \
+    chmod +x mkcert-v*-linux-amd64 && \
+    mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 COPY services/caddy/Caddyfile /etc/caddy/Caddyfile
+
 EXPOSE 80 443
