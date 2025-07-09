@@ -53,20 +53,20 @@ sonar:
 
 docker-config:
 	@if [ ! jq -e '.features.buildkit == true and .features["containerd-snapshotter"] == true and (.["registry-mirrors"] | index("http://localhost:5000"))' /etc/docker/daemon.json > /dev/null 2>&1 ]; then \
-	  echo 'Docker: enable buildkit, containerd-snapshotter & registry-mirrors (caching)'; \
-	  exit 1; \
+	echo 'Docker: enable buildkit, containerd-snapshotter & registry-mirrors (caching)'; \
+	exit 1; \
 	fi
 
 base-image: docker-config
 	@docker buildx build \
-	  --push \
-	  --compress \
-	  --progress=plain \
-	  --cache-from=type=registry,ref=$(REGISTRY_CACHE) \
-	  --cache-to=type=registry,ref=$(REGISTRY_CACHE),mode=max,oci-mediatypes=true \
-	  --build-arg NODE_MAJOR=$(NODE_MAJOR) \
-	  -f dockerfiles/Dockerfile.base \
-	  -t $(REGISTRY_CACHE)/base-deps:$(NODE_MAJOR) .
+	--push \
+	--compress \
+	--progress=plain \
+	--cache-from=type=registry,ref=$(REGISTRY_CACHE) \
+	--cache-to=type=registry,ref=$(REGISTRY_CACHE),mode=max,oci-mediatypes=true \
+	--build-arg NODE_MAJOR=$(NODE_MAJOR) \
+	-f dockerfiles/Dockerfile.base \
+	-t $(REGISTRY_CACHE)/base-deps:$(NODE_MAJOR) .
 
 clean: stop
 	@pnpm turbo run clean || true
@@ -77,5 +77,5 @@ clean: stop
 
 reset: clean
 	@docker system prune -a --volumes -f || true
-	@docker volume ls -q | grep '^mindfield_' | xargs -r docker volume rm || true
+	@docker volume ls -q | grep '^mindfield' | xargs -r docker volume rm || true
 	@git clean -xfd || true
