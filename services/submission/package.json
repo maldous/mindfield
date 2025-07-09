@@ -18,7 +18,7 @@
     "dist"
   ],
   "dependencies": {
-    "@mindfield/logic": "file:../../core/logic",
+    "@mindfield/logic": "workspace:*",
     "@types/express": "^5.0.3",
     "amqplib": "^0.10.8",
     "axios": "^1.10.0",

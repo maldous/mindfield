@@ -14,9 +14,11 @@
     "build-storybook": "storybook build",
     "clean": "rm -rf dist"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "dependencies": {
-    "@mindfield/logic": "file:../../core/logic",
+    "@mindfield/logic": "workspace:*",
     "@mindfield/ui": "file:../../core/ui",
     "@tanstack/react-query": "^5.81.2",
     "autoprefixer": "^10.4.21",
