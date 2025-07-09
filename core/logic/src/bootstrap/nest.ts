@@ -25,10 +25,13 @@ import slowDown from 'express-slow-down';
 import promClient from 'prom-client';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { WsAdapter } from '@nestjs/platform-ws';
-import { Queue, Worker, QueueScheduler } from 'bullmq';
-import { ExpressAdapter } from '@nestjs/platform-express';
+import { Queue, Worker } from 'bullmq';
+import { QueueScheduler } from 'bullmq';
+// Delete the ExpressAdapter import as it's not used directly
+// import { ExpressAdapter } from '@nestjs/platform-express';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
+import * as express from 'express';
 
 /* OTEL */
 import { NodeSDK } from '@opentelemetry/sdk-node';
@@ -44,7 +47,8 @@ export async function startNest() {
   await sdk.start();
 
   /* ── Nest factory ── */
-  const adapter = new ExpressAdapter();
+  // Delete the adapter variable as it's not used directly
+  // const adapter = new ExpressAdapter();
   const app = await NestFactory.create(AppModule, {
     logger: new Logger(), // pino under the hood
     cors: { origin: true, credentials: true },
@@ -81,6 +85,7 @@ export async function startNest() {
       }),
     );
     const keycloak = new Keycloak({ store: memoryStore }, {
+      'confidential-port': 0,
       'auth-server-url': process.env.KEYCLOAK_URL,
       realm: process.env.KEYCLOAK_REALM ?? 'mindfield',
       resource: process.env.KEYCLOAK_CLIENT_ID ?? 'api',
@@ -110,7 +115,7 @@ export async function startNest() {
     const connection = { connection: { url: process.env.REDIS_URL } as any };
     const queue = new Queue('api-q', connection);
     const scheduler = new QueueScheduler('api-q', connection);
-    const worker = new Worker('api-q', async (job) => {
+    const worker = new Worker('api-q', async (job: any) => {
       app.get(Logger).log(`dummy worker job ${job.id}`);
     }, connection);
 
