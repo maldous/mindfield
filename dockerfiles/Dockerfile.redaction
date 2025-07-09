@@ -1,5 +1,5 @@
 FROM python:3.11-slim AS base
-RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt --mount=type=cache,id=apt-lists,target=/var/lib/apt/lists apt-get update && apt-get install -y gcc g++ curl
+RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt --mount=type=cache,id=apt-lists,target=/var/lib/apt/lists apt-get update && apt-get install -y gcc g++ curl tesseract-ocr poppler-utils
 WORKDIR /app
 COPY services/redaction/requirements.txt .
 RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip pip install --no-cache-dir -r requirements.txt && python -m spacy download en_core_web_lg

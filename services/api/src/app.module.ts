@@ -5,7 +5,7 @@ import { LoggerModule } from "nestjs-pino";
   imports: [
     LoggerModule.forRoot({
       pinoHttp: {
-        level: process.env.LOG_LEVEL || "info",
+        level: process.env.LOG_LEVEL ?? "info",
       },
     }),
   ],

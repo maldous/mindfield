@@ -8,6 +8,10 @@ import uvicorn
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 from presidio_anonymizer.entities import RecognizerResult, OperatorConfig
+import io
+from PIL import Image
+import pytesseract
+from pdf2image import convert_from_bytes
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -161,22 +165,24 @@ async def anonymize_text(request: TextAnonymizationRequest):
         logger.error(f"Error anonymizing text: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Anonymization failed: {str(e)}")
 
-@app.post("/analyze-document")
-async def analyze_document(file: UploadFile = File(...)):
-    """Analyze uploaded document for PII (placeholder for OCR integration)"""
-    try:
-        # Read file content
-        content = await file.read()
-        
-        # For now, just return a placeholder response
-        # TODO: Integrate OCR (Tesseract) to extract text from images/PDFs
-        return {
-            "filename": file.filename,
-            "content_type": file.content_type,
-            "size": len(content),
-            "message": "Document analysis not yet implemented - requires OCR integration"
-        }
-        
+    @app.post("/analyze-document", response_model=AnalysisResponse)
+    async def analyze_document(req: UploadFile = File(...)):
+        """Analyze uploaded document for PII via OCR (Tesseract)"""
+        content = await req.read()
+        text = ""
+        if req.content_type == "application/pdf":
+            pages = convert_from_bytes(content)
+            for img in pages:
+                text += pytesseract.image_to_string(img)
+        else:
+            img = Image.open(io.BytesIO(content))
+            text = pytesseract.image_to_string(img)
+
+        # now run the normal analyzer on `text`
+        results = analyzer.analyze(text=text, language="en")
+        pii = [PIIResult(... ) for r in results]
+        return AnalysisResponse(original_text=text, pii_entities=pii, has_pii=bool(pii))
+
     except Exception as e:
         logger.error(f"Error analyzing document: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Document analysis failed: {str(e)}")
