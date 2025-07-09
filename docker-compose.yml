@@ -1,10 +1,13 @@
+env_file:
+  - .env
+
 x-node-args: &node-args
   NODE_MAJOR: "${NODE_MAJOR:-24}"
 
 x-build-env: &build-env
-  DOCKER_BUILDKIT: 1
-  BUILDKIT_PROGRESS: plain
-  BUILDKIT_INLINE_CACHE: 1
+  DOCKER_BUILDKIT: "${DOCKER_BUILDKIT:-1}"
+  BUILDKIT_PROGRESS: "${BUILDKIT_PROGRESS:-plain}"
+  BUILDKIT_INLINE_CACHE: "${BUILDKIT_INLINE_CACHE:-1}"
 
 services:
 
@@ -22,10 +25,9 @@ services:
       "-c", "effective_io_concurrency=200"
     ]
     environment:
-      POSTGRES_DB: mindfield
-      POSTGRES_USER: mindfield
-      POSTGRES_PASSWORD: mindfield_dev_password
-      POSTGRES_HOST_AUTH_METHOD: md5
+      POSTGRES_DB: ${MINDFIELD_POSTGRES_DB}
+      POSTGRES_USER: ${MINDFIELD_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${MINDFIELD_POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init:/docker-entrypoint-initdb.d
@@ -40,15 +42,6 @@ services:
 
   pgbouncer:
     image: edoburu/pgbouncer:latest
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=mindfield
-      - DB_PASSWORD=mindfield_dev_password
-      - DB_NAME=mindfield
-      - POOL_MODE=transaction
-      - MAX_CLIENT_CONN=100
-      - DEFAULT_POOL_SIZE=25
     depends_on:
       postgres: { condition: service_healthy }
     healthcheck:
@@ -62,15 +55,6 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
-    environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
-      KC_DB_USERNAME: mindfield
-      KC_DB_PASSWORD: mindfield_dev_password
-      KC_HOSTNAME_STRICT: "false"
-      KC_HOSTNAME_STRICT_HTTPS: "false"
     volumes: [keycloak_data:/opt/keycloak/data]
     depends_on:
       pgbouncer: {condition: service_healthy}
@@ -90,15 +74,6 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://mindfield:mindfield_dev_password@postgres:5432/mindfield
-      REDIS_URL: redis://redis:6379
-      S3_ENDPOINT: http://minio:9000
-      S3_ACCESS_KEY: minioadmin
-      S3_SECRET_KEY: minioadmin123
-      S3_BUCKET: mindfield-uploads
-      PORT: 3000
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -119,9 +94,6 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-    environment:
-      NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:3001
     depends_on: [ api ]
     read_only: true
     tmpfs:
@@ -143,15 +115,6 @@ services:
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
     command: [ "node", "dist/main.js" ]
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://mindfield:mindfield_dev_password@postgres:5432/mindfield
-      REDIS_URL: redis://redis:6379
-      S3_ENDPOINT: http://minio:9000
-      S3_ACCESS_KEY: minioadmin
-      S3_SECRET_KEY: minioadmin123
-      S3_BUCKET: mindfield-uploads
-      PORT: 3000
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -173,11 +136,6 @@ services:
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
     command: [ "node", "dist/main.js" ]
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://mindfield:mindfield_dev_password@postgres:5432/mindfield
-      REDIS_URL: redis://redis:6379
-      PORT: 3000
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -199,11 +157,6 @@ services:
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
     command: [ "node", "dist/main.js" ]
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://mindfield:mindfield_dev_password@postgres:5432/mindfield
-      REDIS_URL: redis://redis:6379
-      PORT: 3000
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -223,17 +176,6 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://mindfield:mindfield_dev_password@pgbouncer:5432/mindfield
-      S3_ENDPOINT: http://minio:9000
-      S3_ACCESS_KEY: minioadmin
-      S3_SECRET_KEY: minioadmin123
-      S3_BUCKET: mindfield-uploads
-      KEYCLOAK_URL: http://keycloak:8080
-      KEYCLOAK_REALM: mindfield
-      KEYCLOAK_CLIENT_ID: grapesjs
-      PORT: 3000
     depends_on:
       pgbouncer: { condition: service_healthy }
       minio: { condition: service_healthy }
@@ -265,9 +207,6 @@ services:
   minio:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin123
     volumes: [minio_data:/data]
     healthcheck:
       test: ["CMD","curl","-f","http://localhost:9000/minio/health/live"]
@@ -297,10 +236,6 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-    environment:
-      NODE_ENV: development
-      PORT: 3000
-      REDIS_URL: redis://redis:6379
     depends_on:
       redis: {condition: service_healthy}
     mem_limit: 1g
@@ -334,11 +269,6 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    environment:
-      GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_SMTP_ENABLED: "true"
-      GF_SMTP_HOST: mailhog:1025
-      GF_SMTP_FROM_ADDRESS: grafana@mindfield.local
     volumes:
       - grafana_data:/var/lib/grafana
       - ./services/grafana/provisioning:/etc/grafana/provisioning
@@ -369,8 +299,6 @@ services:
 
   jaeger:
     image: jaegertracing/all-in-one:latest
-    environment:
-      COLLECTOR_OTLP_ENABLED: "true"
     mem_limit: 256m
     cpus: 0.5
     ports: ["16686:16686","14268:14268"]
@@ -394,7 +322,6 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-    environment: [CADDY_MKCERT=true]
     volumes:
       - ./services/caddy/Caddyfile:/etc/caddy/Caddyfile
       - ./keys:/etc/ssl/certs:ro
@@ -406,9 +333,6 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    environment:
-      RABBITMQ_DEFAULT_USER: mindfield
-      RABBITMQ_DEFAULT_PASS: mindfield_dev_password
     volumes: [rabbitmq_data:/var/lib/rabbitmq]
     healthcheck:
       test: ["CMD","rabbitmq-diagnostics","ping"]
@@ -421,7 +345,6 @@ services:
 
   backup:
     image: postgres:15-alpine
-    environment: {PGPASSWORD: mindfield_dev_password}
     volumes:
       - ./backups:/backups
       - ./backup.sh:/backup.sh
@@ -438,9 +361,9 @@ services:
   kong-database:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: kong
-      POSTGRES_USER: kong
-      POSTGRES_PASSWORD: kong_dev_password
+      POSTGRES_DB: ${KONG_POSTGRES_DB}
+      POSTGRES_USER: ${KONG_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${KONG_POSTGRES_PASSWORD}
     volumes: [kong_db_data:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U kong"]
@@ -453,30 +376,12 @@ services:
   kong-migrations:
     image: kong:latest
     command: kong migrations bootstrap
-    environment:
-      KONG_DATABASE: postgres
-      KONG_PG_HOST: kong-database
-      KONG_PG_DATABASE: kong
-      KONG_PG_USER: kong
-      KONG_PG_PASSWORD: kong_dev_password
     depends_on:
       kong-database: {condition: service_healthy}
     restart: "no"
 
   kong:
     image: kong:latest
-    environment:
-      KONG_DATABASE: postgres
-      KONG_PG_HOST: kong-database
-      KONG_PG_DATABASE: kong
-      KONG_PG_USER: kong
-      KONG_PG_PASSWORD: kong_dev_password
-      KONG_PROXY_ACCESS_LOG: /dev/stdout
-      KONG_ADMIN_ACCESS_LOG: /dev/stdout
-      KONG_PROXY_ERROR_LOG: /dev/stderr
-      KONG_ADMIN_ERROR_LOG: /dev/stderr
-      KONG_ADMIN_LISTEN: 0.0.0.0:8001
-      KONG_PLUGINS: bundled,rate-limiting,key-auth,oauth2
     depends_on:
       kong-database: {condition: service_healthy}
       kong-migrations: {condition: service_completed_successfully}
@@ -491,14 +396,6 @@ services:
 
   opensearch:
     image: opensearchproject/opensearch:latest
-    environment:
-      cluster.name: mindfield-cluster
-      node.name: opensearch
-      discovery.type: single-node
-      bootstrap.memory_lock: true
-      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
-      DISABLE_INSTALL_DEMO_CONFIG: true
-      DISABLE_SECURITY_PLUGIN: true
     ulimits:
       memlock: {soft: -1, hard: -1}
       nofile: {soft: 65536, hard: 65536}
@@ -509,9 +406,6 @@ services:
 
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:latest
-    environment:
-      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
-      DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
     depends_on: [opensearch]
     mem_limit: 512m
     cpus: 0.5
@@ -563,10 +457,6 @@ services:
 
   step-ca:
     image: smallstep/step-ca:latest
-    environment:
-      DOCKER_STEPCA_INIT_NAME: "MindField Internal CA"
-      DOCKER_STEPCA_INIT_DNS_NAMES: "localhost,step-ca,*.mindfield.local"
-      DOCKER_STEPCA_INIT_REMOTE_MANAGEMENT: true
     volumes: [step_ca_data:/home/step]
     mem_limit: 128m
     cpus: 0.25
@@ -574,11 +464,6 @@ services:
 
   postgrest:
     image: postgrest/postgrest:latest
-    environment:
-      PGRST_DB_URI: postgres://mindfield:mindfield_dev_password@postgres:5432/mindfield
-      PGRST_DB_SCHEMA: public
-      PGRST_DB_ANON_ROLE: mindfield
-      PGRST_OPENAPI_SERVER_PROXY_URI: http://localhost:3008
     depends_on:
       postgres: {condition: service_healthy}
     mem_limit: 128m
@@ -587,13 +472,6 @@ services:
 
   hasura:
     image: hasura/graphql-engine:latest
-    environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://mindfield:mindfield_dev_password@postgres:5432/mindfield
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
-      HASURA_GRAPHQL_DEV_MODE: "true"
-      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup,http-log,webhook-log,websocket-log,query-log
-      HASURA_GRAPHQL_ADMIN_SECRET: hasura_admin_secret
-      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: anonymous
     depends_on:
       postgres: {condition: service_healthy}
     mem_limit: 512m
@@ -611,11 +489,6 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
     volumes: [pgadmin_data:/var/lib/pgadmin]
     depends_on:
       postgres: {condition: service_healthy}
@@ -625,8 +498,6 @@ services:
 
   prisma-studio:
     image: timothyjmiller/prisma-studio:latest
-    environment:
-      DATABASE_URL: postgres://mindfield:mindfield_dev_password@postgres:5432/mindfield
     depends_on:
       postgres: {condition: service_healthy}
     mem_limit: 256m
@@ -635,17 +506,12 @@ services:
 
   swagger-ui:
     image: swaggerapi/swagger-ui:latest
-    environment:
-      SWAGGER_JSON_URL: http://localhost:3001/api-docs/swagger.json
-      BASE_URL: /swagger
     mem_limit: 128m
     cpus: 0.25
     ports: ["3013:8080"]
 
   redoc:
     image: redocly/redoc:latest
-    environment:
-      SPEC_URL: http://localhost:3001/api-docs/swagger.json
     mem_limit: 128m
     cpus: 0.25
     ports: ["3014:80"]
@@ -660,8 +526,6 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-    environment:
-      NODE_ENV: development
     volumes:
       - ./core/ui:/app/core/ui
       - ./apps/web:/app/apps/web
@@ -672,9 +536,9 @@ services:
   sonarqube-db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: sonarqube
-      POSTGRES_USER: sonarqube
-      POSTGRES_PASSWORD: sonarqube_dev_password
+      POSTGRES_DB: ${SONAR_POSTGRES_DB}
+      POSTGRES_USER: ${SONAR_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${SONAR_POSTGRES_PASSWORD}
     volumes: [sonarqube_db_data:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U sonarqube"]
@@ -686,10 +550,6 @@ services:
 
   sonarqube:
     image: sonarqube:community
-    environment:
-      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonarqube
-      SONAR_JDBC_USERNAME: sonarqube
-      SONAR_JDBC_PASSWORD: sonarqube_dev_password
     depends_on:
       sonarqube-db: {condition: service_healthy}
     volumes:
@@ -703,9 +563,9 @@ services:
   gitea-db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: gitea
-      POSTGRES_USER: gitea
-      POSTGRES_PASSWORD: gitea_dev_password
+      POSTGRES_DB: ${GITEA_POSTGRES_DB}
+      POSTGRES_USER: ${GITEA_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${GITEA_POSTGRES_PASSWORD}
     volumes: [gitea_db_data:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U gitea"]
@@ -717,18 +577,6 @@ services:
 
   gitea:
     image: gitea/gitea:latest
-    environment:
-      USER_UID: 1000
-      USER_GID: 1000
-      GITEA__database__DB_TYPE: postgres
-      GITEA__database__HOST: gitea-db:5432
-      GITEA__database__NAME: gitea
-      GITEA__database__USER: gitea
-      GITEA__database__PASSWD: gitea_dev_password
-      GITEA__server__DOMAIN: localhost
-      GITEA__server__SSH_DOMAIN: localhost
-      GITEA__server__ROOT_URL: http://localhost:3017/
-      GITEA__server__SSH_PORT: 2222
     depends_on:
       gitea-db: {condition: service_healthy}
     volumes:
