@@ -31,8 +31,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import { Queue, Worker } from 'bullmq';
-import { QueueScheduler } from 'bullmq';
+import { Queue, Worker, QueueScheduler } from 'bullmq';
 
 /* ────────── OpenTelemetry ────────── */
 import { NodeSDK } from '@opentelemetry/sdk-node';
