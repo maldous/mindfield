@@ -165,9 +165,10 @@ async def anonymize_text(request: TextAnonymizationRequest):
         logger.error(f"Error anonymizing text: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Anonymization failed: {str(e)}")
 
-    @app.post("/analyze-document", response_model=AnalysisResponse)
-    async def analyze_document(req: UploadFile = File(...)):
-        """Analyze uploaded document for PII via OCR (Tesseract)"""
+@app.post("/analyze-document", response_model=AnalysisResponse)
+async def analyze_document(req: UploadFile = File(...)):
+    """Analyze uploaded document for PII via OCR (Tesseract)"""
+    try:
         content = await req.read()
         text = ""
         if req.content_type == "application/pdf":
@@ -178,14 +179,22 @@ async def anonymize_text(request: TextAnonymizationRequest):
             img = Image.open(io.BytesIO(content))
             text = pytesseract.image_to_string(img)
 
-        # now run the normal analyzer on `text`
         results = analyzer.analyze(text=text, language="en")
-        pii = [PIIResult(... ) for r in results]
+        pii = [
+            PIIResult(
+                entity_type=r.entity_type,
+                start=r.start,
+                end=r.end,
+                score=r.score,
+                text=text[r.start : r.end],
+            )
+            for r in results
+        ]
         return AnalysisResponse(original_text=text, pii_entities=pii, has_pii=bool(pii))
 
     except Exception as e:
-        logger.error(f"Error analyzing document: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Document analysis failed: {str(e)}")
+        logger.error(f"Error analyzing document: {e}")
+        raise HTTPException(status_code=500, detail=f"Document analysis failed: {e}")
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 3000))
