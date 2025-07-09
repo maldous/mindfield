@@ -14,7 +14,7 @@
 
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger, Type } from '@nestjs/common';
 import helmet from 'helmet';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
@@ -26,9 +26,6 @@ import promClient from 'prom-client';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { WsAdapter } from '@nestjs/platform-ws';
 import { Queue, Worker } from 'bullmq';
-import { QueueScheduler } from 'bullmq';
-import { Type, Logger } from '@nestjs/common';   
-import { AppModule } from './app.module';
 import * as express from 'express';
 
 /* OTEL */
@@ -36,7 +33,7 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 
-export async function startNest(AppRoot: Type<any>) {
+export async function startNest(AppRoot: Type<unknown>) {
   /* ── OTEL ── */
   const sdk = new NodeSDK({
     traceExporter: new OTLPTraceExporter(),
@@ -44,32 +41,32 @@ export async function startNest(AppRoot: Type<any>) {
   });
   await sdk.start();
 
-  const app = await NestFactory.create(AppRoot, {   
-    logger: new Logger(),             
-    cors: { origin: true, credentials: true },
+  /* ── Nest factory ── */
+  const app = await NestFactory.create(AppRoot, {
+    logger: new Logger(),          // NestJS built-in logger
+    cors:   { origin: true, credentials: true },
     bodyParser: false,
   });
 
+  /* ── Core middleware ── */
   app.use(helmet());
   app.use(compression());
   app.use(cookieParser());
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: false }));
 
-  /* validation */
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
+  /* ── Validation ── */
+  app.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
 
-  /* rate-limit / slow-down */
-  const limiter = rateLimit({
-    windowMs: 60_000,
-    max: 1000,
-    standardHeaders: true,
-    legacyHeaders: false,
-  });
+  /* ── Rate-limit / slow-down ── */
+  const limiter  = rateLimit({ windowMs: 60_000, max: 1_000,
+                               standardHeaders: true, legacyHeaders: false });
   const slowdown = slowDown({ windowMs: 60_000, delayAfter: 400, delayMs: 250 });
   app.use(limiter, slowdown);
 
-  /* Keycloak (optional) */
+  /* ── Keycloak (optional) ── */
   if (process.env.KEYCLOAK_URL) {
     const memoryStore = new session.MemoryStore();
     app.use(
@@ -80,17 +77,21 @@ export async function startNest(AppRoot: Type<any>) {
         store: memoryStore,
       }),
     );
-    const keycloak = new Keycloak({ store: memoryStore }, {
-      'confidential-port': 0,
-      'auth-server-url': process.env.KEYCLOAK_URL,
-      realm: process.env.KEYCLOAK_REALM ?? 'mindfield',
-      resource: process.env.KEYCLOAK_CLIENT_ID ?? 'api',
-      'ssl-required': 'external',
-    });
+
+    const keycloak = new Keycloak(
+      { store: memoryStore },
+      {
+        'confidential-port': 0,
+        'auth-server-url':   process.env.KEYCLOAK_URL,
+        realm:               process.env.KEYCLOAK_REALM  ?? 'mindfield',
+        resource:            process.env.KEYCLOAK_CLIENT_ID ?? 'api',
+        'ssl-required':      'external',
+      },
+    );
     app.use(keycloak.middleware());
   }
 
-  /* Prometheus metrics */
+  /* ── Prometheus metrics ── */
   const registry = new promClient.Registry();
   promClient.collectDefaultMetrics({ register: registry, prefix: 'api_' });
   app.getHttpAdapter().getInstance().get('/metrics', async (_req: any, res: any) => {
@@ -98,39 +99,52 @@ export async function startNest(AppRoot: Type<any>) {
     res.end(await registry.metrics());
   });
 
-  /* Swagger */
-  const docCfg = new DocumentBuilder().setTitle('MindField API').setVersion('1.0').build();
+  /* ── Swagger ── */
+  const docCfg   = new DocumentBuilder().setTitle('MindField API').setVersion('1.0').build();
   const document = SwaggerModule.createDocument(app, docCfg);
   SwaggerModule.setup('api-docs', app, document);
 
-  /* WebSockets */
+  /* ── WebSockets ── */
   app.useWebSocketAdapter(new WsAdapter(app));
 
-  /* BullMQ helper */
+  /* ── BullMQ helper ── */
+  let queue:      Queue | undefined;
+  let _worker:    Worker | undefined; // underscore = intentionally unused
+
   if (process.env.REDIS_URL) {
     const connection = { connection: { url: process.env.REDIS_URL } as any };
-    const queue = new Queue('api-q', connection);
-    const scheduler = new QueueScheduler('api-q', connection);
-    const _worker = new Worker('api-q', async (job: any) => {
-      app.get(Logger).log(`dummy worker job ${job.id}`);
-    }, connection);
 
-    // Expose via app locals
+    queue     = new Queue('api-q', connection);
+
+    // Dummy worker so the queue has a consumer (useful in dev)
+    _worker = new Worker(
+      'api-q',
+      async job => app.get(Logger).log(`dummy worker job ${job.id}`),
+      connection,
+    );
+
     (app.getHttpAdapter().getInstance() as any).locals.queue = queue;
-    await scheduler.waitUntilReady();
   }
 
-  /* ── listen & shutdown ── */
+  /* ── listen & graceful shutdown ── */
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);
   app.get(Logger).log(`🚀  API running on :${port}`);
 
   const shutdown = async () => {
     app.get(Logger).log('Shutting down…');
-    await app.close();
-    await sdk.shutdown().catch(app.get(Logger).error);
+
+    await Promise.all([
+      _worker?.close().catch(() => void 0),
+      queue?.close().catch(() => void 0),
+      app.close(),
+      sdk.shutdown().catch(app.get(Logger).error),
+    ]);
+
     process.exit(0);
   };
-  process.on('SIGINT', shutdown);
+
+  process.on('SIGINT',  shutdown);
   process.on('SIGTERM', shutdown);
 }
+
