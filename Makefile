@@ -49,7 +49,7 @@ sonar:
         printf "%s\n" "$$r"; \
 	done | jq -s "map(.issues)|add" > sonar.json; \
 	echo ""; \
-	jq -r ".[] | \"\( (.component | split(\":\")[1])):\(.line) \(.message)\"" sonar.json'
+	jq -r ".[] | select(.issueStatus != \"FIXED\") | \"\( (.component | split(\":\")[1])):\(.line) \(.message)\"" sonar.json'
 
 docker-config:
 	@if [ ! jq -e '.features.buildkit == true and .features["containerd-snapshotter"] == true and (.["registry-mirrors"] | index("http://localhost:5000"))' /etc/docker/daemon.json > /dev/null 2>&1 ]; then \
