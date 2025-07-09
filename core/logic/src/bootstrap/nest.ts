@@ -28,7 +28,7 @@ import { WsAdapter } from '@nestjs/platform-ws';
 import { Queue, Worker } from 'bullmq';
 import * as express from 'express';
 
-/* OTEL */
+/* ────────── OpenTelemetry ────────── */
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
@@ -43,10 +43,13 @@ export async function startNest(AppRoot: Type<unknown>) {
 
   /* ── Nest factory ── */
   const app = await NestFactory.create(AppRoot, {
-    logger: new Logger(),          // NestJS built-in logger
-    cors:   { origin: true, credentials: true },
+    logger: new Logger(), // let Nest handle stdout/stderr
+    cors: { origin: true, credentials: true },
     bodyParser: false,
   });
+
+  /* Local logger instance (to avoid .get(Logger) look-ups) */
+  const logger = new Logger('bootstrap');
 
   /* ── Core middleware ── */
   app.use(helmet());
@@ -61,9 +64,17 @@ export async function startNest(AppRoot: Type<unknown>) {
   );
 
   /* ── Rate-limit / slow-down ── */
-  const limiter  = rateLimit({ windowMs: 60_000, max: 1_000,
-                               standardHeaders: true, legacyHeaders: false });
-  const slowdown = slowDown({ windowMs: 60_000, delayAfter: 400, delayMs: 250 });
+  const limiter = rateLimit({
+    windowMs: 60_000,
+    max: 1_000,
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  const slowdown = slowDown({
+    windowMs: 60_000,
+    delayAfter: 400,
+    delayMs: 250,
+  });
   app.use(limiter, slowdown);
 
   /* ── Keycloak (optional) ── */
@@ -82,10 +93,10 @@ export async function startNest(AppRoot: Type<unknown>) {
       { store: memoryStore },
       {
         'confidential-port': 0,
-        'auth-server-url':   process.env.KEYCLOAK_URL,
-        realm:               process.env.KEYCLOAK_REALM  ?? 'mindfield',
-        resource:            process.env.KEYCLOAK_CLIENT_ID ?? 'api',
-        'ssl-required':      'external',
+        'auth-server-url': process.env.KEYCLOAK_URL,
+        realm: process.env.KEYCLOAK_REALM ?? 'mindfield',
+        resource: process.env.KEYCLOAK_CLIENT_ID ?? 'api',
+        'ssl-required': 'external',
       },
     );
     app.use(keycloak.middleware());
@@ -94,13 +105,19 @@ export async function startNest(AppRoot: Type<unknown>) {
   /* ── Prometheus metrics ── */
   const registry = new promClient.Registry();
   promClient.collectDefaultMetrics({ register: registry, prefix: 'api_' });
-  app.getHttpAdapter().getInstance().get('/metrics', async (_req: any, res: any) => {
-    res.set('Content-Type', registry.contentType);
-    res.end(await registry.metrics());
-  });
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .get('/metrics', async (_req: unknown, res: any) => {
+      res.set('Content-Type', registry.contentType);
+      res.end(await registry.metrics());
+    });
 
   /* ── Swagger ── */
-  const docCfg   = new DocumentBuilder().setTitle('MindField API').setVersion('1.0').build();
+  const docCfg = new DocumentBuilder()
+    .setTitle('MindField API')
+    .setVersion('1.0')
+    .build();
   const document = SwaggerModule.createDocument(app, docCfg);
   SwaggerModule.setup('api-docs', app, document);
 
@@ -108,43 +125,44 @@ export async function startNest(AppRoot: Type<unknown>) {
   app.useWebSocketAdapter(new WsAdapter(app));
 
   /* ── BullMQ helper ── */
-  let queue:      Queue | undefined;
-  let _worker:    Worker | undefined; // underscore = intentionally unused
+  let queue: Queue | undefined;
+  let _worker: Worker | undefined; // intentionally unused variable
 
   if (process.env.REDIS_URL) {
     const connection = { connection: { url: process.env.REDIS_URL } as any };
 
-    queue     = new Queue('api-q', connection);
+    queue = new Queue('api-q', connection);
 
     // Dummy worker so the queue has a consumer (useful in dev)
     _worker = new Worker(
       'api-q',
-      async job => app.get(Logger).log(`dummy worker job ${job.id}`),
+      async job => logger.log(`dummy worker job ${job.id}`),
       connection,
     );
 
+    // Expose queue on Express locals (handy for tests / health)
     (app.getHttpAdapter().getInstance() as any).locals.queue = queue;
   }
 
-  /* ── listen & graceful shutdown ── */
+  /* ── Listen & graceful shutdown ── */
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);
-  app.get(Logger).log(`🚀  API running on :${port}`);
+  logger.log(`🚀  API running on :${port}`);
 
   const shutdown = async () => {
-    app.get(Logger).log('Shutting down…');
+    logger.log('Shutting down…');
 
     await Promise.all([
       _worker?.close().catch(() => void 0),
       queue?.close().catch(() => void 0),
       app.close(),
-      sdk.shutdown().catch(app.get(Logger).error),
+      sdk.shutdown().catch(err => logger.error(err)),
     ]);
 
     process.exit(0);
   };
 
-  process.on('SIGINT',  shutdown);
+  process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
 }
 
