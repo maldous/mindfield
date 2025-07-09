@@ -29,7 +29,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 import { Server as HttpServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
-import { Queue, Worker } from "bullmq";
+import { Queue, Worker, Job } from "bullmq";
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const pino = require("pino");
@@ -229,7 +229,7 @@ export async function startExpress(opts: Options) {
     // Delete the QueueScheduler instantiation as it's not directly used in express.ts
     const worker = new Worker(
       `${opts.serviceName}-q`,
-      async (job: { id: string }) => {
+      async (job: Job) => {
         rootLogger.info(
           { jobId: job.id },
           "Dummy worker – no processor registered",
@@ -287,7 +287,7 @@ export async function startExpress(opts: Options) {
     server.close(async () => {
       if (queueDeps) {
         await queueDeps.worker.close();
-        await queueDeps.scheduler.close();
+
         await queueDeps.queue.close();
       }
       await sdk.shutdown().catch(rootLogger.error);
