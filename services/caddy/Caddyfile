@@ -1,6 +1,6 @@
 {
     order rate_limit before reverse_proxy
-    email {$LETSENCRYPT_EMAIL:admin@example.com}
+    email {$LETSENCRYPT_EMAIL:admin@mindfield.local}
 }
 
 localhost, 127.0.0.1 {
