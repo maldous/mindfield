@@ -23,6 +23,7 @@ help:
 	@echo "make restart    - Stop and start all services"
 	@echo "make reset      - Reset everything"
 	@echo "make sonar      - Sonar everything"
+	@echo "make all        - Reset, setup & start"
 
 setup: ; @./setup.sh
 install: ; @if [ -d node_modules ]; then pnpm install --frozen-lockfile; else pnpm install; fi
@@ -37,6 +38,7 @@ stop: ; @docker compose down
 start: install build base-image ; @docker compose --profile dev build --pull --parallel && docker compose --profile dev up -d --remove-orphans
 prod: install build base-image ; @docker compose --profile prod build --pull --parallel && docker compose --profile prod up -d --remove-orphans
 restart: stop start
+all: reset setup start
 
 sonar:
 	@if [ ! -f .env ]; then touch .env; fi; \
