@@ -377,12 +377,9 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
     volumes:
       - ./services/caddy/Caddyfile:/etc/caddy/Caddyfile
-      - ./keys:/etc/ssl/certs:ro
-      - caddy_data:/data
-      - caddy_config:/config
     mem_limit: 128m
     cpus: 0.25
-    ports: ["8080:80", "8443:443"]
+    ports: ["80:80", "443:443"]
 
   rabbitmq:
     env_file:
@@ -604,17 +601,19 @@ services:
     env_file:
       - .env
     image: swaggerapi/swagger-ui:latest
+    depends_on: [api]
     mem_limit: 128m
     cpus: 0.25
-    ports: ["3013:8080"]
+    ports: ["3013:3000"]
 
   redoc:
     env_file:
       - .env
     image: redocly/redoc:latest
+    depends_on: [api]
     mem_limit: 128m
     cpus: 0.25
-    ports: ["3014:80"]
+    ports: ["3014:3000"]
 
   storybook:
     env_file:

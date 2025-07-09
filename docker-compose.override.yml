@@ -1,4 +1,9 @@
 services:
+  caddy:
+    volumes:
+      - ./caddy/data:/data
+      - ./caddy/config:/config
+
   grafana:
     volumes:
       - grafana_dashboards:/var/lib/grafana/dashboards
