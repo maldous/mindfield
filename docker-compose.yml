@@ -570,20 +570,7 @@ services:
     env_file:
       - .env
     image: graphile/postgraphile:latest
-    command:
-      - "--connection"
-      - "${DATABASE_URL}"
-      - "--schema public"
-      - "--watch"
-      - "--enhance-graphiql"
-      - "--dynamic-json"
-      - "--no-setof-functions-contain-nulls"
-      - "--no-ignore-rbac"
-      - "--show-error-stack=json"
-      - "--extended-errors hint,detail,errcode"
-      - "--export-schema-graphql /tmp/schema.graphql"
-      - "--graphiql /graphiql"
-      - "--port 5000"
+    command: ["--connection", "${DATABASE_URL}", "--schema", "public", "--watch", "--enhance-graphiql", "--dynamic-json", "--no-setof-functions-contain-nulls", "--no-ignore-rbac", "--show-error-stack=json", "--extended-errors", "hint,detail,errcode", "--export-schema-graphql", "/tmp/schema.graphql", "--graphiql", "/graphiql", "--port", "5000"]
     depends_on:
       postgres:
         condition: service_healthy
