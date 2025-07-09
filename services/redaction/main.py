@@ -1,17 +1,18 @@
-import os
+import io
 import logging
+import os
 from typing import List, Optional
-from fastapi import FastAPI, HTTPException, UploadFile, File
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+
+import pytesseract
 import uvicorn
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from pdf2image import convert_from_bytes
+from PIL import Image
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
-from presidio_anonymizer.entities import RecognizerResult, OperatorConfig
-import io
-from PIL import Image
-import pytesseract
-from pdf2image import convert_from_bytes
+from presidio_anonymizer.entities import OperatorConfig, RecognizerResult
+from pydantic import BaseModel
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -24,23 +25,27 @@ anonymizer = AnonymizerEngine()
 app = FastAPI(
     title="MindField PII Redaction Service",
     description="PII detection and anonymization using Microsoft Presidio",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if os.getenv("NODE_ENV") == "development" else ["https://mindfield.local"],
+    allow_origins=(
+        ["*"] if os.getenv("NODE_ENV") == "development" else ["https://mindfield.local"]
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 class TextAnalysisRequest(BaseModel):
     text: str
     language: str = "en"
     entities: Optional[List[str]] = None
     score_threshold: float = 0.35
+
 
 class TextAnonymizationRequest(BaseModel):
     text: str
@@ -49,6 +54,7 @@ class TextAnonymizationRequest(BaseModel):
     score_threshold: float = 0.35
     anonymization_config: Optional[dict] = None
 
+
 class PIIResult(BaseModel):
     entity_type: str
     start: int
@@ -56,20 +62,24 @@ class PIIResult(BaseModel):
     score: float
     text: str
 
+
 class AnalysisResponse(BaseModel):
     original_text: str
     pii_entities: List[PIIResult]
     has_pii: bool
+
 
 class AnonymizationResponse(BaseModel):
     original_text: str
     anonymized_text: str
     pii_entities: List[PIIResult]
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {"status": "ok", "service": "pii-redaction", "presidio_version": "2.2.358"}
+
 
 @app.post("/analyze", response_model=AnalysisResponse)
 async def analyze_text(request: TextAnalysisRequest):
@@ -80,9 +90,9 @@ async def analyze_text(request: TextAnalysisRequest):
             text=request.text,
             language=request.language,
             entities=request.entities,
-            score_threshold=request.score_threshold
+            score_threshold=request.score_threshold,
         )
-        
+
         # Convert results to response format
         pii_entities = [
             PIIResult(
@@ -90,20 +100,21 @@ async def analyze_text(request: TextAnalysisRequest):
                 start=result.start,
                 end=result.end,
                 score=result.score,
-                text=request.text[result.start:result.end]
+                text=request.text[result.start : result.end],
             )
             for result in results
         ]
-        
+
         return AnalysisResponse(
             original_text=request.text,
             pii_entities=pii_entities,
-            has_pii=len(pii_entities) > 0
+            has_pii=len(pii_entities) > 0,
         )
-        
+
     except Exception as e:
         logger.error(f"Error analyzing text: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
 
 @app.post("/anonymize", response_model=AnonymizationResponse)
 async def anonymize_text(request: TextAnonymizationRequest):
@@ -114,9 +125,9 @@ async def anonymize_text(request: TextAnonymizationRequest):
             text=request.text,
             language=request.language,
             entities=request.entities,
-            score_threshold=request.score_threshold
+            score_threshold=request.score_threshold,
         )
-        
+
         # Default anonymization config
         default_config = {
             "DEFAULT": OperatorConfig("replace", {"new_value": "[REDACTED]"}),
@@ -132,17 +143,17 @@ async def anonymize_text(request: TextAnonymizationRequest):
             "AU_ACN": OperatorConfig("replace", {"new_value": "[ACN]"}),
             "AU_TFN": OperatorConfig("replace", {"new_value": "[TFN]"}),
         }
-        
+
         # Use custom config if provided
         anonymization_config = request.anonymization_config or default_config
-        
+
         # Anonymize the text
         anonymized_result = anonymizer.anonymize(
             text=request.text,
             analyzer_results=analysis_results,
-            operators=anonymization_config
+            operators=anonymization_config,
         )
-        
+
         # Convert analysis results to response format
         pii_entities = [
             PIIResult(
@@ -150,20 +161,21 @@ async def anonymize_text(request: TextAnonymizationRequest):
                 start=result.start,
                 end=result.end,
                 score=result.score,
-                text=request.text[result.start:result.end]
+                text=request.text[result.start : result.end],
             )
             for result in analysis_results
         ]
-        
+
         return AnonymizationResponse(
             original_text=request.text,
             anonymized_text=anonymized_result.text,
-            pii_entities=pii_entities
+            pii_entities=pii_entities,
         )
-        
+
     except Exception as e:
         logger.error(f"Error anonymizing text: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Anonymization failed: {str(e)}")
+
 
 @app.post("/analyze-document", response_model=AnalysisResponse)
 async def analyze_document(req: UploadFile = File(...)):
@@ -196,6 +208,7 @@ async def analyze_document(req: UploadFile = File(...)):
         logger.error(f"Error analyzing document: {e}")
         raise HTTPException(status_code=500, detail=f"Document analysis failed: {e}")
 
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 3000))
     uvicorn.run(
@@ -203,5 +216,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=port,
         log_level="info",
-        reload=os.getenv("NODE_ENV") == "development"
+        reload=os.getenv("NODE_ENV") == "development",
     )
