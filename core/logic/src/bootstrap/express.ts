@@ -22,7 +22,7 @@ import Keycloak from 'keycloak-connect';
 import rateLimit from 'express-rate-limit';
 import slowDown from 'express-slow-down';
 import pino from 'pino';
-import pinoHttp from 'express-pino-logger';
+import pinoHttp from 'pino-http';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { v4 as uuid } from 'uuid';
 import promClient from 'prom-client';
@@ -31,7 +31,8 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import { Queue, Worker, QueueScheduler } from 'bullmq';
+import { Queue, Worker } from 'bullmq';
+import { QueueScheduler } from 'bullmq';
 
 /* ────────── OpenTelemetry ────────── */
 import { NodeSDK } from '@opentelemetry/sdk-node';
@@ -77,25 +78,20 @@ export async function startExpress(opts: Options) {
   app.use(cookieParser());
 
   /* ── Request-id & ALS context ── */
-  app.use((req, _res, next) => {
+  app.use((req: express.Request, _res: express.Response, next: express.NextFunction) => {
     const store = new Map<string, any>();
     store.set('requestId', req.headers['x-request-id'] ?? uuid());
     als.run(store, next);
   });
 
   /* ── Pino HTTP logger ── */
-  app.use(
-    pinoHttp({
-      logger: rootLogger,
-      serializers: {
+  app.use(pinoHttp({ logger: rootLogger, serializers: {
         req: (req) => ({
           id: als.getStore()?.get('requestId'),
           method: req.method,
           url: req.url,
         }),
-      },
-    }),
-  );
+      }, }));
 
   /* ── Rate-limit & slow-down ── */
   const limiter = rateLimit({
@@ -120,6 +116,7 @@ export async function startExpress(opts: Options) {
     );
 
     const keycloak = new Keycloak({ store: memoryStore }, {
+      'confidential-port': 0,
       'auth-server-url': process.env.KEYCLOAK_URL,
       realm: process.env.KEYCLOAK_REALM ?? 'mindfield',
       resource: process.env.KEYCLOAK_CLIENT_ID ?? opts.serviceName,
@@ -127,7 +124,7 @@ export async function startExpress(opts: Options) {
     });
     app.use(keycloak.middleware());
     // Example protected endpoint
-    app.get('/whoami', keycloak.protect(), (req, res) =>
+    app.get('/whoami', keycloak.protect(), (req: express.Request, res: express.Response) =>
       res.json({ user: (req as any).kauth?.grant?.access_token?.content }),
     );
   }
@@ -142,12 +139,12 @@ export async function startExpress(opts: Options) {
     labelNames: ['method', 'route', 'code'],
   });
   registry.registerMetric(httpMetrics);
-  app.use((req, res, next) => {
+  app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
     const end = httpMetrics.startTimer({ method: req.method, route: req.path });
     res.on('finish', () => end({ code: res.statusCode }));
     next();
   });
-  app.get('/metrics', async (_req, res) => {
+  app.get('/metrics', async (_req: express.Request, res: express.Response) => {
     res.set('Content-Type', registry.contentType);
     res.end(await registry.metrics());
   });
@@ -187,7 +184,7 @@ export async function startExpress(opts: Options) {
     const scheduler = new QueueScheduler(`${opts.serviceName}-q`, connection);
     const worker = new Worker(
       `${opts.serviceName}-q`,
-      async (job) => {
+      async (job: any) => {
         rootLogger.info({ jobId: job.id }, 'Dummy worker – no processor registered');
       },
       connection,

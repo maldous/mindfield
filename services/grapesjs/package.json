@@ -28,7 +28,6 @@
     "cors": "^2.8.5",
     "envalid": "^8.0.0",
     "express": "^5.1.0",
-    "express-pino-logger": "^7.0.0",
     "express-rate-limit": "^6.11.2",
     "express-session": "^1.18.1",
     "express-slow-down": "^2.1.0",
