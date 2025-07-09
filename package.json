@@ -47,5 +47,10 @@
   "packageManager": "pnpm@10.12.4",
   "dependencies": {
     "react-native-reanimated": "^3.18.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "bullmq": "^5.56.2"
+    }
   }
 }
