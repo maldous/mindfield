@@ -554,12 +554,27 @@ services:
     env_file:
       - .env
     image: graphile/postgraphile:latest
-    command: ["--connection", "postgres://mindfield:mindfield_dev_password@postgres:5432/mindfield", "--schema", "public", "--watch", "--enhance-graphiql", "--dynamic-json", "--no-setof-functions-contain-nulls", "--no-ignore-rbac", "--show-error-stack=json", "--extended-errors", "hint,detail,errcode", "--export-schema-graphql", "/tmp/schema.graphql", "--graphiql", "/graphiql", "--port", "5000"]
+    command:
+      - "--connection"
+      - "${DATABASE_URL}"
+      - "--schema public"
+      - "--watch"
+      - "--enhance-graphiql"
+      - "--dynamic-json"
+      - "--no-setof-functions-contain-nulls"
+      - "--no-ignore-rbac"
+      - "--show-error-stack=json"
+      - "--extended-errors hint,detail,errcode"
+      - "--export-schema-graphql /tmp/schema.graphql"
+      - "--graphiql /graphiql"
+      - "--port 5000"
     depends_on:
-      postgres: {condition: service_healthy}
+      postgres:
+        condition: service_healthy
     mem_limit: 256m
     cpus: 0.5
-    ports: ["3010:5000"]
+    ports:
+      - "3010:5000"
 
   pgadmin:
     env_file:
