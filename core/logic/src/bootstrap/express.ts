@@ -21,8 +21,6 @@ import session from 'express-session';
 import Keycloak from 'keycloak-connect';
 import rateLimit from 'express-rate-limit';
 import slowDown from 'express-slow-down';
-import pino from 'pino';
-import pinoHttp from 'pino-http';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { v4 as uuid } from 'uuid';
 import promClient from 'prom-client';
@@ -31,7 +29,10 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import { Queue, Worker, QueueScheduler } from 'bullmq';
+import { Queue, Worker } from 'bullmq';
+
+import pino = require('pino');
+import pinoHttp = require('pino-http');
 
 /* ────────── OpenTelemetry ────────── */
 import { NodeSDK } from '@opentelemetry/sdk-node';
@@ -48,7 +49,7 @@ export interface Options {
   registerQueues?: (deps: {
     queue: Queue;
     worker: Worker;
-    scheduler: QueueScheduler;
+    // Delete scheduler as it is not used in express.ts
   }) => void;
 }
 
@@ -85,7 +86,7 @@ export async function startExpress(opts: Options) {
 
   /* ── Pino HTTP logger ── */
   app.use(pinoHttp({ logger: rootLogger, serializers: {
-        req: (req) => ({
+        req: (req: express.Request) => ({        
           id: als.getStore()?.get('requestId'),
           method: req.method,
           url: req.url,
@@ -180,7 +181,7 @@ export async function startExpress(opts: Options) {
   if (process.env.REDIS_URL && opts.registerQueues) {
     const connection = { connection: { url: process.env.REDIS_URL } as any };
     const queue = new Queue(`${opts.serviceName}-q`, connection);
-    const scheduler = new QueueScheduler(`${opts.serviceName}-q`, connection);
+    // Delete the QueueScheduler instantiation as it's not directly used in express.ts
     const worker = new Worker(
       `${opts.serviceName}-q`,
       async (job: any) => {
@@ -188,7 +189,7 @@ export async function startExpress(opts: Options) {
       },
       connection,
     );
-    queueDeps = { queue, worker, scheduler };
+    queueDeps = { queue, worker };
     await opts.registerQueues(queueDeps);
   }
 
