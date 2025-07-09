@@ -1,11 +1,10 @@
-.PHONY: help setup install build base-image start prod test lint format type-check logs stop clean docker-config reset sonar sonar-init
+.PHONY: help setup install build base-image start prod test lint format type-check logs stop clean docker-config reset sonar tmp
 .DEFAULT_GOAL := help
 
 export COMPOSE_DOCKER_CLI_BUILD=1
 export COMPOSE_BAKE=1
 export NODE_MAJOR ?= $(shell cut -d. -f1 .node-version)
 export REGISTRY_CACHE ?= localhost:5001/mindfield-cache
-export SONAR_TOKEN ?= squ_acd89c4d22e9d4fe57fa77eb05423c685005d399
 
 help:
 	@echo "make setup      - Initial project setup"
@@ -36,8 +35,21 @@ install: ; @if [ -d node_modules ]; then pnpm install --frozen-lockfile; else pn
 start: base-image; @docker compose --profile dev build --pull --parallel && docker compose --profile dev up -d --remove-orphans
 prod: base-image; @docker compose --profile prod build --pull --parallel && docker compose --profile prod up -d --remove-orphans
 restart: stop start
-sonar-init: ; @curl -u admin:admin -X POST 'http://localhost:3016/api/projects/create' -d project=mindfield -d name=MindField
-sonar: ; @sonar -Dsonar.host.url=http://localhost:3016 -Dsonar.login=admin:admin -Dsonar.projectKey=mindfield && ./sonar.sh && jq -r ' .[] | "\( (.component | split(":")[1])):\(.line) \(.message)" ' sonar.json
+
+sonar:
+	@if [ ! -f .env ]; then touch .env; fi; \
+	if ! grep -q "SONAR_TOKEN" .env; then \
+        token=$$(curl -s -u admin:admin -X POST 'http://localhost:3016/api/user_tokens/generate' -d name=admin | jq -r '.token'); \
+        echo "SONAR_TOKEN=$$token" >> .env; \
+	fi; \
+	bash -c 'source .env && sonar -Dsonar.host.url=http://localhost:3016 -Dsonar.login=$${SONAR_TOKEN} -Dsonar.projectKey=mindfield'; \
+	bash -c 'source .env && for ((p=1;;p++)); do \
+        r=$$(curl -s -u $${SONAR_TOKEN}: "http://localhost:3016/api/issues/search?branch=main&ps=500&p=$$p"); \
+        if [ $$(jq -e ".issues|length" <<<"$${r}") -eq 0 ]; then break; fi; \
+        printf "%s\n" "$$r"; \
+	done | jq -s "map(.issues)|add" > sonar.json; \
+	echo ""; \
+	jq -r ".[] | \"\( (.component | split(\":\")[1])):\(.line) \(.message)\"" sonar.json'
 
 docker-config:
 	@if [ ! jq -e '.features.buildkit == true and .features["containerd-snapshotter"] == true and (.["registry-mirrors"] | index("http://localhost:5000"))' /etc/docker/daemon.json > /dev/null 2>&1 ]; then \
@@ -65,4 +77,5 @@ clean: stop
 
 reset: clean
 	@docker system prune -a --volumes -f || true
+	@docker volume ls -q | grep '^mindfield_' | xargs -r docker volume rm || true
 	@git clean -xfd || true
