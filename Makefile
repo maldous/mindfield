@@ -36,7 +36,8 @@ install: ; @if [ -d node_modules ]; then pnpm install --frozen-lockfile; else pn
 start: base-image; @docker compose --profile dev build --pull --parallel && docker compose --profile dev up -d --remove-orphans
 prod: base-image; @docker compose --profile prod build --pull --parallel && docker compose --profile prod up -d --remove-orphans
 restart: stop start
-sonar: ; @sonar -Dsonar.host.url=http://localhost:3016 -Dsonar.token=${SONAR_TOKEN} -Dsonar.projectKey=mindfield && ./sonar.sh ${SONAR_TOKEN} && jq -r ' .[] | "\( (.component | split(":")[1])):\(.line) \(.message)" ' sonar.json
+sonar-init: @curl -u admin:admin -X POST 'http://localhost:3016/api/projects/create' -d project=mindfield -d name=MindField
+sonar: ; @sonar -Dsonar.host.url=http://localhost:3016 -Dsonar.login=admin:admin -Dsonar.projectKey=mindfield && ./sonar.sh && jq -r ' .[] | "\( (.component | split(":")[1])):\(.line) \(.message)" ' sonar.json
 
 docker-config:
 	@if [ ! jq -e '.features.buildkit == true and .features["containerd-snapshotter"] == true and (.["registry-mirrors"] | index("http://localhost:5000"))' /etc/docker/daemon.json > /dev/null 2>&1 ]; then \
