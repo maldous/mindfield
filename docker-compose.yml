@@ -444,6 +444,11 @@ services:
   opensearch:
     env_file:
       - .env
+    environment:
+      cluster.name: mindfield-cluster
+      node.name: opensearch
+      discovery.type: single-node
+      bootstrap.memory_lock: true
     image: opensearchproject/opensearch:latest
     ulimits:
       memlock: {soft: -1, hard: -1}

@@ -147,3 +147,6 @@ keys
 pnpm-lock.yaml
 **/storybook-static
 sonar.json
+
+# envsubst
+database/init/01-init-keycloak.sql
