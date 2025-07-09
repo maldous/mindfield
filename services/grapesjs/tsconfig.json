@@ -14,7 +14,7 @@
     "jsx": "preserve",
     "lib": ["ES2020"],
     "moduleDetection": "force",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "bundler",
     "module": "nodenext",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
