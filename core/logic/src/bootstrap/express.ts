@@ -208,16 +208,23 @@ export async function startExpress(opts: Options) {
     (req, res) => res.json({ echoed: (req.body as { msg: string }).msg }),
   );
 
-  /* ── Swagger / Redoc ── */
   if (opts.exposeSwagger !== false) {
     const swaggerSpec = swaggerJsdoc({
       definition: {
         openapi: "3.0.0",
         info: { title: `${opts.serviceName} API`, version: "1.0.0" },
       },
-      apis: ["dist/**/*.js", "dist/**/*.ts"], // adjust for your compiled output
+      apis: ["dist/**/*.js", "dist/**/*.ts"],
       ...(opts.swaggerOptions ?? {}),
     });
+
+    // Serve the spec so external viewers can fetch it
+    app.get("/api-docs/swagger.json", (_req, res) => {
+      res.setHeader("Content-Type", "application/json");
+      res.send(swaggerSpec);
+    });
+
+    // In-process Swagger-UI for dev convenience
     app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   }
 

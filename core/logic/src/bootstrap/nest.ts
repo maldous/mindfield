@@ -118,8 +118,21 @@ export async function startNest(AppRoot: Type<unknown>) {
     .setTitle("MindField API")
     .setVersion("1.0")
     .build();
+
   const document = SwaggerModule.createDocument(app, docCfg);
-  SwaggerModule.setup("api-docs", app, document);
+
+  // Raw JSON for external viewers
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .get("/api-docs/swagger.json", (_req: unknown, res: express.Response) =>
+      res.json(document),
+    );
+
+  // In-process Swagger-UI
+  SwaggerModule.setup("api-docs", app, document, {
+    jsonDocumentUrl: "api-docs/swagger.json", // deep-link button on the UI
+  });
 
   /* ── WebSockets ── */
   app.useWebSocketAdapter(new WsAdapter(app));
