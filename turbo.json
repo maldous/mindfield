@@ -4,40 +4,56 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"]
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**",
+        "build/**"
+      ]
     },
     "build:prod": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"]
+      "dependsOn": ["build"],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**",
+        "build/**"
+      ]
     },
     "build:android": {
       "dependsOn": ["^build"],
       "outputs": ["build/**", "*.apk", "*.aab"]
     },
+
     "storybook": {
       "cache": false,
       "persistent": true
     },
     "build-storybook": {
-      "dependsOn": ["^build"],
-      "outputs": ["storybook/**"]
+      "dependsOn": ["build"],
+      "outputs": [".storybook-static/**"]
     },
+
     "dev": {
       "cache": false,
-      "persistent": true
-    },
-    "lint": {
+      "persistent": true,
       "dependsOn": ["^build"]
+    },
+
+    "lint": {
+      "outputs": []
     },
     "test": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
     },
     "type-check": {
-      "dependsOn": ["^build"]
+      "outputs": []
     },
+
     "clean": {
       "cache": false
     }
   }
 }
+
