@@ -1,24 +1,24 @@
 {
   "name": "@mindfield/ui",
-  "type": "module",
   "version": "0.1.0",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "build:prod": "tsc -p tsconfig.build.json",
-    "dev": "tsc --watch",
-    "lint": "eslint src",
-    "test": "jest",
-    "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
-  },
   "files": [
     "dist"
   ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build-storybook": "storybook build",
+    "build:prod": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "dev": "tsc --watch",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "lint": "eslint src",
+    "storybook": "storybook dev -p 6006",
+    "test": "jest",
+    "type-check": "tsc --noEmit"
+  },
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "nativewind": "^4.1.23",

@@ -4,8 +4,8 @@ packages:
   - services/*
 
 onlyBuiltDependencies:
-  - '@nestjs/core'
-  - '@scarf/scarf'
+  - "@nestjs/core"
+  - "@scarf/scarf"
   - chromedriver
   - core-js-pure
   - esbuild

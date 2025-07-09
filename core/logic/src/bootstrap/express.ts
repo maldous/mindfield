@@ -12,33 +12,33 @@
  * Graceful shutdown
  */
 
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
+import { Job, Queue, Worker } from "bullmq";
+import { celebrate, errors as celebrateErrors, Joi } from "celebrate";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-import session from "express-session";
-import Keycloak from "keycloak-connect";
+import cors from "cors";
+import express from "express";
 import rateLimit from "express-rate-limit";
+import session from "express-session";
 import slowDown from "express-slow-down";
-import { AsyncLocalStorage } from "node:async_hooks";
-import { v4 as uuid } from "uuid";
-import promClient from "prom-client";
-import { celebrate, errors as celebrateErrors, Joi } from "celebrate";
-import swaggerUi from "swagger-ui-express";
-import swaggerJsdoc from "swagger-jsdoc";
+import helmet from "helmet";
 import { Server as HttpServer } from "http";
-import { Server as SocketIOServer } from "socket.io";
-import { Queue, Worker, Job } from "bullmq";
+import Keycloak from "keycloak-connect";
+import { AsyncLocalStorage } from "node:async_hooks";
 import { createRequire } from "node:module";
+import promClient from "prom-client";
+import { Server as SocketIOServer } from "socket.io";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
+import { v4 as uuid } from "uuid";
 const require = createRequire(import.meta.url);
 const pino = require("pino");
 const pinoHttp = require("pino-http");
 
 /* ────────── OpenTelemetry ────────── */
-import { NodeSDK } from "@opentelemetry/sdk-node";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { NodeSDK } from "@opentelemetry/sdk-node";
 
 /* ─────────────────────────────────────────────────────────────── */
 

@@ -1,22 +1,22 @@
 {
   "name": "@mindfield/submission",
-  "type": "module",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "build:prod": "tsc -p tsconfig.build.json",
-    "start": "node dist/main.js",
-    "dev": "ts-node src/main.ts",
-    "lint": "eslint src",
-    "test": "jest",
-    "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist",
-    "format": "prettier --write \"src/**/*.ts\""
-  },
+  "type": "module",
   "files": [
     "dist"
   ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:prod": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "dev": "ts-node src/main.ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint src",
+    "start": "node dist/main.js",
+    "test": "jest",
+    "type-check": "tsc --noEmit"
+  },
   "dependencies": {
     "@mindfield/logic": "workspace:*",
     "@types/express": "^5.0.3",

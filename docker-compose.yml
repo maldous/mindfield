@@ -7,21 +7,28 @@ x-build-env: &build-env
   BUILDKIT_INLINE_CACHE: "${BUILDKIT_INLINE_CACHE:-1}"
 
 services:
-
   postgres:
     env_file:
       - .env
     image: postgres:15-alpine
     command: [
       "postgres",
-      "-c", "shared_buffers=256MB",
-      "-c", "effective_cache_size=1GB",
-      "-c", "maintenance_work_mem=64MB",
-      "-c", "checkpoint_completion_target=0.9",
-      "-c", "wal_buffers=16MB",
-      "-c", "default_statistics_target=100",
-      "-c", "random_page_cost=1.1",
-      "-c", "effective_io_concurrency=200"
+      "-c",
+      "shared_buffers=256MB",
+      "-c",
+      "effective_cache_size=1GB",
+      "-c",
+      "maintenance_work_mem=64MB",
+      "-c",
+      "checkpoint_completion_target=0.9",
+      "-c",
+      "wal_buffers=16MB",
+      "-c",
+      "default_statistics_target=100",
+      "-c",
+      "random_page_cost=1.1",
+      "-c",
+      "effective_io_concurrency=200",
     ]
     environment:
       POSTGRES_DB: ${MINDFIELD_POSTGRES_DB}
@@ -31,13 +38,13 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U mindfield" ]
+      test: ["CMD-SHELL", "pg_isready -U mindfield"]
       interval: 10s
       timeout: 5s
       retries: 5
     mem_limit: 512m
     cpus: 1.0
-    ports: [ "5432:5432" ]
+    ports: ["5432:5432"]
 
   pgbouncer:
     env_file:
@@ -46,13 +53,13 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
     healthcheck:
-      test: [ "CMD", "pg_isready", "-h", "localhost", "-p", "5432" ]
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "5432"]
       interval: 10s
       timeout: 5s
       retries: 5
     mem_limit: 64m
     cpus: 0.25
-    ports: [ "6432:5432" ]
+    ports: ["6432:5432"]
 
   keycloak:
     env_file:
@@ -60,8 +67,8 @@ services:
     image: quay.io/keycloak/keycloak:latest
     volumes: [keycloak_data:/opt/keycloak/data]
     depends_on:
-      pgbouncer: {condition: service_healthy}
-      mailhog: {condition: service_healthy}
+      pgbouncer: { condition: service_healthy }
+      mailhog: { condition: service_healthy }
     command: start-dev
     mem_limit: 512m
     cpus: 0.5
@@ -87,7 +94,7 @@ services:
       - "/tmp"
     mem_limit: 512m
     cpus: 1.0
-    ports: [ "3001:3000" ]
+    ports: ["3001:3000"]
 
   web:
     env_file:
@@ -101,14 +108,14 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-    depends_on: [ api ]
+    depends_on: [api]
     read_only: true
     tmpfs:
       - "/tmp"
       - "/app/.next/cache"
     mem_limit: 512m
     cpus: 1.0
-    ports: [ "8000:3000" ]
+    ports: ["8000:3000"]
 
   render:
     env_file:
@@ -123,15 +130,15 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-    command: [ "node", "dist/main.js" ]
+    command: ["node", "dist/main.js"]
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
     read_only: true
-    tmpfs: [ "/tmp" ]
+    tmpfs: ["/tmp"]
     mem_limit: 512m
     cpus: 1.0
-    ports: [ "3002:3000" ]
+    ports: ["3002:3000"]
 
   transform:
     env_file:
@@ -146,15 +153,15 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-    command: [ "node", "dist/main.js" ]
+    command: ["node", "dist/main.js"]
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
     read_only: true
-    tmpfs: [ "/tmp" ]
+    tmpfs: ["/tmp"]
     mem_limit: 256m
     cpus: 0.5
-    ports: [ "3003:3000" ]
+    ports: ["3003:3000"]
 
   submission:
     env_file:
@@ -169,15 +176,15 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-    command: [ "node", "dist/main.js" ]
+    command: ["node", "dist/main.js"]
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
     read_only: true
-    tmpfs: [ "/tmp" ]
+    tmpfs: ["/tmp"]
     mem_limit: 256m
     cpus: 0.5
-    ports: [ "3004:3000" ]
+    ports: ["3004:3000"]
 
   grapesjs:
     env_file:
@@ -196,7 +203,7 @@ services:
       minio: { condition: service_healthy }
     mem_limit: 256m
     cpus: 0.5
-    ports: [ "3005:3000" ]
+    ports: ["3005:3000"]
 
   redis:
     env_file:
@@ -204,16 +211,25 @@ services:
     image: redis:7-alpine
     command: [
       "redis-server",
-      "--appendonly", "yes",
-      "--maxmemory", "128mb",
-      "--maxmemory-policy", "allkeys-lru",
-      "--save", "900", "1",
-      "--save", "300", "10",
-      "--save", "60", "10000"
+      "--appendonly",
+      "yes",
+      "--maxmemory",
+      "128mb",
+      "--maxmemory-policy",
+      "allkeys-lru",
+      "--save",
+      "900",
+      "1",
+      "--save",
+      "300",
+      "10",
+      "--save",
+      "60",
+      "10000",
     ]
     volumes: [redis_data:/data]
     healthcheck:
-      test: ["CMD","redis-cli","ping"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -228,13 +244,13 @@ services:
     command: server /data --console-address ":9001"
     volumes: [minio_data:/data]
     healthcheck:
-      test: ["CMD","curl","-f","http://localhost:9000/minio/health/live"]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3
     mem_limit: 256m
     cpus: 0.5
-    ports: ["9000:9000","9001:9001"]
+    ports: ["9000:9000", "9001:9001"]
 
   mailhog:
     env_file:
@@ -242,7 +258,7 @@ services:
     image: mailhog/mailhog:latest
     mem_limit: 128m
     cpus: 0.25
-    ports: ["2025:1025","8025:8025"]
+    ports: ["2025:1025", "8025:8025"]
     healthcheck:
       test: ["CMD", "true"]
       interval: 30s
@@ -252,7 +268,7 @@ services:
   redaction:
     env_file:
       - .env
-    build: 
+    build:
       context: .
       dockerfile: dockerfiles/Dockerfile.redaction
       cache_from:
@@ -260,7 +276,7 @@ services:
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
     depends_on:
-      redis: {condition: service_healthy}
+      redis: { condition: service_healthy }
     mem_limit: 1g
     cpus: 1.0
     ports: ["3006:3000"]
@@ -336,7 +352,7 @@ services:
     image: jaegertracing/all-in-one:latest
     mem_limit: 256m
     cpus: 0.5
-    ports: ["16686:16686","14268:14268"]
+    ports: ["16686:16686", "14268:14268"]
 
   alertmanager:
     image: prom/alertmanager:latest
@@ -366,7 +382,7 @@ services:
       - caddy_config:/config
     mem_limit: 128m
     cpus: 0.25
-    ports: ["8080:80","8443:443"]
+    ports: ["8080:80", "8443:443"]
 
   rabbitmq:
     env_file:
@@ -374,13 +390,13 @@ services:
     image: rabbitmq:3-management-alpine
     volumes: [rabbitmq_data:/var/lib/rabbitmq]
     healthcheck:
-      test: ["CMD","rabbitmq-diagnostics","ping"]
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 30s
       timeout: 10s
       retries: 5
     mem_limit: 256m
     cpus: 0.5
-    ports: ["5672:5672","15672:15672"]
+    ports: ["5672:5672", "15672:15672"]
 
   backup:
     env_file:
@@ -395,7 +411,7 @@ services:
                pg_dumpall -h postgres -U mindfield > /backups/backup_$(date +%Y%m%d_%H%M%S).sql &&
                find /backups -name '*.sql' -mtime +7 -delete;
              done"
-    depends_on: {postgres: {condition: service_healthy}}
+    depends_on: { postgres: { condition: service_healthy } }
     mem_limit: 128m
     cpus: 0.25
 
@@ -422,7 +438,7 @@ services:
     image: kong:latest
     command: kong migrations bootstrap
     depends_on:
-      kong-database: {condition: service_healthy}
+      kong-database: { condition: service_healthy }
     restart: "no"
 
   kong:
@@ -430,8 +446,8 @@ services:
       - .env
     image: kong:latest
     depends_on:
-      kong-database: {condition: service_healthy}
-      kong-migrations: {condition: service_completed_successfully}
+      kong-database: { condition: service_healthy }
+      kong-migrations: { condition: service_completed_successfully }
     healthcheck:
       test: ["CMD", "kong", "health"]
       interval: 10s
@@ -451,8 +467,8 @@ services:
       bootstrap.memory_lock: true
     image: opensearchproject/opensearch:latest
     ulimits:
-      memlock: {soft: -1, hard: -1}
-      nofile: {soft: 65536, hard: 65536}
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
     volumes: [opensearch_data:/usr/share/opensearch/data]
     mem_limit: 1g
     cpus: 1.0
@@ -484,9 +500,9 @@ services:
       - .env
     image: prom/node-exporter:latest
     command:
-      - '--path.rootfs=/host'
+      - "--path.rootfs=/host"
     volumes:
-      - '/:/host:ro,rslave'
+      - "/:/host:ro,rslave"
     pid: host
     mem_limit: 128m
     cpus: 0.25
@@ -535,7 +551,7 @@ services:
       - .env
     image: postgrest/postgrest:latest
     depends_on:
-      postgres: {condition: service_healthy}
+      postgres: { condition: service_healthy }
     mem_limit: 128m
     cpus: 0.25
     ports: ["3008:3000"]
@@ -545,7 +561,7 @@ services:
       - .env
     image: hasura/graphql-engine:latest
     depends_on:
-      postgres: {condition: service_healthy}
+      postgres: { condition: service_healthy }
     mem_limit: 512m
     cpus: 0.5
     ports: ["3009:8080"]
@@ -582,7 +598,7 @@ services:
     image: dpage/pgadmin4:latest
     volumes: [pgadmin_data:/var/lib/pgadmin]
     depends_on:
-      postgres: {condition: service_healthy}
+      postgres: { condition: service_healthy }
     mem_limit: 256m
     cpus: 0.5
     ports: ["3011:80"]
@@ -592,7 +608,7 @@ services:
       - .env
     image: timothyjmiller/prisma-studio:latest
     depends_on:
-      postgres: {condition: service_healthy}
+      postgres: { condition: service_healthy }
     mem_limit: 256m
     cpus: 0.5
     ports: ["3012:5555"]
@@ -654,7 +670,7 @@ services:
       - .env
     image: sonarqube:community
     depends_on:
-      sonarqube-db: {condition: service_healthy}
+      sonarqube-db: { condition: service_healthy }
     volumes:
       - sonarqube_es7:/opt/sonarqube/data/es7
       - sonarqube_logs:/opt/sonarqube/logs
@@ -685,7 +701,7 @@ services:
       - .env
     image: gitea/gitea:latest
     depends_on:
-      gitea-db: {condition: service_healthy}
+      gitea-db: { condition: service_healthy }
     volumes:
       - gitea_data:/data
       - /etc/timezone:/etc/timezone:ro
@@ -695,7 +711,6 @@ services:
     ports: ["3017:3000", "2222:22"]
 
 volumes:
-
   caddy_config:
   caddy_data:
   gitea_data:

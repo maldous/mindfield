@@ -13,25 +13,25 @@
  */
 
 import "reflect-metadata";
+import { Logger, Type, ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
-import { ValidationPipe, Logger, Type } from "@nestjs/common";
-import helmet from "helmet";
+import { WsAdapter } from "@nestjs/platform-ws";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { Queue, Worker } from "bullmq";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-import session from "express-session";
-import Keycloak from "keycloak-connect";
-import rateLimit from "express-rate-limit";
-import slowDown from "express-slow-down";
-import promClient from "prom-client";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { WsAdapter } from "@nestjs/platform-ws";
-import { Queue, Worker } from "bullmq";
 import * as express from "express";
+import rateLimit from "express-rate-limit";
+import session from "express-session";
+import slowDown from "express-slow-down";
+import helmet from "helmet";
+import Keycloak from "keycloak-connect";
+import promClient from "prom-client";
 
 /* ────────── OpenTelemetry ────────── */
-import { NodeSDK } from "@opentelemetry/sdk-node";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { NodeSDK } from "@opentelemetry/sdk-node";
 
 export async function startNest(AppRoot: Type<unknown>) {
   /* ── OTEL ── */
