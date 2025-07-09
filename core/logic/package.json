@@ -33,5 +33,19 @@
     "ts-jest": "^29.4.0",
     "typescript": "^5.8.3"
   },
-  "packageManager": "pnpm@10.12.4"
+  "packageManager": "pnpm@10.12.4",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./bootstrap/express": {
+      "types": "./dist/bootstrap/express.d.ts",
+      "import": "./dist/bootstrap/express.js"
+    },
+    "./bootstrap/nest": {
+      "types": "./dist/bootstrap/nest.d.ts",
+      "import": "./dist/bootstrap/nest.js"
+    }
+  }
 }

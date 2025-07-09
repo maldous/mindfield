@@ -1,9 +1,8 @@
-import { startExpress } from '@mindfield/logic/bootstrap/express';
-import routes from './routes';
+import { startExpress } from '@mindfield/logic';
+import routes from './routes.js';
 
 startExpress({
   serviceName: 'grapejs',
   registerRoutes: routes,
-  registerQueues: ({ queue }) => {
-  },
+  registerQueues: () => {},
 });
