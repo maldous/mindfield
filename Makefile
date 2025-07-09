@@ -37,7 +37,7 @@ prod: install build base-image ; @docker compose --profile prod build --pull --p
 restart: stop start
 
 sonar:
-	if [ ! -f .env ]; then touch .env; fi; \
+	@if [ ! -f .env ]; then touch .env; fi; \
 	if ! grep -q "SONAR_TOKEN" .env; then \
         token=$$(curl -s -u admin:admin -X POST 'http://localhost:3016/api/user_tokens/generate' -d name=admin | jq -r '.token'); \
         echo "SONAR_TOKEN=$$token" >> .env; \
