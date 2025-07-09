@@ -6,3 +6,5 @@ for ((p=1;;p++)); do
   jq -e '.issues|length==0' <<<"$r" && break
   printf '%s\n' "$r"
 done | jq -s 'map(.issues)|add' > sonar.json
+
+echo -e "\n--\n"
