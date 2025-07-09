@@ -1,6 +1,3 @@
-env_file:
-  - .env
-
 x-node-args: &node-args
   NODE_MAJOR: "${NODE_MAJOR:-24}"
 
@@ -12,6 +9,8 @@ x-build-env: &build-env
 services:
 
   postgres:
+    env_file:
+      - .env
     image: postgres:15-alpine
     command: [
       "postgres",
@@ -41,6 +40,8 @@ services:
     ports: [ "5432:5432" ]
 
   pgbouncer:
+    env_file:
+      - .env
     image: edoburu/pgbouncer:latest
     depends_on:
       postgres: { condition: service_healthy }
@@ -54,6 +55,8 @@ services:
     ports: [ "6432:5432" ]
 
   keycloak:
+    env_file:
+      - .env
     image: quay.io/keycloak/keycloak:latest
     volumes: [keycloak_data:/opt/keycloak/data]
     depends_on:
@@ -65,6 +68,8 @@ services:
     ports: ["8081:8080"]
 
   api:
+    env_file:
+      - .env
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.api
@@ -85,6 +90,8 @@ services:
     ports: [ "3001:3000" ]
 
   web:
+    env_file:
+      - .env
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.web
@@ -104,6 +111,8 @@ services:
     ports: [ "8000:3000" ]
 
   render:
+    env_file:
+      - .env
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.services
@@ -125,6 +134,8 @@ services:
     ports: [ "3002:3000" ]
 
   transform:
+    env_file:
+      - .env
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.services
@@ -146,6 +157,8 @@ services:
     ports: [ "3003:3000" ]
 
   submission:
+    env_file:
+      - .env
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.services
@@ -167,6 +180,8 @@ services:
     ports: [ "3004:3000" ]
 
   grapesjs:
+    env_file:
+      - .env
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.grapesjs
@@ -184,6 +199,8 @@ services:
     ports: [ "3005:3000" ]
 
   redis:
+    env_file:
+      - .env
     image: redis:7-alpine
     command: [
       "redis-server",
@@ -205,6 +222,8 @@ services:
     ports: ["6379:6379"]
 
   minio:
+    env_file:
+      - .env
     image: minio/minio:latest
     command: server /data --console-address ":9001"
     volumes: [minio_data:/data]
@@ -218,6 +237,8 @@ services:
     ports: ["9000:9000","9001:9001"]
 
   mailhog:
+    env_file:
+      - .env
     image: mailhog/mailhog:latest
     mem_limit: 128m
     cpus: 0.25
@@ -229,6 +250,8 @@ services:
       retries: 3
 
   redaction:
+    env_file:
+      - .env
     build: 
       context: .
       dockerfile: dockerfiles/Dockerfile.redaction
@@ -243,6 +266,8 @@ services:
     ports: ["3006:3000"]
 
   mkdocs:
+    env_file:
+      - .env
     image: squidfunk/mkdocs-material:latest
     command: serve --dev-addr=0.0.0.0:8000
     volumes: ["./docs:/docs"]
@@ -252,6 +277,8 @@ services:
     ports: ["8001:8000"]
 
   prometheus:
+    env_file:
+      - .env
     image: prom/prometheus:latest
     volumes:
       - ./services/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
@@ -268,6 +295,8 @@ services:
     ports: ["9090:9090"]
 
   grafana:
+    env_file:
+      - .env
     image: grafana/grafana:latest
     volumes:
       - grafana_data:/var/lib/grafana
@@ -279,6 +308,8 @@ services:
     ports: ["3007:3000"]
 
   loki:
+    env_file:
+      - .env
     image: grafana/loki:latest
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
@@ -288,6 +319,8 @@ services:
     ports: ["3100:3100"]
 
   promtail:
+    env_file:
+      - .env
     image: grafana/promtail:latest
     command: -config.file=/etc/promtail/config.yml
     volumes:
@@ -298,6 +331,8 @@ services:
     cpus: 0.25
 
   jaeger:
+    env_file:
+      - .env
     image: jaegertracing/all-in-one:latest
     mem_limit: 256m
     cpus: 0.5
@@ -315,6 +350,8 @@ services:
     ports: ["9093:9093"]
 
   caddy:
+    env_file:
+      - .env
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.caddy
@@ -332,6 +369,8 @@ services:
     ports: ["8080:80","8443:443"]
 
   rabbitmq:
+    env_file:
+      - .env
     image: rabbitmq:3-management-alpine
     volumes: [rabbitmq_data:/var/lib/rabbitmq]
     healthcheck:
@@ -344,6 +383,8 @@ services:
     ports: ["5672:5672","15672:15672"]
 
   backup:
+    env_file:
+      - .env
     image: postgres:15-alpine
     volumes:
       - ./backups:/backups
@@ -359,6 +400,8 @@ services:
     cpus: 0.25
 
   kong-database:
+    env_file:
+      - .env
     image: postgres:15-alpine
     environment:
       POSTGRES_DB: ${KONG_POSTGRES_DB}
@@ -374,6 +417,8 @@ services:
     cpus: 0.5
 
   kong-migrations:
+    env_file:
+      - .env
     image: kong:latest
     command: kong migrations bootstrap
     depends_on:
@@ -381,6 +426,8 @@ services:
     restart: "no"
 
   kong:
+    env_file:
+      - .env
     image: kong:latest
     depends_on:
       kong-database: {condition: service_healthy}
@@ -395,6 +442,8 @@ services:
     ports: ["8002:8000", "8444:8443", "8003:8001", "8445:8444"]
 
   opensearch:
+    env_file:
+      - .env
     image: opensearchproject/opensearch:latest
     ulimits:
       memlock: {soft: -1, hard: -1}
@@ -405,6 +454,8 @@ services:
     ports: ["9200:9200", "9600:9600"]
 
   opensearch-dashboards:
+    env_file:
+      - .env
     image: opensearchproject/opensearch-dashboards:latest
     depends_on: [opensearch]
     mem_limit: 512m
@@ -412,6 +463,8 @@ services:
     ports: ["5601:5601"]
 
   otel-collector:
+    env_file:
+      - .env
     image: otel/opentelemetry-collector-contrib:latest
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
@@ -422,6 +475,8 @@ services:
     ports: ["4317:4317", "4318:4318", "8888:8888", "8889:8889"]
 
   node-exporter:
+    env_file:
+      - .env
     image: prom/node-exporter:latest
     command:
       - '--path.rootfs=/host'
@@ -433,6 +488,8 @@ services:
     ports: ["9100:9100"]
 
   blackbox-exporter:
+    env_file:
+      - .env
     image: prom/blackbox-exporter:latest
     volumes:
       - ./services/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml
@@ -441,6 +498,8 @@ services:
     ports: ["9115:9115"]
 
   uptime-kuma:
+    env_file:
+      - .env
     image: louislam/uptime-kuma:latest
     volumes: [uptime_kuma_data:/app/data]
     mem_limit: 256m
@@ -448,6 +507,8 @@ services:
     ports: ["3018:3001"]
 
   trivy:
+    env_file:
+      - .env
     image: aquasec/trivy:latest
     command: ["server", "--listen", "0.0.0.0:8080"]
     volumes: [trivy_cache:/root/.cache]
@@ -456,6 +517,8 @@ services:
     ports: ["8004:8080"]
 
   step-ca:
+    env_file:
+      - .env
     image: smallstep/step-ca:latest
     volumes: [step_ca_data:/home/step]
     mem_limit: 128m
@@ -463,6 +526,8 @@ services:
     ports: ["9443:9443"]
 
   postgrest:
+    env_file:
+      - .env
     image: postgrest/postgrest:latest
     depends_on:
       postgres: {condition: service_healthy}
@@ -471,6 +536,8 @@ services:
     ports: ["3008:3000"]
 
   hasura:
+    env_file:
+      - .env
     image: hasura/graphql-engine:latest
     depends_on:
       postgres: {condition: service_healthy}
@@ -479,6 +546,8 @@ services:
     ports: ["3009:8080"]
 
   postgraphile:
+    env_file:
+      - .env
     image: graphile/postgraphile:latest
     command: ["--connection", "postgres://mindfield:mindfield_dev_password@postgres:5432/mindfield", "--schema", "public", "--watch", "--enhance-graphiql", "--dynamic-json", "--no-setof-functions-contain-nulls", "--no-ignore-rbac", "--show-error-stack=json", "--extended-errors", "hint,detail,errcode", "--export-schema-graphql", "/tmp/schema.graphql", "--graphiql", "/graphiql", "--port", "5000"]
     depends_on:
@@ -488,6 +557,8 @@ services:
     ports: ["3010:5000"]
 
   pgadmin:
+    env_file:
+      - .env
     image: dpage/pgadmin4:latest
     volumes: [pgadmin_data:/var/lib/pgadmin]
     depends_on:
@@ -497,6 +568,8 @@ services:
     ports: ["3011:80"]
 
   prisma-studio:
+    env_file:
+      - .env
     image: timothyjmiller/prisma-studio:latest
     depends_on:
       postgres: {condition: service_healthy}
@@ -505,18 +578,24 @@ services:
     ports: ["3012:5555"]
 
   swagger-ui:
+    env_file:
+      - .env
     image: swaggerapi/swagger-ui:latest
     mem_limit: 128m
     cpus: 0.25
     ports: ["3013:8080"]
 
   redoc:
+    env_file:
+      - .env
     image: redocly/redoc:latest
     mem_limit: 128m
     cpus: 0.25
     ports: ["3014:80"]
 
   storybook:
+    env_file:
+      - .env
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.storybook
@@ -534,6 +613,8 @@ services:
     ports: ["3015:6006"]
 
   sonarqube-db:
+    env_file:
+      - .env
     image: postgres:15-alpine
     environment:
       POSTGRES_DB: ${SONAR_POSTGRES_DB}
@@ -549,6 +630,8 @@ services:
     cpus: 0.5
 
   sonarqube:
+    env_file:
+      - .env
     image: sonarqube:community
     depends_on:
       sonarqube-db: {condition: service_healthy}
@@ -561,6 +644,8 @@ services:
     ports: ["3016:9000"]
 
   gitea-db:
+    env_file:
+      - .env
     image: postgres:15-alpine
     environment:
       POSTGRES_DB: ${GITEA_POSTGRES_DB}
@@ -576,6 +661,8 @@ services:
     cpus: 0.5
 
   gitea:
+    env_file:
+      - .env
     image: gitea/gitea:latest
     depends_on:
       gitea-db: {condition: service_healthy}
