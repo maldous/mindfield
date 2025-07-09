@@ -138,9 +138,11 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+#Sonar
+.scannerwork/
+
 # MindField
 .turbo
-lixit
 keys
 pnpm-lock.yaml
 **/storybook-static
