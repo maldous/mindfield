@@ -2,6 +2,7 @@
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "allowSyntheticDefaultImports": true,
+    "composite": true,
     "declarationMap": true,
     "declaration": true,
     "emitDecoratorMetadata": true,

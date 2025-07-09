@@ -16,7 +16,9 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "nativewind": "^4.1.23",
