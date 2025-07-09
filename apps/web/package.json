@@ -1,22 +1,22 @@
 {
   "name": "@mindfield/web",
   "version": "0.1.0",
-  "type": "module",
   "private": true,
-  "scripts": {
-    "dev": "next dev -p 8000",
-    "build": "next build",
-    "build:prod": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "type-check": "tsc --noEmit",
-    "storybook": "storybook dev -p 6006 --no-open",
-    "build-storybook": "storybook build",
-    "clean": "rm -rf dist"
-  },
+  "type": "module",
   "files": [
     "dist"
   ],
+  "scripts": {
+    "build": "next build",
+    "build-storybook": "storybook build",
+    "build:prod": "next build",
+    "clean": "rm -rf dist",
+    "dev": "next dev -p 8000",
+    "lint": "next lint",
+    "start": "next start",
+    "storybook": "storybook dev -p 6006 --no-open",
+    "type-check": "tsc --noEmit"
+  },
   "dependencies": {
     "@mindfield/logic": "workspace:*",
     "@mindfield/ui": "file:../../core/ui",

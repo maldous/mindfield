@@ -14,7 +14,8 @@ help:
 	@echo "make prod       - Build & start prod-like stack"
 	@echo "make test       - Run all tests"
 	@echo "make lint       - ESLint across workspace"
-	@echo "make format     - Prettier formatting"
+	@echo "make format     - code formatting"
+	@echo "make tidy       - package formatting"
 	@echo "make type-check - TypeScript checks"
 	@echo "make logs       - Tail docker logs"
 	@echo "make stop       - Stop all services"
@@ -29,6 +30,7 @@ build: ; @pnpm turbo run build build-storybook
 test: ; @pnpm turbo run test -- --passWithNoTests --coverage --all
 lint: ; @pnpm turbo run lint
 format: ; @pnpm format
+tidy: ; @pnpm tidy
 type-check: ; @pnpm turbo run type-check
 logs: ; @docker compose logs -f
 stop: ; @docker compose down

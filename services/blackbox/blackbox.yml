@@ -22,7 +22,7 @@ modules:
       method: POST
       headers:
         Content-Type: application/json
-      body: '{}'
+      body: "{}"
 
   tcp_connect:
     prober: tcp

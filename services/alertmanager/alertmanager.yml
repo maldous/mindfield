@@ -1,18 +1,18 @@
 global:
-  smtp_smarthost: 'mailhog:1025'
-  smtp_from: 'alerts@mindfield.local'
+  smtp_smarthost: "mailhog:1025"
+  smtp_from: "alerts@mindfield.local"
 
 route:
-  group_by: ['alertname']
+  group_by: ["alertname"]
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 1h
-  receiver: 'web.hook'
+  receiver: "web.hook"
 
 receivers:
-  - name: 'web.hook'
+  - name: "web.hook"
     email_configs:
-      - to: 'admin@mindfield.local'
+      - to: "admin@mindfield.local"
         html: |
           MindField Alert: {{ .GroupLabels.alertname }}
           {{ range .Alerts }}
@@ -22,7 +22,7 @@ receivers:
 
 inhibit_rules:
   - source_match:
-      severity: 'critical'
+      severity: "critical"
     target_match:
-      severity: 'warning'
-    equal: ['alertname', 'dev', 'instance']
+      severity: "warning"
+    equal: ["alertname", "dev", "instance"]

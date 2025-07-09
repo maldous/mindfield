@@ -1,5 +1,4 @@
 services:
-
   grafana:
     volumes:
       - grafana_dashboards:/var/lib/grafana/dashboards
@@ -18,7 +17,6 @@ services:
       - web_node_modules:/repo/apps/web/node_modules
 
 volumes:
-
   grafana_dashboards: {}
   grafana_provisioning: {}
   storybook_next: {}
