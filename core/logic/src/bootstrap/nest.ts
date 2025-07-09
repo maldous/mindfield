@@ -27,9 +27,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { WsAdapter } from '@nestjs/platform-ws';
 import { Queue, Worker } from 'bullmq';
 import { QueueScheduler } from 'bullmq';
-// Delete the ExpressAdapter import as it's not used directly
-// import { ExpressAdapter } from '@nestjs/platform-express';
-import { Logger } from 'nestjs-pino';
+import { Type, Logger } from '@nestjs/common';   
 import { AppModule } from './app.module';
 import * as express from 'express';
 
@@ -46,14 +44,12 @@ export async function startNest(AppRoot: Type<any>) {
   });
   await sdk.start();
 
-  /* ── Nest factory ── */
-  // Delete the adapter variable as it's not used directly
-  // const adapter = new ExpressAdapter();
-  const app = await NestFactory.create(AppModule, {
-    logger: new Logger(), // pino under the hood
+  const app = await NestFactory.create(AppRoot, {   
+    logger: new Logger(),             
     cors: { origin: true, credentials: true },
-    bodyParser: false, // we add it manually for large limits
+    bodyParser: false,
   });
+
   app.use(helmet());
   app.use(compression());
   app.use(cookieParser());
@@ -115,7 +111,7 @@ export async function startNest(AppRoot: Type<any>) {
     const connection = { connection: { url: process.env.REDIS_URL } as any };
     const queue = new Queue('api-q', connection);
     const scheduler = new QueueScheduler('api-q', connection);
-    const worker = new Worker('api-q', async (job: any) => {
+    const _worker = new Worker('api-q', async (job: any) => {
       app.get(Logger).log(`dummy worker job ${job.id}`);
     }, connection);
 
