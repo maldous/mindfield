@@ -33,7 +33,7 @@ import { Queue, Worker } from "bullmq";
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const pino = require("pino");
-const pinoHttp: any = require("pino-http");
+const pinoHttp = require("pino-http");
 
 /* ────────── OpenTelemetry ────────── */
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -54,7 +54,7 @@ export interface Options {
   }) => void;
 }
 
-const als = new AsyncLocalStorage<Map<string, any>>();
+const als = new AsyncLocalStorage<Map<string, unknown>>();
 const rootLogger = pino({ level: process.env.LOG_LEVEL ?? "info" });
 
 export async function startExpress(opts: Options) {
@@ -85,7 +85,7 @@ export async function startExpress(opts: Options) {
       _res: express.Response,
       next: express.NextFunction,
     ) => {
-      const store = new Map<string, any>();
+      const store = new Map<string, unknown>();
       store.set("requestId", req.headers["x-request-id"] ?? uuid());
       als.run(store, next);
     },
@@ -148,7 +148,7 @@ export async function startExpress(opts: Options) {
       "/whoami",
       keycloak.protect(),
       (req: express.Request, res: express.Response) =>
-        res.json({ user: (req as any).kauth?.grant?.access_token?.content }),
+        res.json({ user: (req as express.Request & { kauth?: { grant?: { access_token?: { content?: unknown } } } }).kauth?.grant?.access_token?.content }),
     );
   }
 
@@ -199,7 +199,7 @@ export async function startExpress(opts: Options) {
     celebrate({
       body: Joi.object({ msg: Joi.string().max(1024).required() }),
     }),
-    (req, res) => res.json({ echoed: (req.body as any).msg }),
+    (req, res) => res.json({ echoed: (req.body as { msg: string }).msg }),
   );
 
   /* ── Swagger / Redoc ── */
@@ -216,14 +216,14 @@ export async function startExpress(opts: Options) {
   }
 
   /* ── BullMQ helpers (Redis URL must exist) ── */
-  let queueDeps: any = null;
+  let queueDeps: { queue: Queue; worker: Worker } | null = null;
   if (process.env.REDIS_URL && opts.registerQueues) {
-    const connection = { connection: { url: process.env.REDIS_URL } as any };
+    const connection = { connection: { url: process.env.REDIS_URL } };
     const queue = new Queue(`${opts.serviceName}-q`, connection);
     // Delete the QueueScheduler instantiation as it's not directly used in express.ts
     const worker = new Worker(
       `${opts.serviceName}-q`,
-      async (job: any) => {
+      async (job: { id: string }) => {
         rootLogger.info(
           { jobId: job.id },
           "Dummy worker – no processor registered",
@@ -255,10 +255,9 @@ export async function startExpress(opts: Options) {
   app.use((_req, res) => res.status(404).json({ error: "Not Found" }));
 
   /* Global error */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   app.use(
     (
-      err: any,
+      err: Error & { status?: number },
       _req: express.Request,
       res: express.Response,
       _next: express.NextFunction,

@@ -24,7 +24,7 @@ help:
 
 setup: ; @./setup.sh
 build: ; @pnpm turbo run build build-storybook
-test: ; @pnpm turbo run test --passWithNoTests
+test: ; @pnpm turbo run test -- --passWithNoTests --coverage --all
 lint: ; @pnpm turbo run lint
 format: ; @pnpm format
 type-check: ; @pnpm turbo run type-check
