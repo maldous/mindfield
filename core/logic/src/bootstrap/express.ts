@@ -30,9 +30,10 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { Queue, Worker } from 'bullmq';
-
-import pino = require('pino');
-import pinoHttp = require('pino-http');
+import requirePino = require('pino');
+import requirePinoHttp = require('pino-http');
+const pino = requirePino;
+const pinoHttp = requirePinoHttp;
 
 /* ────────── OpenTelemetry ────────── */
 import { NodeSDK } from '@opentelemetry/sdk-node';
