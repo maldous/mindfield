@@ -63,7 +63,7 @@ export async function startExpress(opts: Options) {
     traceExporter: new OTLPTraceExporter(),
     instrumentations: [getNodeAutoInstrumentations()],
   });
-  await sdk.start();
+  sdk.start();
 
   /* ── Express core ── */
   const app = express();
@@ -238,7 +238,7 @@ export async function startExpress(opts: Options) {
       connection,
     );
     queueDeps = { queue, worker };
-    await opts.registerQueues(queueDeps);
+    opts.registerQueues(queueDeps);
   }
 
   /* ── Web-sockets ── */

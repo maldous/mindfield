@@ -3,7 +3,10 @@ ARG REGISTRY_CACHE=localhost:5001/mindfield-cache
 FROM ${REGISTRY_CACHE}/base-deps:${NODE_MAJOR} AS deps
 ARG NODE_MAJOR
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN mkdir -p core/logic core/ui services/grapesjs
+RUN mkdir -p \
+  core/logic \
+  core/ui \
+  services/grapesjs
 COPY core/logic/package.json ./core/logic/
 COPY core/ui/package.json ./core/ui/
 COPY services/grapesjs/package.json ./services/grapesjs/

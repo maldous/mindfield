@@ -39,7 +39,7 @@ export async function startNest(AppRoot: Type<unknown>) {
     traceExporter: new OTLPTraceExporter(),
     instrumentations: [getNodeAutoInstrumentations()],
   });
-  await sdk.start();
+  sdk.start();
 
   /* ── Nest factory ── */
   const app = await NestFactory.create(AppRoot, {
