@@ -42,6 +42,7 @@ sonar:
         token=$$(curl -s -u admin:admin -X POST 'http://localhost:3016/api/user_tokens/generate' -d name=admin | jq -r '.token'); \
         echo "SONAR_TOKEN=$$token" >> .env; \
 	fi; \
+        rm -f sonar.json; \
 	bash -c 'source .env && sonar -Dsonar.host.url=http://localhost:3016 -Dsonar.login=$${SONAR_TOKEN} -Dsonar.projectKey=mindfield'; \
 	bash -c 'source .env && for ((p=1;;p++)); do \
         r=$$(curl -s -u $${SONAR_TOKEN}: "http://localhost:3016/api/issues/search?branch=main&ps=500&p=$$p"); \
