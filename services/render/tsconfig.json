@@ -14,7 +14,7 @@
     "jsx": "preserve",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "moduleDetection": "force",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "bundler",
     "module": "nodenext",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
