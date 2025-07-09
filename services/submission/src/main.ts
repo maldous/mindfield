@@ -1,8 +1,8 @@
-import { startExpress } from '@mindfield/logic';
-import routes from './routes.js';
+import { startExpress } from "@mindfield/logic";
+import routes from "./routes.js";
 
 startExpress({
-  serviceName: 'submission',
+  serviceName: "submission",
   registerRoutes: routes,
   registerQueues: () => {},
 });

@@ -16,7 +16,6 @@ export PATH="$VOLTA_HOME/bin:$PATH"
 volta install "node@$NODE_VERSION"
 volta install "pnpm@latest"
 volta install "turbo@latest"
-volta install "husky@latest"
 
 if ! command -v docker &> /dev/null; then
   echo "Docker not found; please install Docker manually."
@@ -28,7 +27,6 @@ if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/
 fi
 
 mkdir -p .buildx_cache
-mkdir -p backups
 
 if [ ! -f .env.local ]; then
     cat > .env.local << EOF

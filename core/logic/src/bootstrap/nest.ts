@@ -12,26 +12,26 @@
  * Graceful shutdown
  */
 
-import 'reflect-metadata';
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, Logger, Type } from '@nestjs/common';
-import helmet from 'helmet';
-import compression from 'compression';
-import cookieParser from 'cookie-parser';
-import session from 'express-session';
-import Keycloak from 'keycloak-connect';
-import rateLimit from 'express-rate-limit';
-import slowDown from 'express-slow-down';
-import promClient from 'prom-client';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { WsAdapter } from '@nestjs/platform-ws';
-import { Queue, Worker } from 'bullmq';
-import * as express from 'express';
+import "reflect-metadata";
+import { NestFactory } from "@nestjs/core";
+import { ValidationPipe, Logger, Type } from "@nestjs/common";
+import helmet from "helmet";
+import compression from "compression";
+import cookieParser from "cookie-parser";
+import session from "express-session";
+import Keycloak from "keycloak-connect";
+import rateLimit from "express-rate-limit";
+import slowDown from "express-slow-down";
+import promClient from "prom-client";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { WsAdapter } from "@nestjs/platform-ws";
+import { Queue, Worker } from "bullmq";
+import * as express from "express";
 
 /* ────────── OpenTelemetry ────────── */
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 
 export async function startNest(AppRoot: Type<unknown>) {
   /* ── OTEL ── */
@@ -49,13 +49,13 @@ export async function startNest(AppRoot: Type<unknown>) {
   });
 
   /* Local logger instance (to avoid .get(Logger) look-ups) */
-  const logger = new Logger('bootstrap');
+  const logger = new Logger("bootstrap");
 
   /* ── Core middleware ── */
   app.use(helmet());
   app.use(compression());
   app.use(cookieParser());
-  app.use(express.json({ limit: '10mb' }));
+  app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: false }));
 
   /* ── Validation ── */
@@ -82,7 +82,7 @@ export async function startNest(AppRoot: Type<unknown>) {
     const memoryStore = new session.MemoryStore();
     app.use(
       session({
-        secret: process.env.SESSION_SECRET ?? 'dev_secret_change_me',
+        secret: process.env.SESSION_SECRET ?? "dev_secret_change_me",
         resave: false,
         saveUninitialized: true,
         store: memoryStore,
@@ -92,11 +92,11 @@ export async function startNest(AppRoot: Type<unknown>) {
     const keycloak = new Keycloak(
       { store: memoryStore },
       {
-        'confidential-port': 0,
-        'auth-server-url': process.env.KEYCLOAK_URL,
-        realm: process.env.KEYCLOAK_REALM ?? 'mindfield',
-        resource: process.env.KEYCLOAK_CLIENT_ID ?? 'api',
-        'ssl-required': 'external',
+        "confidential-port": 0,
+        "auth-server-url": process.env.KEYCLOAK_URL,
+        realm: process.env.KEYCLOAK_REALM ?? "mindfield",
+        resource: process.env.KEYCLOAK_CLIENT_ID ?? "api",
+        "ssl-required": "external",
       },
     );
     app.use(keycloak.middleware());
@@ -104,22 +104,22 @@ export async function startNest(AppRoot: Type<unknown>) {
 
   /* ── Prometheus metrics ── */
   const registry = new promClient.Registry();
-  promClient.collectDefaultMetrics({ register: registry, prefix: 'api_' });
+  promClient.collectDefaultMetrics({ register: registry, prefix: "api_" });
   app
     .getHttpAdapter()
     .getInstance()
-    .get('/metrics', async (_req: unknown, res: any) => {
-      res.set('Content-Type', registry.contentType);
+    .get("/metrics", async (_req: unknown, res: any) => {
+      res.set("Content-Type", registry.contentType);
       res.end(await registry.metrics());
     });
 
   /* ── Swagger ── */
   const docCfg = new DocumentBuilder()
-    .setTitle('MindField API')
-    .setVersion('1.0')
+    .setTitle("MindField API")
+    .setVersion("1.0")
     .build();
   const document = SwaggerModule.createDocument(app, docCfg);
-  SwaggerModule.setup('api-docs', app, document);
+  SwaggerModule.setup("api-docs", app, document);
 
   /* ── WebSockets ── */
   app.useWebSocketAdapter(new WsAdapter(app));
@@ -131,12 +131,12 @@ export async function startNest(AppRoot: Type<unknown>) {
   if (process.env.REDIS_URL) {
     const connection = { connection: { url: process.env.REDIS_URL } as any };
 
-    queue = new Queue('api-q', connection);
+    queue = new Queue("api-q", connection);
 
     // Dummy worker so the queue has a consumer (useful in dev)
     _worker = new Worker(
-      'api-q',
-      async job => logger.log(`dummy worker job ${job.id}`),
+      "api-q",
+      async (job) => logger.log(`dummy worker job ${job.id}`),
       connection,
     );
 
@@ -150,19 +150,18 @@ export async function startNest(AppRoot: Type<unknown>) {
   logger.log(`🚀  API running on :${port}`);
 
   const shutdown = async () => {
-    logger.log('Shutting down…');
+    logger.log("Shutting down…");
 
     await Promise.all([
       _worker?.close().catch(() => void 0),
       queue?.close().catch(() => void 0),
       app.close(),
-      sdk.shutdown().catch(err => logger.error(err)),
+      sdk.shutdown().catch((err) => logger.error(err)),
     ]);
 
     process.exit(0);
   };
 
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 }
-

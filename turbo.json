@@ -4,21 +4,11 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "dist/**",
-        "build/**"
-      ]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"]
     },
     "build:prod": {
       "dependsOn": ["build"],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "dist/**",
-        "build/**"
-      ]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"]
     },
     "build:android": {
       "dependsOn": ["^build"],
@@ -56,4 +46,3 @@
     }
   }
 }
-
