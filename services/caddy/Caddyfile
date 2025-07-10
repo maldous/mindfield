@@ -3,25 +3,122 @@
     email {$LETSENCRYPT_EMAIL:admin@mindfield.local}
 }
 
+(common) {
+    handle_path /api/* {
+        reverse_proxy kong:8000
+    }
+    handle_path /docs/* {
+        reverse_proxy mkdocs:8000
+    }
+    handle_path /grafana/* {
+        reverse_proxy grafana:3000
+    }
+    handle_path /grapesjs/* {
+        reverse_proxy grapesjs:3000
+    }
+    handle_path /keycloak/* {
+        reverse_proxy keycloak:8080
+    }
+    handle_path /minio/* {
+        reverse_proxy minio:9000
+    }
+    handle_path /minio-console/* {
+        reverse_proxy minio:9001
+    }
+    handle_path /mailhog/* {
+        reverse_proxy mailhog:8025
+    }
+    handle_path /prometheus/* {
+        reverse_proxy prometheus:9090
+    }
+    handle_path /loki/* {
+        reverse_proxy loki:3100
+    }
+    handle_path /jaeger/* {
+        reverse_proxy jaeger:16686
+    }
+    handle_path /alertmanager/* {
+        reverse_proxy alertmanager:9093
+    }
+    handle_path /rabbitmq/* {
+        reverse_proxy rabbitmq:15672
+    }
+    handle_path /opensearch/* {
+        reverse_proxy opensearch:9200
+    }
+    handle_path /opensearch-dashboards/* {
+        reverse_proxy opensearch-dashboards:5601
+    }
+    handle_path /otel-collector/* {
+        reverse_proxy otel-collector:8888
+    }
+    handle_path /node-exporter/* {
+        reverse_proxy node-exporter:9100
+    }
+    handle_path /blackbox-exporter/* {
+        reverse_proxy blackbox-exporter:9115
+    }
+    handle_path /uptime-kuma/* {
+        reverse_proxy uptime-kuma:3001
+    }
+    handle_path /trivy/* {
+        reverse_proxy trivy:8080
+    }
+    handle_path /step-ca/* {
+        reverse_proxy step-ca:9443
+    }
+    handle_path /postgrest/* {
+        reverse_proxy postgrest:3000
+    }
+    handle_path /hasura/* {
+        reverse_proxy hasura:8080
+    }
+    handle_path /postgraphile/* {
+        reverse_proxy postgraphile:5000
+    }
+    handle_path /pgadmin/* {
+        reverse_proxy pgadmin:80
+    }
+    handle_path /prisma-studio/* {
+        reverse_proxy prisma-studio:5555
+    }
+    handle_path /swagger-ui/* {
+        reverse_proxy swagger-ui:3000
+    }
+    handle_path /redoc/* {
+        reverse_proxy redoc:3000
+    }
+    handle_path /storybook/* {
+        reverse_proxy storybook:6006
+    }
+    handle_path /sonarqube/* {
+        reverse_proxy sonarqube:9000
+    }
+    handle_path /gitea/* {
+        reverse_proxy gitea:3000
+    }
+    handle_path /redaction/* {
+        reverse_proxy redaction:3000
+    }
+    handle_path /render/* {
+        reverse_proxy render:3000
+    }
+    handle_path /transform/* {
+        reverse_proxy transform:3000
+    }
+    handle_path /submission/* {
+        reverse_proxy submission:3000
+    }
+    handle {
+        reverse_proxy web:3000
+    }
+}
+
 localhost, 127.0.0.1 {
     tls internal
     route {
         rate_limit {remote.ip} 100r/m 10000 429
-        handle_path /api/* {
-            reverse_proxy kong:8000
-        }
-        handle_path /docs/* {
-            reverse_proxy mkdocs:8000
-        }
-        handle_path /grafana/* {
-            reverse_proxy grafana:3000
-        }
-        handle_path /grapesjs/* {
-            reverse_proxy grapesjs:3000
-        }
-        handle {
-            reverse_proxy web:3000
-        }
+        import common
     }
     log {
         output file /var/log/caddy/access.log
@@ -33,21 +130,7 @@ localhost, 127.0.0.1 {
     tls {$LETSENCRYPT_EMAIL}
     route {
         rate_limit {remote.ip} 1000r/m 10000 429
-        handle_path /api/* {
-            reverse_proxy kong:8000
-        }
-        handle_path /docs/* {
-            reverse_proxy mkdocs:8000
-        }
-        handle_path /grafana/* {
-            reverse_proxy grafana:3000
-        }
-        handle_path /grapesjs/* {
-            reverse_proxy grapesjs:3000
-        }
-        handle {
-            reverse_proxy web:3000
-        }
+        import common
     }
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
