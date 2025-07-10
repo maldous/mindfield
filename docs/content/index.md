@@ -14,7 +14,7 @@ MindField is a personality profiling app built with React. It helps users explor
 - [hasura](https://hasura.aldous.info/): Instant GraphQL API on Postgres.
 - [jaeger](https://jaeger.aldous.info/): Distributed-tracing storage & UI.
 - [keycloak](https://keycloak.aldous.info/): OAuth2/OpenID Connect identity provider.
-- [kong](https://kong.aldous.info/): API gateway & rate-limiter.
+- [kong](https://api.aldous.info/): API gateway & rate-limiter.
 - kong-database: PostgreSQL store for Kong.
 - [loki](https://loki.aldous.info/): Log aggregation compatible with Prometheus.
 - mailhog: Fake SMTP server for dev/testing.
