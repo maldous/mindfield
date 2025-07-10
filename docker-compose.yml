@@ -293,6 +293,7 @@ services:
       - .env
     image: mcr.microsoft.com/presidio-analyzer:latest
     environment:
+      - PORT=5001
       - PRESIDIO_ANALYZER_ENTITIES_CACHE_TTL=3600
       - PRESIDIO_ANALYZER_DEFAULT_SCORE_THRESHOLD=0.35
     depends_on:
@@ -302,7 +303,7 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -312,8 +313,9 @@ services:
       - .env
     image: mcr.microsoft.com/presidio-anonymizer:latest
     environment:
+      - PORT=5001
       - PRESIDIO_ANALYZER_HOST=presidio-analyzer
-      - PRESIDIO_ANALYZER_PORT=5002
+      - PRESIDIO_ANALYZER_PORT=5001
     depends_on:
       presidio-analyzer: { condition: service_healthy }
     mem_limit: 512m
@@ -331,8 +333,9 @@ services:
       - .env
     image: mcr.microsoft.com/presidio-image-redactor:latest
     environment:
+      - PORT=5001
       - PRESIDIO_ANALYZER_HOST=presidio-analyzer
-      - PRESIDIO_ANALYZER_PORT=5002
+      - PRESIDIO_ANALYZER_PORT=5001
     depends_on:
       presidio-analyzer: { condition: service_healthy }
     mem_limit: 1g
@@ -340,7 +343,7 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5003/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
       interval: 30s
       timeout: 10s
       retries: 3

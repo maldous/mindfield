@@ -30,8 +30,8 @@ if ! curl -s ${KONG_ADMIN_URL}/plugins | grep -q '"name":"oidc"'; then
 fi
 
 # Configure rate limiting plugin globally
-# Check if OIDC plugin already exists
-if ! curl -s ${KONG_ADMIN_URL}/plugins | grep -q '"name":"oidc"'; then
+# Check if rate-limiting plugin already exists
+if ! curl -s ${KONG_ADMIN_URL}/plugins | grep -q '"name":"rate-limiting"'; then
   curl -X POST ${KONG_ADMIN_URL}/plugins \
   -H "Content-Type: application/json" \
   -d '{
@@ -46,8 +46,8 @@ if ! curl -s ${KONG_ADMIN_URL}/plugins | grep -q '"name":"oidc"'; then
 fi
 
 # Configure CORS plugin globally
-# Check if OIDC plugin already exists
-if ! curl -s ${KONG_ADMIN_URL}/plugins | grep -q '"name":"oidc"'; then
+# Check if CORS plugin already exists
+if ! curl -s ${KONG_ADMIN_URL}/plugins | grep -q '"name":"cors"'; then
   curl -X POST ${KONG_ADMIN_URL}/plugins \
   -H "Content-Type: application/json" \
   -d '{
@@ -146,7 +146,7 @@ if ! curl -s ${KONG_ADMIN_URL}/services | grep -q '"name":"presidio-analyzer-ser
   -H "Content-Type: application/json" \
   -d '{
     "name": "presidio-analyzer-service",
-    "url": "http://presidio-analyzer:5002"
+    "url": "http://presidio-analyzer:5001"
   }'
 
   curl -X POST ${KONG_ADMIN_URL}/services/presidio-analyzer-service/routes \
@@ -182,7 +182,7 @@ if ! curl -s ${KONG_ADMIN_URL}/services | grep -q '"name":"presidio-image-servic
   -H "Content-Type: application/json" \
   -d '{
     "name": "presidio-image-service",
-    "url": "http://presidio-image-redactor:5003"
+    "url": "http://presidio-image-redactor:5001"
   }'
 
   curl -X POST ${KONG_ADMIN_URL}/services/presidio-image-service/routes \
