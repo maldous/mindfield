@@ -108,7 +108,8 @@ http://localhost:3017  - Keycloak
 
 - **postgres** - Primary database (internal only)
 - **[pgadmin](https://pgadmin.aldous.info/)** - PostgreSQL admin interface
-- **[redis](https://redis.aldous.info/)** - Cache and session store
+- **redis** - Cache and session store
+- **[redis-insight](https://redis-insight.aldous.info/)** - Official GUI by Redis
 - **minio** - S3-compatible object storage (internal only)
 - **[minio-console](https://minio-console.aldous.info/)** - MinIO management UI
 
