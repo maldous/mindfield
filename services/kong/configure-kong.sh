@@ -27,6 +27,8 @@ if ! curl -s ${KONG_ADMIN_URL}/plugins | grep -q '"name":"oidc"'; then
     }
   }'
 
+fi
+
 # Configure rate limiting plugin globally
 # Check if OIDC plugin already exists
 if ! curl -s ${KONG_ADMIN_URL}/plugins | grep -q '"name":"oidc"'; then
@@ -40,6 +42,8 @@ if ! curl -s ${KONG_ADMIN_URL}/plugins | grep -q '"name":"oidc"'; then
       "policy": "local"
     }
   }'
+
+fi
 
 # Configure CORS plugin globally
 # Check if OIDC plugin already exists

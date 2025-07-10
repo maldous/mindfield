@@ -1,0 +1,145 @@
+# Development override - exposes ports for local development
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  # Core Application Services
+  web:
+    ports: ["3000:3000"]
+    volumes:
+      - ./:/repo:delegated
+      - web_next:/repo/.next
+      - web_node_modules:/repo/apps/web/node_modules
+
+  api:
+    ports: ["3001:3000"]
+
+  # Data Processing Services
+  submission:
+    ports: ["3002:3000"]
+
+  transform:
+    ports: ["3003:3000"]
+
+  render:
+    ports: ["3004:3000"]
+
+  redaction:
+    ports: ["3005:3000"]
+
+  grapesjs:
+    ports: ["3006:3000"]
+
+  # Monitoring & Observability
+  grafana:
+    ports: ["3007:3000"]
+    volumes:
+      - grafana_dashboards:/var/lib/grafana/dashboards
+      - grafana_provisioning:/etc/grafana/provisioning
+
+  prometheus:
+    ports: ["9090:9090"]
+
+  loki:
+    ports: ["3100:3100"]
+
+  jaeger:
+    ports: ["16686:16686", "14268:14268"]
+
+  alertmanager:
+    ports: ["9093:9093"]
+
+  # API Development Tools
+  hasura:
+    ports: ["3009:8080"]
+
+  postgraphile:
+    ports: ["3010:5000"]
+
+  postgrest:
+    ports: ["3008:3000"]
+
+  swagger-ui:
+    ports: ["3013:8080"]
+
+  redoc:
+    ports: ["3014:80"]
+
+  # Development Tools
+  storybook:
+    ports: ["3015:6006"]
+    volumes:
+      - ./:/app:delegated
+      - storybook_next:/app/.next
+      - storybook_node_modules:/app/apps/web/node_modules
+
+  sonarqube:
+    ports: ["3016:9000"]
+
+  # Database & Admin Tools
+  pgadmin:
+    ports: ["3011:80"]
+
+  prisma-studio:
+    ports: ["3012:5555"]
+
+  # Infrastructure Services
+  keycloak:
+    ports: ["3017:8080"]
+
+  mailhog:
+    ports: ["2025:1025", "8025:8025"]
+
+  rabbitmq:
+    ports: ["5672:5672", "15672:15672"]
+
+  minio:
+    ports: ["9000:9000", "9001:9001"]
+
+  # Search & Analytics
+  opensearch:
+    ports: ["9200:9200", "9600:9600"]
+
+  opensearch-dashboards:
+    ports: ["5601:5601"]
+
+  # Monitoring Infrastructure
+  uptime-kuma:
+    ports: ["3018:3001"]
+
+  trivy:
+    ports: ["8004:8080"]
+
+  step-ca:
+    ports: ["9443:9443"]
+
+  # Kong API Gateway
+  kong:
+    ports: ["8002:8000", "8444:8443", "8003:8001", "8445:8444"]
+
+  # OpenTelemetry
+  otel-collector:
+    ports: ["4317:4317", "4318:4318", "8888:8888", "8889:8889"]
+
+  node-exporter:
+    ports: ["9100:9100"]
+
+  blackbox-exporter:
+    ports: ["9115:9115"]
+
+  # Documentation
+  mkdocs:
+    ports: ["8001:8000"]
+
+  # Caddy with development volumes
+  caddy:
+    volumes:
+      - ./caddy/data:/data
+      - ./caddy/config:/config
+
+volumes:
+  grafana_dashboards: {}
+  grafana_provisioning: {}
+  storybook_next: {}
+  storybook_node_modules: {}
+  web_next: {}
+  web_node_modules: {}
