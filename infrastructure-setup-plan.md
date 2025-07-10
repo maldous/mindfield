@@ -89,7 +89,9 @@ Transform the current development setup into a production-ready platform with pr
 - **submission** - Form submission processing
 - **transform** - Data transformation
 - **render** - PDF/report generation
-- **redaction** - PII removal service
+- **presidio-analyzer** - PII detection service
+- **presidio-anonymizer** - PII anonymization service
+- **presidio-image-redactor** - Image PII redaction service
 
 ### Development/Admin Tools (Restricted access)
 

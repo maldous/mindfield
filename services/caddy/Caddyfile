@@ -139,7 +139,9 @@ prisma-studio.{$DOMAIN:mindfield.local},
 storybook.{$DOMAIN:mindfield.local},
 sonarqube.{$DOMAIN:mindfield.local},
 gitea.{$DOMAIN:mindfield.local},
-redaction.{$DOMAIN:mindfield.local},
+presidio-analyzer.{$DOMAIN:mindfield.local},
+presidio-anonymizer.{$DOMAIN:mindfield.local},
+presidio-image.{$DOMAIN:mindfield.local},
 render.{$DOMAIN:mindfield.local},
 transform.{$DOMAIN:mindfield.local},
 submission.{$DOMAIN:mindfield.local},
@@ -245,8 +247,14 @@ postgrest.{$DOMAIN:mindfield.local} {
     @gitea_prod host gitea.{$DOMAIN:mindfield.local}
     reverse_proxy @gitea_prod gitea:3000
 
-    @redaction_prod host redaction.{$DOMAIN:mindfield.local}
-    reverse_proxy @redaction_prod redaction:3000
+    @presidio-analyzer_prod host presidio-analyzer.{$DOMAIN:mindfield.local}
+    reverse_proxy @presidio-analyzer_prod presidio-analyzer:5002
+
+    @presidio-anonymizer_prod host presidio-anonymizer.{$DOMAIN:mindfield.local}
+    reverse_proxy @presidio-anonymizer_prod presidio-anonymizer:5001
+
+    @presidio-image_prod host presidio-image.{$DOMAIN:mindfield.local}
+    reverse_proxy @presidio-image_prod presidio-image-redactor:5003
 
     @render_prod host render.{$DOMAIN:mindfield.local}
     reverse_proxy @render_prod render:3000

@@ -108,7 +108,7 @@ MindField is built as a microservices architecture with the following key princi
 - **Submission**: Form processing service
 - **Transform**: Data transformation pipeline
 - **Render**: PDF and report generation
-- **Redaction**: PII removal and data sanitization
+- **Presidio**: Microsoft's PII detection and anonymization platform with separate services for text analysis, anonymization, and image redaction
 - **GrapesJS**: Visual content editor
 
 ### Development Tools
@@ -189,7 +189,7 @@ HTTPS   TLS   OAuth2   JWT    Validation
 
 - Encryption at rest (database, object storage)
 - Encryption in transit (TLS everywhere)
-- PII redaction service
+- Microsoft Presidio PII detection and anonymization services
 - Regular security scanning with Trivy
 
 ## Scalability Considerations
