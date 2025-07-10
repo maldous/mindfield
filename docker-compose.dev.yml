@@ -23,15 +23,21 @@ services:
   render:
     ports: ["3004:3000"]
 
-  redaction:
-    ports: ["3005:3000"]
+  presidio-analyzer:
+    ports: ["3005:5002"]
+
+  presidio-anonymizer:
+    ports: ["3006:5001"]
+
+  presidio-image-redactor:
+    ports: ["3007:5003"]
 
   grapesjs:
-    ports: ["3006:3000"]
+    ports: ["3008:3000"]
 
   # Monitoring & Observability
   grafana:
-    ports: ["3007:3000"]
+    ports: ["3009:3000"]
     volumes:
       - grafana_dashboards:/var/lib/grafana/dashboards
       - grafana_provisioning:/etc/grafana/provisioning
@@ -50,13 +56,13 @@ services:
 
   # API Development Tools
   hasura:
-    ports: ["3009:8080"]
+    ports: ["3010:8080"]
 
   postgraphile:
-    ports: ["3010:5000"]
+    ports: ["3011:5000"]
 
   postgrest:
-    ports: ["3008:3000"]
+    ports: ["3012:3000"]
 
   swagger-ui:
     ports: ["3013:8080"]
@@ -73,18 +79,18 @@ services:
       - storybook_node_modules:/app/apps/web/node_modules
 
   sonarqube:
-    ports: ["3016:9000"]
+    ports: ["3018:9000"]
 
   # Database & Admin Tools
   pgadmin:
-    ports: ["3011:80"]
+    ports: ["3016:80"]
 
   prisma-studio:
-    ports: ["3012:5555"]
+    ports: ["3017:5555"]
 
   # Infrastructure Services
   keycloak:
-    ports: ["3017:8080"]
+    ports: ["3019:8080"]
 
   mailhog:
     ports: ["2025:1025", "8025:8025"]
@@ -104,7 +110,7 @@ services:
 
   # Monitoring Infrastructure
   uptime-kuma:
-    ports: ["3018:3001"]
+    ports: ["3020:3001"]
 
   trivy:
     ports: ["8004:8080"]

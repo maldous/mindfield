@@ -140,20 +140,56 @@ if ! curl -s ${KONG_ADMIN_URL}/services | grep -q '"name":"render-service"'; the
 
 fi
 
-# Redaction Service
-if ! curl -s ${KONG_ADMIN_URL}/services | grep -q '"name":"redaction-service"'; then
+# Presidio Services
+if ! curl -s ${KONG_ADMIN_URL}/services | grep -q '"name":"presidio-analyzer-service"'; then
   curl -X POST ${KONG_ADMIN_URL}/services \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "redaction-service",
-    "url": "http://redaction:3000"
+    "name": "presidio-analyzer-service",
+    "url": "http://presidio-analyzer:5002"
   }'
 
-  curl -X POST ${KONG_ADMIN_URL}/services/redaction-service/routes \
+  curl -X POST ${KONG_ADMIN_URL}/services/presidio-analyzer-service/routes \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "redaction-route",
-    "paths": ["/services/redaction"],
+    "name": "presidio-analyzer-route",
+    "paths": ["/services/presidio/analyzer"],
+    "strip_path": true
+  }'
+
+fi
+
+if ! curl -s ${KONG_ADMIN_URL}/services | grep -q '"name":"presidio-anonymizer-service"'; then
+  curl -X POST ${KONG_ADMIN_URL}/services \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "presidio-anonymizer-service",
+    "url": "http://presidio-anonymizer:5001"
+  }'
+
+  curl -X POST ${KONG_ADMIN_URL}/services/presidio-anonymizer-service/routes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "presidio-anonymizer-route",
+    "paths": ["/services/presidio/anonymizer"],
+    "strip_path": true
+  }'
+
+fi
+
+if ! curl -s ${KONG_ADMIN_URL}/services | grep -q '"name":"presidio-image-service"'; then
+  curl -X POST ${KONG_ADMIN_URL}/services \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "presidio-image-service",
+    "url": "http://presidio-image-redactor:5003"
+  }'
+
+  curl -X POST ${KONG_ADMIN_URL}/services/presidio-image-service/routes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "presidio-image-route",
+    "paths": ["/services/presidio/image"],
     "strip_path": true
   }'
 

@@ -94,7 +94,9 @@ http://localhost:3017  - Keycloak
 - **[submission](https://submission.aldous.info/)** - Handles form submissions
 - **[transform](https://transform.aldous.info/)** - Data transformation service
 - **[render](https://render.aldous.info/)** - PDF/report generation
-- **[redaction](https://redaction.aldous.info/)** - PII removal service
+- **[presidio-analyzer](https://presidio-analyzer.aldous.info/)** - PII detection service
+- **[presidio-anonymizer](https://presidio-anonymizer.aldous.info/)** - PII anonymization service
+- **[presidio-image](https://presidio-image.aldous.info/)** - Image PII redaction service
 - **[grapesjs](https://grapesjs.aldous.info/)** - Visual editor service
 
 ### Authentication & Identity
@@ -175,7 +177,9 @@ Routes are automatically configured via `kong-configure` service:
 - `/services/submission/*` → Submission service
 - `/services/transform/*` → Transform service
 - `/services/render/*` → Render service
-- `/services/redaction/*` → Redaction service
+- `/services/presidio/analyzer/*` → Presidio Analyzer service
+- `/services/presidio/anonymizer/*` → Presidio Anonymizer service
+- `/services/presidio/image/*` → Presidio Image Redactor service
 - `/services/grapesjs/*` → GrapesJS service
 
 ## Development Workflow
@@ -206,20 +210,22 @@ API:               http://localhost:3001
 Submission:        http://localhost:3002
 Transform:         http://localhost:3003
 Render:            http://localhost:3004
-Redaction:         http://localhost:3005
-GrapesJS:          http://localhost:3006
-Grafana:           http://localhost:3007
-PostgREST:         http://localhost:3008
-Hasura:            http://localhost:3009
-PostGraphile:      http://localhost:3010
-PgAdmin:           http://localhost:3011
-Prisma Studio:     http://localhost:3012
+Presidio Analyzer: http://localhost:3005
+Presidio Anonymizer: http://localhost:3006
+Presidio Image:    http://localhost:3007
+GrapesJS:          http://localhost:3008
+Grafana:           http://localhost:3009
+Hasura:            http://localhost:3010
+PostGraphile:      http://localhost:3011
+PostgREST:         http://localhost:3012
 Swagger UI:        http://localhost:3013
 ReDoc:             http://localhost:3014
 Storybook:         http://localhost:3015
-SonarQube:         http://localhost:3016
-Keycloak:          http://localhost:3017
-Uptime Kuma:       http://localhost:3018
+PgAdmin:           http://localhost:3016
+Prisma Studio:     http://localhost:3017
+SonarQube:         http://localhost:3018
+Keycloak:          http://localhost:3019
+Uptime Kuma:       http://localhost:3020
 ```
 
 ## Operations
@@ -328,7 +334,9 @@ https://api.aldous.info/api/* → Internal API service
 https://api.aldous.info/services/submission/* → Submission service
 https://api.aldous.info/services/transform/* → Transform service
 https://api.aldous.info/services/render/* → Render service
-https://api.aldous.info/services/redaction/* → Redaction service
+https://api.aldous.info/services/presidio/analyzer/* → Presidio Analyzer service
+https://api.aldous.info/services/presidio/anonymizer/* → Presidio Anonymizer service
+https://api.aldous.info/services/presidio/image/* → Presidio Image Redactor service
 https://api.aldous.info/services/grapesjs/* → GrapesJS service
 ```
 

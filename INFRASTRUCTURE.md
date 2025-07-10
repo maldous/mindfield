@@ -75,7 +75,7 @@ docker-compose logs -f <service-name>
 - **Submission**: Form processing
 - **Transform**: Data transformation
 - **Render**: PDF generation
-- **Redaction**: PII removal
+- **Presidio**: PII detection and anonymization (Analyzer, Anonymizer, Image Redactor)
 - **GrapesJS**: Visual editor
 
 ### Monitoring Stack
@@ -125,7 +125,9 @@ Routes are automatically configured via `kong-configure` service:
 - `/services/submission/*` → Submission service
 - `/services/transform/*` → Transform service
 - `/services/render/*` → Render service
-- `/services/redaction/*` → Redaction service
+- `/services/presidio/analyzer/*` → Presidio Analyzer service
+- `/services/presidio/anonymizer/*` → Presidio Anonymizer service
+- `/services/presidio/image/*` → Presidio Image Redactor service
 - `/services/grapesjs/*` → GrapesJS service
 
 ## Operations

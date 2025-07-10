@@ -288,22 +288,62 @@ services:
       timeout: 3s
       retries: 3
 
-  redaction:
+  presidio-analyzer:
     env_file:
       - .env
-    build:
-      context: .
-      dockerfile: dockerfiles/Dockerfile.redaction
-      cache_from:
-        - type=registry,ref=localhost:5001/mindfield-cache
-      cache_to:
-        - type=registry,ref=localhost:5001/mindfield-cache,mode=max
+    image: mcr.microsoft.com/presidio-analyzer:latest
+    environment:
+      - PRESIDIO_ANALYZER_ENTITIES_CACHE_TTL=3600
+      - PRESIDIO_ANALYZER_DEFAULT_SCORE_THRESHOLD=0.35
     depends_on:
       redis: { condition: service_healthy }
     mem_limit: 1g
     cpus: 1.0
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  presidio-anonymizer:
+    env_file:
+      - .env
+    image: mcr.microsoft.com/presidio-anonymizer:latest
+    environment:
+      - PRESIDIO_ANALYZER_HOST=presidio-analyzer
+      - PRESIDIO_ANALYZER_PORT=5002
+    depends_on:
+      presidio-analyzer: { condition: service_healthy }
+    mem_limit: 512m
+    cpus: 0.5
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  presidio-image-redactor:
+    env_file:
+      - .env
+    image: mcr.microsoft.com/presidio-image-redactor:latest
+    environment:
+      - PRESIDIO_ANALYZER_HOST=presidio-analyzer
+      - PRESIDIO_ANALYZER_PORT=5002
+    depends_on:
+      presidio-analyzer: { condition: service_healthy }
+    mem_limit: 1g
+    cpus: 1.0
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   mkdocs:
     env_file:
