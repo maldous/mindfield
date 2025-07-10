@@ -95,12 +95,12 @@ sonar:
         echo "SONAR_TOKEN=$$token" >> .env; \
 	fi; \
         rm -f sonar.json; \
-	bash -c 'source .env && sonar -Dsonar.host.url=http://localhost:3016 -Dsonar.login=$${SONAR_TOKEN} -Dsonar.projectKey=mindfield'; \
+	bash -c 'source .env && sonar -Dsonar.host.url=http://localhost:3016 -Dsonar.login=$${SONAR_TOKEN} -Dsonar.projectKey=mindfield -Dsonar.exclusions=caddy/**'; \
 	bash -c 'source .env && for ((p=1;;p++)); do \
         r=$$(curl -s -u $${SONAR_TOKEN}: "http://localhost:3016/api/issues/search?branch=main&ps=500&p=$$p"); \
         if [ $$(jq -e ".issues|length" <<<"$${r}") -eq 0 ]; then break; fi; \
         printf "%s\n" "$$r"; \
-	done | jq -s "map(.issues)|add" > sonar.json; \
+	done | jq -s "map(.issues) | add // []" > sonar.json; \
 	echo ""; \
 	jq -r ".[] | select(.issueStatus != \"FIXED\") | \"\( (.component | split(\":\")[1])):\(.line) \(.message)\"" sonar.json'
 
