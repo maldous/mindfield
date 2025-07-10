@@ -7,25 +7,29 @@ export NODE_MAJOR ?= $(shell cut -d. -f1 .node-version)
 export REGISTRY_CACHE ?= localhost:5001/mindfield-cache
 
 help:
-	@echo "make setup      - Initial project setup"
-	@echo "make install    - pnpm ci for all workspaces"
-	@echo "make build      - pnpm run build (monorepo)"
-	@echo "make start      - Build & start full dev stack (via Caddy)"
-	@echo "make dev        - Build & start dev stack with exposed ports"
-	@echo "make prod       - Build & start prod-like stack"
-	@echo "make test       - Run all tests"
-	@echo "make lint       - ESLint across workspace"
-	@echo "make format     - code formatting"
-	@echo "make tidy       - package formatting"
-	@echo "make type-check - TypeScript checks"
-	@echo "make logs       - Tail docker logs"
-	@echo "make stop       - Stop all services"
-	@echo "make clean      - Tear down & clean images"
-	@echo "make restart    - Stop and start all services"
-	@echo "make reset      - Reset everything"
-	@echo "make sonar      - Sonar everything"
-	@echo "make all        - Reset, setup & start"
-	@echo "make ports      - Show all exposed development ports"
+	@echo "make setup           - Initial project setup"
+	@echo "make install         - pnpm ci for all workspaces"
+	@echo "make build           - pnpm run build (monorepo)"
+	@echo "make base-image      - Build & push base-deps image"
+	@echo "make docker-config   - Verify Docker daemon config"
+	@echo "make start           - Build & start full dev stack via Caddy"
+	@echo "make dev             - Build & start dev stack with exposed ports"
+	@echo "make prod            - Alias for start (production mode)"
+	@echo "make test            - Run all tests"
+	@echo "make lint            - ESLint across workspace"
+	@echo "make format          - Code formatting"
+	@echo "make tidy            - Package formatting"
+	@echo "make type-check      - TypeScript checks"
+	@echo "make logs            - Tail docker logs"
+	@echo "make stop            - Stop all services"
+	@echo "make stop-dev        - Stop dev stack only"
+	@echo "make restart         - Stop and start all services"
+	@echo "make restart-dev     - Stop and start dev stack only"
+	@echo "make clean           - Tear down & prune images"
+	@echo "make reset           - Full reset (prune volumes, clean, etc.)"
+	@echo "make sonar           - Run SonarQube analysis"
+	@echo "make ports           - Show all exposed development ports"
+	@echo "make all             - Reset, setup & start"
 
 setup: ; @./setup.sh
 install: ; @if [ -d node_modules ]; then pnpm install --frozen-lockfile; else pnpm install; fi
@@ -39,7 +43,7 @@ logs: ; @docker compose logs -f
 stop: ; @docker compose down
 start: install build base-image ; @docker compose build --pull --parallel && docker compose up -d --remove-orphans
 dev: install build base-image ; @docker compose -f docker-compose.yml -f docker-compose.dev.yml build --pull --parallel && docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --remove-orphans
-prod: start  # Alias for start (production mode)
+prod: start
 restart: stop start
 restart-dev: stop dev
 stop-dev: ; @docker compose -f docker-compose.yml -f docker-compose.dev.yml down
