@@ -39,9 +39,9 @@ scrape_configs:
           - "transform:3000"
           - "submission:3000"
           - "grapesjs:3000"
-          - "presidio-analyzer:5002"
+          - "presidio-analyzer:5001"
           - "presidio-anonymizer:5001"
-          - "presidio-image-redactor:5003"
+          - "presidio-image-redactor:5001"
     metrics_path: "/metrics"
     scrape_interval: 30s
 
