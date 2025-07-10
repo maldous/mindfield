@@ -6,6 +6,14 @@ x-build-env: &build-env
   BUILDKIT_PROGRESS: "${BUILDKIT_PROGRESS:-plain}"
   BUILDKIT_INLINE_CACHE: "${BUILDKIT_INLINE_CACHE:-1}"
 
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+  monitoring:
+    driver: bridge
+
 services:
   postgres:
     env_file:
@@ -44,7 +52,8 @@ services:
       retries: 5
     mem_limit: 512m
     cpus: 1.0
-    ports: ["5432:5432"]
+    networks:
+      - backend
 
   pgbouncer:
     env_file:
@@ -59,7 +68,8 @@ services:
       retries: 5
     mem_limit: 64m
     cpus: 0.25
-    ports: ["6432:5432"]
+    networks:
+      - backend
 
   keycloak:
     env_file:
@@ -72,7 +82,9 @@ services:
     command: start-dev
     mem_limit: 512m
     cpus: 0.5
-    ports: ["8081:8080"]
+    networks:
+      - frontend
+      - backend
 
   api:
     env_file:
@@ -94,7 +106,8 @@ services:
       - "/tmp"
     mem_limit: 512m
     cpus: 1.0
-    ports: ["3001:3000"]
+    networks:
+      - backend
 
   web:
     env_file:
@@ -115,7 +128,8 @@ services:
       - "/app/.next/cache"
     mem_limit: 512m
     cpus: 1.0
-    ports: ["8000:3000"]
+    networks:
+      - frontend
 
   render:
     env_file:
@@ -138,7 +152,8 @@ services:
     tmpfs: ["/tmp"]
     mem_limit: 512m
     cpus: 1.0
-    ports: ["3002:3000"]
+    networks:
+      - backend
 
   transform:
     env_file:
@@ -161,7 +176,8 @@ services:
     tmpfs: ["/tmp"]
     mem_limit: 256m
     cpus: 0.5
-    ports: ["3003:3000"]
+    networks:
+      - backend
 
   submission:
     env_file:
@@ -184,7 +200,8 @@ services:
     tmpfs: ["/tmp"]
     mem_limit: 256m
     cpus: 0.5
-    ports: ["3004:3000"]
+    networks:
+      - backend
 
   grapesjs:
     env_file:
@@ -203,7 +220,9 @@ services:
       minio: { condition: service_healthy }
     mem_limit: 256m
     cpus: 0.5
-    ports: ["3005:3000"]
+    networks:
+      - backend
+      - frontend
 
   redis:
     env_file:
@@ -235,7 +254,8 @@ services:
       retries: 5
     mem_limit: 256m
     cpus: 0.5
-    ports: ["6379:6379"]
+    networks:
+      - backend
 
   minio:
     env_file:
@@ -250,7 +270,8 @@ services:
       retries: 3
     mem_limit: 256m
     cpus: 0.5
-    ports: ["9000:9000", "9001:9001"]
+    networks:
+      - backend
 
   mailhog:
     env_file:
@@ -258,7 +279,9 @@ services:
     image: mailhog/mailhog:latest
     mem_limit: 128m
     cpus: 0.25
-    ports: ["2025:1025", "8025:8025"]
+    networks:
+      - backend
+      - frontend
     healthcheck:
       test: ["CMD", "true"]
       interval: 30s
@@ -279,7 +302,8 @@ services:
       redis: { condition: service_healthy }
     mem_limit: 1g
     cpus: 1.0
-    ports: ["3006:3000"]
+    networks:
+      - backend
 
   mkdocs:
     env_file:
@@ -290,7 +314,9 @@ services:
     working_dir: /docs
     mem_limit: 128m
     cpus: 0.25
-    ports: ["8001:8000"]
+    networks:
+      - backend
+      - frontend
 
   prometheus:
     env_file:
@@ -308,7 +334,10 @@ services:
       - --web.enable-lifecycle
     mem_limit: 512m
     cpus: 0.5
-    ports: ["9090:9090"]
+    networks:
+      - monitoring
+      - backend
+      - frontend
 
   grafana:
     env_file:
@@ -321,7 +350,11 @@ services:
     depends_on: [mailhog]
     mem_limit: 256m
     cpus: 0.5
-    ports: ["3007:3000"]
+    networks:
+      - frontend
+      - monitoring
+    # Remove external port - will be accessed via Caddy
+    # ports: ["3007:3000"]
 
   loki:
     env_file:
@@ -332,7 +365,10 @@ services:
       - ./services/loki/loki-config.yml:/etc/loki/local-config.yaml
     mem_limit: 512m
     cpus: 0.5
-    ports: ["3100:3100"]
+    networks:
+      - monitoring
+      - backend
+      - frontend
 
   promtail:
     env_file:
@@ -345,6 +381,9 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     mem_limit: 128m
     cpus: 0.25
+    networks:
+      - monitoring
+      - backend
 
   jaeger:
     env_file:
@@ -352,7 +391,10 @@ services:
     image: jaegertracing/all-in-one:latest
     mem_limit: 256m
     cpus: 0.5
-    ports: ["16686:16686", "14268:14268"]
+    networks:
+      - monitoring
+      - backend
+      - frontend
 
   alertmanager:
     image: prom/alertmanager:latest
@@ -363,7 +405,10 @@ services:
       - ./services/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
     mem_limit: 128m
     cpus: 0.25
-    ports: ["9093:9093"]
+    networks:
+      - monitoring
+      - backend
+      - frontend
 
   caddy:
     env_file:
@@ -377,9 +422,15 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
     volumes:
       - ./services/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
     mem_limit: 128m
     cpus: 0.25
     ports: ["80:80", "443:443"]
+    networks:
+      - frontend
+      - backend
+      - monitoring
 
   rabbitmq:
     env_file:
@@ -393,7 +444,9 @@ services:
       retries: 5
     mem_limit: 256m
     cpus: 0.5
-    ports: ["5672:5672", "15672:15672"]
+    networks:
+      - backend
+      - frontend
 
   backup:
     env_file:
@@ -428,6 +481,8 @@ services:
       retries: 5
     mem_limit: 256m
     cpus: 0.5
+    networks:
+      - backend
 
   kong-migrations:
     env_file:
@@ -452,7 +507,22 @@ services:
       retries: 3
     mem_limit: 1g
     cpus: 1.0
-    ports: ["8002:8000", "8444:8443", "8003:8001", "8445:8444"]
+    networks:
+      - frontend
+      - backend
+
+  kong-configure:
+    env_file:
+      - .env
+    image: curlimages/curl:latest
+    depends_on:
+      kong: { condition: service_healthy }
+    volumes:
+      - ./services/kong/configure-kong.sh:/configure-kong.sh
+    command: sh /configure-kong.sh
+    restart: "no"
+    networks:
+      - backend
 
   opensearch:
     env_file:
@@ -469,7 +539,9 @@ services:
     volumes: [opensearch_data:/usr/share/opensearch/data]
     mem_limit: 1g
     cpus: 1.0
-    ports: ["9200:9200", "9600:9600"]
+    networks:
+      - backend
+      - frontend
 
   opensearch-dashboards:
     env_file:
@@ -478,7 +550,9 @@ services:
     depends_on: [opensearch]
     mem_limit: 512m
     cpus: 0.5
-    ports: ["5601:5601"]
+    networks:
+      - backend
+      - frontend
 
   otel-collector:
     env_file:
@@ -490,7 +564,10 @@ services:
     depends_on: [jaeger, prometheus, opensearch]
     mem_limit: 256m
     cpus: 0.5
-    ports: ["4317:4317", "4318:4318", "8888:8888", "8889:8889"]
+    networks:
+      - monitoring
+      - backend
+      - frontend
 
   node-exporter:
     env_file:
@@ -503,7 +580,9 @@ services:
     pid: host
     mem_limit: 128m
     cpus: 0.25
-    ports: ["9100:9100"]
+    networks:
+      - monitoring
+      - backend
 
   blackbox-exporter:
     env_file:
@@ -513,7 +592,9 @@ services:
       - ./services/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml
     mem_limit: 128m
     cpus: 0.25
-    ports: ["9115:9115"]
+    networks:
+      - monitoring
+      - backend
 
   uptime-kuma:
     env_file:
@@ -522,7 +603,9 @@ services:
     volumes: [uptime_kuma_data:/app/data]
     mem_limit: 256m
     cpus: 0.5
-    ports: ["3018:3001"]
+    networks:
+      - backend
+      - frontend
 
   trivy:
     env_file:
@@ -532,7 +615,9 @@ services:
     volumes: [trivy_cache:/root/.cache]
     mem_limit: 512m
     cpus: 0.5
-    ports: ["8004:8080"]
+    networks:
+      - backend
+      - frontend
 
   step-ca:
     env_file:
@@ -541,7 +626,9 @@ services:
     volumes: [step_ca_data:/home/step]
     mem_limit: 128m
     cpus: 0.25
-    ports: ["9443:9443"]
+    networks:
+      - backend
+      - frontend
 
   postgrest:
     env_file:
@@ -551,7 +638,9 @@ services:
       postgres: { condition: service_healthy }
     mem_limit: 128m
     cpus: 0.25
-    ports: ["3008:3000"]
+    networks:
+      - backend
+      - frontend
 
   hasura:
     env_file:
@@ -561,7 +650,9 @@ services:
       postgres: { condition: service_healthy }
     mem_limit: 512m
     cpus: 0.5
-    ports: ["3009:8080"]
+    networks:
+      - backend
+      - frontend
 
   postgraphile:
     env_file:
@@ -573,8 +664,9 @@ services:
         condition: service_healthy
     mem_limit: 256m
     cpus: 0.5
-    ports:
-      - "3010:5000"
+    networks:
+      - backend
+      - frontend
 
   pgadmin:
     env_file:
@@ -585,7 +677,9 @@ services:
       postgres: { condition: service_healthy }
     mem_limit: 256m
     cpus: 0.5
-    ports: ["3011:80"]
+    networks:
+      - backend
+      - frontend
 
   prisma-studio:
     env_file:
@@ -595,7 +689,9 @@ services:
       postgres: { condition: service_healthy }
     mem_limit: 256m
     cpus: 0.5
-    ports: ["3012:5555"]
+    networks:
+      - backend
+      - frontend
 
   swagger-ui:
     env_file:
@@ -604,7 +700,9 @@ services:
     depends_on: [api]
     mem_limit: 128m
     cpus: 0.25
-    ports: ["3013:3000"]
+    networks:
+      - backend
+      - frontend
 
   redoc:
     env_file:
@@ -613,7 +711,9 @@ services:
     depends_on: [api]
     mem_limit: 128m
     cpus: 0.25
-    ports: ["3014:3000"]
+    networks:
+      - backend
+      - frontend
 
   storybook:
     env_file:
@@ -632,7 +732,8 @@ services:
       - ./apps/web:/app/apps/web
     mem_limit: 512m
     cpus: 0.5
-    ports: ["3015:6006"]
+    networks:
+      - frontend
 
   sonarqube-db:
     env_file:
@@ -650,6 +751,8 @@ services:
       retries: 5
     mem_limit: 256m
     cpus: 0.5
+    networks:
+      - backend
 
   sonarqube:
     env_file:
@@ -663,7 +766,9 @@ services:
       - sonarqube_extensions:/opt/sonarqube/extensions
     mem_limit: 2g
     cpus: 1.0
-    ports: ["3016:9000"]
+    networks:
+      - backend
+      - frontend
 
 volumes:
   caddy_config:
