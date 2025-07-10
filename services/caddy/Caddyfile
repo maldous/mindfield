@@ -30,6 +30,9 @@ localhost, 127.0.0.1 {
     @mailhog host mailhog.localhost mailhog.127.0.0.1
     reverse_proxy @mailhog mailhog:8025
 
+    @redis-insight host redis-insight.localhost redis-insight.127.0.0.1
+    reverse_proxy @redis-insight redis-insight:8025
+
     @prometheus host prometheus.localhost prometheus.127.0.0.1
     reverse_proxy @prometheus prometheus:9090
 
@@ -124,6 +127,7 @@ grapesjs.{$DOMAIN:mindfield.local},
 keycloak.{$DOMAIN:mindfield.local},
 minio-console.{$DOMAIN:mindfield.local},
 mailhog.{$DOMAIN:mindfield.local},
+redis-insight.{$DOMAIN:mindfield.local},
 prometheus.{$DOMAIN:mindfield.local},
 loki.{$DOMAIN:mindfield.local},
 jaeger.{$DOMAIN:mindfield.local},
@@ -187,6 +191,9 @@ postgrest.{$DOMAIN:mindfield.local} {
 
     @mailhog_prod host mailhog.{$DOMAIN:mindfield.local}
     reverse_proxy @mailhog_prod mailhog:8025
+
+    @redis-insight_prod host redis-insight.{$DOMAIN:mindfield.local}
+    reverse_proxy @redis-insight_prod redis-insight:8025
 
     @prometheus_prod host prometheus.{$DOMAIN:mindfield.local}
     reverse_proxy @prometheus_prod prometheus:9090
