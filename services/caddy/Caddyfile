@@ -24,9 +24,6 @@ localhost, 127.0.0.1 {
     @keycloak host keycloak.localhost keycloak.127.0.0.1
     reverse_proxy @keycloak keycloak:8080
 
-    @minio host minio.localhost minio.127.0.0.1
-    reverse_proxy @minio minio:9000
-
     @minio-console host minio-console.localhost minio-console.127.0.0.1
     reverse_proxy @minio-console minio:9001
 
@@ -125,7 +122,6 @@ docs.{$DOMAIN:mindfield.local},
 grafana.{$DOMAIN:mindfield.local},
 grapesjs.{$DOMAIN:mindfield.local},
 keycloak.{$DOMAIN:mindfield.local},
-minio.{$DOMAIN:mindfield.local},
 minio-console.{$DOMAIN:mindfield.local},
 mailhog.{$DOMAIN:mindfield.local},
 prometheus.{$DOMAIN:mindfield.local},
@@ -185,9 +181,6 @@ postgrest.{$DOMAIN:mindfield.local} {
 
     @keycloak_prod host keycloak.{$DOMAIN:mindfield.local}
     reverse_proxy @keycloak_prod keycloak:8080
-
-    @minio_prod host minio.{$DOMAIN:mindfield.local}
-    reverse_proxy @minio_prod minio:9000
 
     @minio-console_prod host minio-console.{$DOMAIN:mindfield.local}
     reverse_proxy @minio-console_prod minio:9001
