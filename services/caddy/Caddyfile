@@ -103,13 +103,13 @@ localhost, 127.0.0.1 {
     reverse_proxy @postgrest postgrest:3000
 
     @presidio-analyzer host presidio-analyzer.localhost presidio-analyzer.127.0.0.1
-    reverse_proxy @presidio-analyzer presidio-analyzer:5001
+    reverse_proxy @presidio-analyzer presidio-analyzer:3000
 
     @presidio-anonymizer host presidio-anonymizer.localhost presidio-anonymizer.127.0.0.1
-    reverse_proxy @presidio-anonymizer presidio-anonymizer:5001
+    reverse_proxy @presidio-anonymizer presidio-anonymizer:3000
 
     @presidio-image host presidio-image.localhost presidio-image.127.0.0.1
-    reverse_proxy @presidio-image presidio-image-redactor:5001
+    reverse_proxy @presidio-image presidio-image-redactor:3000
 
     # Default for services on port 3000
     reverse_proxy {
@@ -256,16 +256,19 @@ postgrest.{$DOMAIN:mindfield.local} {
     reverse_proxy @gitea_prod gitea:3000
 
     @presidio-analyzer_prod host presidio-analyzer.{$DOMAIN:mindfield.local}
-    reverse_proxy @presidio-analyzer_prod presidio-analyzer:5001
+    reverse_proxy @presidio-analyzer_prod presidio-analyzer:3000
 
     @presidio-anonymizer_prod host presidio-anonymizer.{$DOMAIN:mindfield.local}
-    reverse_proxy @presidio-anonymizer_prod presidio-anonymizer:5001
+    reverse_proxy @presidio-anonymizer_prod presidio-anonymizer:3000
 
     @presidio-image_prod host presidio-image.{$DOMAIN:mindfield.local}
-    reverse_proxy @presidio-image_prod presidio-image-redactor:5001
+    reverse_proxy @presidio-image_prod presidio-image-redactor:3000
 
     @render_prod host render.{$DOMAIN:mindfield.local}
     reverse_proxy @render_prod render:3000
+
+    @grapejs_prod host grapesjs.{$DOMAIN:mindfield.local}
+    reverse_proxy @grapejs_prod grapesjs:3000
 
     @transform_prod host transform.{$DOMAIN:mindfield.local}
     reverse_proxy @transform_prod transform:3000
