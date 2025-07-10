@@ -3,6 +3,7 @@
 ## Quick Start
 
 ### Prerequisites
+
 - Docker and Docker Compose installed
 - Domain with DNS management (A records for all subdomains)
 - Ports 80 and 443 available
@@ -10,6 +11,7 @@
 ### Initial Setup
 
 1. **Clone and configure environment**
+
 ```bash
 git clone <repository>
 cd mindfield
@@ -17,6 +19,7 @@ cp .env.example .env  # Edit with your domain and credentials
 ```
 
 2. **Start services**
+
 ```bash
 # Production mode (all services internal except via Caddy)
 docker-compose up -d
@@ -26,6 +29,7 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 ```
 
 3. **Verify services**
+
 ```bash
 # Check all services are running
 docker-compose ps
@@ -37,11 +41,13 @@ docker-compose logs -f <service-name>
 ## Architecture Overview
 
 ### Network Topology
+
 - **frontend**: User-facing services (Caddy, web app, admin UIs)
 - **backend**: Internal services (databases, APIs, processing)
 - **monitoring**: Observability stack (Prometheus, Grafana, etc.)
 
 ### Authentication Flow
+
 1. All services protected by Keycloak OAuth2/OIDC
 2. Caddy handles TLS termination
 3. Kong manages API routing and rate limiting
@@ -50,17 +56,20 @@ docker-compose logs -f <service-name>
 ## Service Categories
 
 ### Core Infrastructure
+
 - **Caddy**: Reverse proxy with automatic HTTPS
 - **Kong**: API gateway for microservices
 - **Keycloak**: Identity and access management
 
 ### Data Layer
+
 - **PostgreSQL**: Primary database
 - **Redis**: Caching and sessions
 - **MinIO**: S3-compatible object storage
 - **OpenSearch**: Full-text search and analytics
 
 ### Application Services
+
 - **API**: Main application backend
 - **Web**: Next.js frontend
 - **Submission**: Form processing
@@ -70,6 +79,7 @@ docker-compose logs -f <service-name>
 - **GrapesJS**: Visual editor
 
 ### Monitoring Stack
+
 - **Prometheus**: Metrics collection
 - **Grafana**: Dashboards
 - **Loki**: Log aggregation
@@ -77,6 +87,7 @@ docker-compose logs -f <service-name>
 - **Alertmanager**: Alert routing
 
 ### Development Tools
+
 - **PgAdmin**: Database management
 - **Hasura**: Instant GraphQL
 - **PostGraphile**: GraphQL for PostgreSQL
@@ -88,7 +99,9 @@ docker-compose logs -f <service-name>
 ## Configuration
 
 ### Environment Variables
+
 Key variables in `.env`:
+
 - `DOMAIN`: Your domain (e.g., aldous.info)
 - `LETSENCRYPT_EMAIL`: Email for SSL certificates
 - `KEYCLOAK_*`: Authentication settings
@@ -97,6 +110,7 @@ Key variables in `.env`:
 - `S3_*`: MinIO configuration
 
 ### Keycloak Setup
+
 1. Access: https://keycloak.yourdomain.com
 2. Login: admin/admin (change immediately)
 3. Create realm: `mindfield`
@@ -104,7 +118,9 @@ Key variables in `.env`:
 5. Configure redirect URIs
 
 ### Kong Configuration
+
 Routes are automatically configured via `kong-configure` service:
+
 - `/api/*` → API service
 - `/services/submission/*` → Submission service
 - `/services/transform/*` → Transform service
@@ -115,21 +131,25 @@ Routes are automatically configured via `kong-configure` service:
 ## Operations
 
 ### Backup Strategy
+
 - PostgreSQL: Daily automated backups via `backup` service
 - MinIO: Configure bucket replication
 - Configuration: Version control + regular snapshots
 
 ### Monitoring
+
 - Grafana dashboards: https://grafana.yourdomain.com
 - Prometheus metrics: https://prometheus.yourdomain.com
 - Uptime monitoring: https://uptime-kuma.yourdomain.com
 
 ### Scaling
+
 - Horizontal: Add service replicas
 - Vertical: Adjust `mem_limit` and `cpus` in docker-compose.yml
 - Database: Configure read replicas
 
 ### Security
+
 - All external traffic via HTTPS
 - Internal communication on Docker networks
 - Secrets in environment variables (use Vault for production)
@@ -140,21 +160,25 @@ Routes are automatically configured via `kong-configure` service:
 ### Common Issues
 
 **Certificate errors**
+
 - Verify all subdomains have A records
 - Check Caddy logs: `docker-compose logs caddy`
 - Ensure ports 80/443 are accessible
 
 **Authentication loops**
+
 - Check Keycloak redirect URIs
 - Verify service environment variables
 - Review Kong OIDC plugin configuration
 
 **Service discovery failures**
+
 - Use Docker service names (e.g., `http://api:3000`)
 - Check network assignments in docker-compose.yml
 - Verify health checks are passing
 
 **Database connection issues**
+
 - Check pgbouncer is healthy
 - Verify DATABASE_URL format
 - Review PostgreSQL logs

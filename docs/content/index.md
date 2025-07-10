@@ -5,6 +5,7 @@ MindField is a personality profiling app built with React. It helps users explor
 ## Quick Start
 
 ### Prerequisites
+
 - Docker and Docker Compose installed
 - Domain with DNS management (A records for all subdomains)
 - Ports 80 and 443 available
@@ -12,6 +13,7 @@ MindField is a personality profiling app built with React. It helps users explor
 ### Initial Setup
 
 1. **Clone and configure environment**
+
 ```bash
 git clone <repository>
 cd mindfield
@@ -20,6 +22,7 @@ cd mindfield
 ```
 
 2. **Start services**
+
 ```bash
 # Production mode (all services via Caddy reverse proxy)
 make start
@@ -32,6 +35,7 @@ make ports
 ```
 
 3. **Verify services**
+
 ```bash
 # Check all services are running
 docker compose ps
@@ -43,11 +47,13 @@ make logs
 ## Architecture Overview
 
 ### Network Topology
+
 - **frontend**: User-facing services (Caddy, web app, admin UIs)
 - **backend**: Internal services (databases, APIs, processing)
 - **monitoring**: Observability stack (Prometheus, Grafana, etc.)
 
 ### Authentication Flow
+
 1. All services protected by Keycloak OAuth2/OIDC
 2. Caddy handles TLS termination with automatic Let's Encrypt certificates
 3. Kong manages API routing and rate limiting
@@ -57,6 +63,7 @@ make logs
 
 **Production Mode (make start)**
 All services accessible via HTTPS when authenticated:
+
 ```
 https://aldous.info/           - Main web application
 https://api.aldous.info/       - Kong API Gateway
@@ -66,6 +73,7 @@ https://grafana.aldous.info/   - Monitoring dashboards
 
 **Development Mode (make dev)**
 Direct port access for development:
+
 ```
 http://localhost:3000  - Web App
 http://localhost:3001  - API
@@ -76,11 +84,13 @@ http://localhost:3017  - Keycloak
 ## Services
 
 ### Core Application Services
+
 - **[web](https://aldous.info/)** - Next.js frontend for MindField
 - **[api](https://api.aldous.info/)** - Kong API Gateway (routes to internal services)
 - **[docs](https://docs.aldous.info/)** - This documentation site
 
 ### Data Processing Services
+
 - **[submission](https://submission.aldous.info/)** - Handles form submissions
 - **[transform](https://transform.aldous.info/)** - Data transformation service
 - **[render](https://render.aldous.info/)** - PDF/report generation
@@ -88,10 +98,12 @@ http://localhost:3017  - Keycloak
 - **[grapesjs](https://grapesjs.aldous.info/)** - Visual editor service
 
 ### Authentication & Identity
+
 - **[keycloak](https://keycloak.aldous.info/)** - OAuth2/OpenID Connect identity provider
 - **[kong](https://kong.aldous.info/)** - API gateway admin interface
 
 ### Data Storage
+
 - **postgres** - Primary database (internal only)
 - **[pgadmin](https://pgadmin.aldous.info/)** - PostgreSQL admin interface
 - **[redis](https://redis.aldous.info/)** - Cache and session store
@@ -99,6 +111,7 @@ http://localhost:3017  - Keycloak
 - **[minio-console](https://minio-console.aldous.info/)** - MinIO management UI
 
 ### API Development Tools
+
 - **[hasura](https://hasura.aldous.info/)** - Instant GraphQL API
 - **[postgraphile](https://postgraphile.aldous.info/)** - GraphQL API for PostgreSQL
 - **[postgrest](https://postgrest.aldous.info/)** - REST API for PostgreSQL
@@ -107,6 +120,7 @@ http://localhost:3017  - Keycloak
 - **[prisma-studio](https://prisma-studio.aldous.info/)** - Database ORM UI
 
 ### Monitoring & Observability
+
 - **[grafana](https://grafana.aldous.info/)** - Metrics dashboards
 - **[prometheus](https://prometheus.aldous.info/)** - Metrics collection
 - **[loki](https://loki.aldous.info/)** - Log aggregation
@@ -115,14 +129,17 @@ http://localhost:3017  - Keycloak
 - **[uptime-kuma](https://uptime-kuma.aldous.info/)** - Uptime monitoring
 
 ### Search & Analytics
+
 - **[opensearch](https://opensearch.aldous.info/)** - Search and analytics
 - **[opensearch-dashboards](https://opensearch-dashboards.aldous.info/)** - OpenSearch UI
 
 ### Development Tools
+
 - **[storybook](https://storybook.aldous.info/)** - Component library
 - **[sonarqube](https://sonarqube.aldous.info/)** - Code quality analysis
 
 ### Infrastructure Services
+
 - **[rabbitmq](https://rabbitmq.aldous.info/)** - Message broker
 - **[mailhog](https://mailhog.aldous.info/)** - Email testing
 - **[step-ca](https://step-ca.aldous.info/)** - Internal certificate authority
@@ -132,7 +149,9 @@ http://localhost:3017  - Keycloak
 ## Configuration
 
 ### Environment Variables
+
 Key variables in `.env`:
+
 - `DOMAIN`: Your domain (e.g., aldous.info)
 - `LETSENCRYPT_EMAIL`: Email for SSL certificates
 - `KEYCLOAK_*`: Authentication settings
@@ -141,6 +160,7 @@ Key variables in `.env`:
 - `S3_*`: MinIO configuration
 
 ### Keycloak Setup
+
 1. Access: https://keycloak.yourdomain.com
 2. Login: admin/admin (change immediately)
 3. Create realm: `mindfield`
@@ -148,7 +168,9 @@ Key variables in `.env`:
 5. Configure redirect URIs
 
 ### Kong Configuration
+
 Routes are automatically configured via `kong-configure` service:
+
 - `/api/*` → API service
 - `/services/submission/*` → Submission service
 - `/services/transform/*` → Transform service
@@ -159,6 +181,7 @@ Routes are automatically configured via `kong-configure` service:
 ## Development Workflow
 
 ### Make Commands
+
 ```bash
 make help          # Show all available commands
 make setup         # Initial project setup
@@ -176,6 +199,7 @@ make reset         # Complete reset
 ```
 
 ### Development Ports (make dev)
+
 ```
 Web App:           http://localhost:3000
 API:               http://localhost:3001
@@ -201,21 +225,25 @@ Uptime Kuma:       http://localhost:3018
 ## Operations
 
 ### Backup Strategy
+
 - PostgreSQL: Daily automated backups via `backup` service
 - MinIO: Configure bucket replication
 - Configuration: Version control + regular snapshots
 
 ### Monitoring
+
 - Grafana dashboards: https://grafana.yourdomain.com
 - Prometheus metrics: https://prometheus.yourdomain.com
 - Uptime monitoring: https://uptime-kuma.yourdomain.com
 
 ### Scaling
+
 - Horizontal: Add service replicas
 - Vertical: Adjust `mem_limit` and `cpus` in docker-compose.yml
 - Database: Configure read replicas
 
 ### Security
+
 - All external traffic via HTTPS
 - Internal communication on Docker networks
 - Secrets in environment variables (use Vault for production)
@@ -226,21 +254,25 @@ Uptime Kuma:       http://localhost:3018
 ### Common Issues
 
 **Certificate errors**
+
 - Verify all subdomains have A records
 - Check Caddy logs: `make logs`
 - Ensure ports 80/443 are accessible
 
 **Authentication loops**
+
 - Check Keycloak redirect URIs
 - Verify service environment variables
 - Review Kong OIDC plugin configuration
 
 **Service discovery failures**
+
 - Use Docker service names (e.g., `http://api:3000`)
 - Check network assignments in docker-compose.yml
 - Verify health checks are passing
 
 **Database connection issues**
+
 - Check pgbouncer is healthy
 - Verify DATABASE_URL format
 - Review PostgreSQL logs
@@ -280,13 +312,17 @@ make reset
 ## API Access Patterns
 
 ### Direct Service Access
+
 When authenticated, you can access any service directly:
+
 ```
 https://{service}.aldous.info
 ```
 
 ### Via Kong API Gateway
+
 All API services are also available through the gateway:
+
 ```
 https://api.aldous.info/api/* → Internal API service
 https://api.aldous.info/services/submission/* → Submission service
@@ -297,6 +333,7 @@ https://api.aldous.info/services/grapesjs/* → GrapesJS service
 ```
 
 ## Service Communication
+
 - Internal services communicate via Docker network names
 - External access requires authentication token from Keycloak
 - Kong handles rate limiting and request routing
