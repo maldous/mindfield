@@ -130,7 +130,8 @@ gitea.{$DOMAIN:mindfield.local},
 redaction.{$DOMAIN:mindfield.local},
 render.{$DOMAIN:mindfield.local},
 transform.{$DOMAIN:mindfield.local},
-submission.{$DOMAIN:mindfield.local} {
+submission.{$DOMAIN:mindfield.local},
+kong.{$DOMAIN:mindfield.local} {
     tls {$LETSENCRYPT_EMAIL}
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -150,6 +151,9 @@ submission.{$DOMAIN:mindfield.local} {
     @api_prod host api.{$DOMAIN:mindfield.local}
     reverse_proxy @api_prod kong:8000
 
+    @kong_prod host kong.{$DOMAIN:mindfield.local}
+    reverse_proxy @kong_prod kong:8001
+
     @docs_prod host docs.{$DOMAIN:mindfield.local}
     reverse_proxy @docs_prod mkdocs:8000
 
@@ -160,7 +164,7 @@ submission.{$DOMAIN:mindfield.local} {
     reverse_proxy @minio_prod minio:9000
 
     @minio-console_prod host minio-console.{$DOMAIN:mindfield.local}
-    reverse_proxy @minio-console_prod minio-console:9001
+    reverse_proxy @minio-console_prod minio:9001
 
     @mailhog_prod host mailhog.{$DOMAIN:mindfield.local}
     reverse_proxy @mailhog_prod mailhog:8025
@@ -222,12 +226,6 @@ submission.{$DOMAIN:mindfield.local} {
     @sonarqube_prod host sonarqube.{$DOMAIN:mindfield.local}
     reverse_proxy @sonarqube_prod sonarqube:9000
 
-    @grafana_prod host grafana.{$DOMAIN:mindfield.local}
-    reverse_proxy @grafana_prod grafana:3000
-
-    @grapesjs_prod host grapesjs.{$DOMAIN:mindfield.local}
-    reverse_proxy @grapesjs_prod grapesjs:3000
-
     @gitea_prod host gitea.{$DOMAIN:mindfield.local}
     reverse_proxy @gitea_prod gitea:3000
 
@@ -248,4 +246,3 @@ submission.{$DOMAIN:mindfield.local} {
         to {host.labels.0}:3000
     }
 }
-
