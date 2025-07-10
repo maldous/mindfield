@@ -24,13 +24,13 @@ services:
     ports: ["3004:3000"]
 
   presidio-analyzer:
-    ports: ["3005:5001"]
+    ports: ["3005:3000"]
 
   presidio-anonymizer:
-    ports: ["3006:5001"]
+    ports: ["3006:3000"]
 
   presidio-image-redactor:
-    ports: ["3007:5001"]
+    ports: ["3007:3000"]
 
   grapesjs:
     ports: ["3008:3000"]
