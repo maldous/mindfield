@@ -17,6 +17,7 @@ localhost, 127.0.0.1 {
 # Wildcard for all other localhost services
 *.localhost, *.127.0.0.1 {
     tls internal
+
     @api host api.localhost api.127.0.0.1
     reverse_proxy @api kong:8000
 
@@ -27,7 +28,7 @@ localhost, 127.0.0.1 {
     reverse_proxy @minio minio:9000
 
     @minio-console host minio-console.localhost minio-console.127.0.0.1
-    reverse_proxy @minio-console minio:9001
+    reverse_proxy @minio-console minio-console:9001
 
     @mailhog host mailhog.localhost mailhog.127.0.0.1
     reverse_proxy @mailhog mailhog:8025
@@ -125,6 +126,7 @@ pgadmin.{$DOMAIN:mindfield.local},
 prisma-studio.{$DOMAIN:mindfield.local},
 storybook.{$DOMAIN:mindfield.local},
 sonarqube.{$DOMAIN:mindfield.local},
+gitea.{$DOMAIN:mindfield.local},
 redaction.{$DOMAIN:mindfield.local},
 render.{$DOMAIN:mindfield.local},
 transform.{$DOMAIN:mindfield.local},
@@ -158,7 +160,7 @@ submission.{$DOMAIN:mindfield.local} {
     reverse_proxy @minio_prod minio:9000
 
     @minio-console_prod host minio-console.{$DOMAIN:mindfield.local}
-    reverse_proxy @minio-console_prod minio:9001
+    reverse_proxy @minio-console_prod minio-console:9001
 
     @mailhog_prod host mailhog.{$DOMAIN:mindfield.local}
     reverse_proxy @mailhog_prod mailhog:8025
@@ -220,8 +222,30 @@ submission.{$DOMAIN:mindfield.local} {
     @sonarqube_prod host sonarqube.{$DOMAIN:mindfield.local}
     reverse_proxy @sonarqube_prod sonarqube:9000
 
+    @grafana_prod host grafana.{$DOMAIN:mindfield.local}
+    reverse_proxy @grafana_prod grafana:3000
+
+    @grapesjs_prod host grapesjs.{$DOMAIN:mindfield.local}
+    reverse_proxy @grapesjs_prod grapesjs:3000
+
+    @gitea_prod host gitea.{$DOMAIN:mindfield.local}
+    reverse_proxy @gitea_prod gitea:3000
+
+    @redaction_prod host redaction.{$DOMAIN:mindfield.local}
+    reverse_proxy @redaction_prod redaction:3000
+
+    @render_prod host render.{$DOMAIN:mindfield.local}
+    reverse_proxy @render_prod render:3000
+
+    @transform_prod host transform.{$DOMAIN:mindfield.local}
+    reverse_proxy @transform_prod transform:3000
+
+    @submission_prod host submission.{$DOMAIN:mindfield.local}
+    reverse_proxy @submission_prod submission:3000
+
     # Default for services on port 3000
     reverse_proxy {
         to {host.labels.0}:3000
     }
 }
+
