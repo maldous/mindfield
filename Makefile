@@ -10,7 +10,8 @@ help:
 	@echo "make setup      - Initial project setup"
 	@echo "make install    - pnpm ci for all workspaces"
 	@echo "make build      - pnpm run build (monorepo)"
-	@echo "make start      - Build & start full dev stack"
+	@echo "make start      - Build & start full dev stack (via Caddy)"
+	@echo "make dev        - Build & start dev stack with exposed ports"
 	@echo "make prod       - Build & start prod-like stack"
 	@echo "make test       - Run all tests"
 	@echo "make lint       - ESLint across workspace"
@@ -24,6 +25,7 @@ help:
 	@echo "make reset      - Reset everything"
 	@echo "make sonar      - Sonar everything"
 	@echo "make all        - Reset, setup & start"
+	@echo "make ports      - Show all exposed development ports"
 
 setup: ; @./setup.sh
 install: ; @if [ -d node_modules ]; then pnpm install --frozen-lockfile; else pnpm install; fi
@@ -35,10 +37,56 @@ tidy: ; @pnpm tidy
 type-check: ; @pnpm turbo run type-check
 logs: ; @docker compose logs -f
 stop: ; @docker compose down
-start: install build base-image ; @docker compose --profile dev build --pull --parallel && docker compose --profile dev up -d --remove-orphans
-prod: install build base-image ; @docker compose --profile prod build --pull --parallel && docker compose --profile prod up -d --remove-orphans
+start: install build base-image ; @docker compose build --pull --parallel && docker compose up -d --remove-orphans
+dev: install build base-image ; @docker compose -f docker-compose.yml -f docker-compose.dev.yml build --pull --parallel && docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --remove-orphans
+prod: start  # Alias for start (production mode)
 restart: stop start
+restart-dev: stop dev
+stop-dev: ; @docker compose -f docker-compose.yml -f docker-compose.dev.yml down
 all: reset setup start
+
+ports:
+	@echo "Development Ports (make dev):"
+	@echo "  Web App:           http://localhost:3000"
+	@echo "  API:               http://localhost:3001"
+	@echo "  Submission:        http://localhost:3002"
+	@echo "  Transform:         http://localhost:3003"
+	@echo "  Render:            http://localhost:3004"
+	@echo "  Redaction:         http://localhost:3005"
+	@echo "  GrapesJS:          http://localhost:3006"
+	@echo "  Grafana:           http://localhost:3007"
+	@echo "  PostgREST:         http://localhost:3008"
+	@echo "  Hasura:            http://localhost:3009"
+	@echo "  PostGraphile:      http://localhost:3010"
+	@echo "  PgAdmin:           http://localhost:3011"
+	@echo "  Prisma Studio:     http://localhost:3012"
+	@echo "  Swagger UI:        http://localhost:3013"
+	@echo "  ReDoc:             http://localhost:3014"
+	@echo "  Storybook:         http://localhost:3015"
+	@echo "  SonarQube:         http://localhost:3016"
+	@echo "  Keycloak:          http://localhost:3017"
+	@echo "  Uptime Kuma:       http://localhost:3018"
+	@echo "  MailHog Web:       http://localhost:8025"
+	@echo "  MailHog SMTP:      localhost:2025"
+	@echo "  MinIO API:         http://localhost:9000"
+	@echo "  MinIO Console:     http://localhost:9001"
+	@echo "  Prometheus:        http://localhost:9090"
+	@echo "  Node Exporter:     http://localhost:9100"
+	@echo "  Loki:              http://localhost:3100"
+	@echo "  OpenSearch:        http://localhost:9200"
+	@echo "  OpenSearch Dash:   http://localhost:5601"
+	@echo "  RabbitMQ Mgmt:     http://localhost:15672"
+	@echo "  Kong Proxy:        http://localhost:8002"
+	@echo "  Kong Admin:        http://localhost:8003"
+	@echo "  Jaeger:            http://localhost:16686"
+	@echo "  Alertmanager:      http://localhost:9093"
+	@echo "  Blackbox Export:   http://localhost:9115"
+	@echo "  Trivy:             http://localhost:8004"
+	@echo "  Step CA:           https://localhost:9443"
+	@echo "  OTEL Collector:    http://localhost:8888"
+	@echo "  MkDocs:            http://localhost:8001"
+	@echo ""
+	@echo "Production (make start/prod): All via Caddy on ports 80/443"
 
 sonar:
 	@if [ ! -f .env ]; then touch .env; fi; \

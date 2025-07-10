@@ -1,16 +1,77 @@
-# MindField
+# MindField Documentation
 
 MindField is a personality profiling app built with React. It helps users explore their traits through interactive questions and visual insights—like stepping into the landscape of your own mind.
 
+## Quick Start
+
+### Prerequisites
+- Docker and Docker Compose installed
+- Domain with DNS management (A records for all subdomains)
+- Ports 80 and 443 available
+
+### Initial Setup
+
+1. **Clone and configure environment**
+```bash
+git clone <repository>
+cd mindfield
+./setup.sh  # Creates .env with production settings
+# Edit .env with your domain and credentials
+```
+
+2. **Start services**
+```bash
+# Production mode (all services via Caddy reverse proxy)
+make start
+
+# Development mode (exposes individual ports)
+make dev
+
+# View all available development ports
+make ports
+```
+
+3. **Verify services**
+```bash
+# Check all services are running
+docker compose ps
+
+# View logs
+make logs
+```
+
 ## Architecture Overview
 
-All services are accessible externally via HTTPS when authenticated through Keycloak. This allows external developers to use any service remotely.
+### Network Topology
+- **frontend**: User-facing services (Caddy, web app, admin UIs)
+- **backend**: Internal services (databases, APIs, processing)
+- **monitoring**: Observability stack (Prometheus, Grafana, etc.)
 
 ### Authentication Flow
-1. All services require authentication via Keycloak OAuth2/OIDC
-2. Access `https://keycloak.aldous.info` to manage authentication
-3. API requests go through Kong Gateway at `https://api.aldous.info`
-4. Direct service access available via `https://{service}.aldous.info` when authenticated
+1. All services protected by Keycloak OAuth2/OIDC
+2. Caddy handles TLS termination with automatic Let's Encrypt certificates
+3. Kong manages API routing and rate limiting
+4. Services validate tokens with Keycloak
+
+### Service Access Patterns
+
+**Production Mode (make start)**
+All services accessible via HTTPS when authenticated:
+```
+https://aldous.info/           - Main web application
+https://api.aldous.info/       - Kong API Gateway
+https://keycloak.aldous.info/  - Authentication
+https://grafana.aldous.info/   - Monitoring dashboards
+```
+
+**Development Mode (make dev)**
+Direct port access for development:
+```
+http://localhost:3000  - Web App
+http://localhost:3001  - API
+http://localhost:3007  - Grafana
+http://localhost:3017  - Keycloak
+```
 
 ## Services
 
@@ -19,16 +80,16 @@ All services are accessible externally via HTTPS when authenticated through Keyc
 - **[api](https://api.aldous.info/)** - Kong API Gateway (routes to internal services)
 - **[docs](https://docs.aldous.info/)** - This documentation site
 
-### Authentication & Identity
-- **[keycloak](https://keycloak.aldous.info/)** - OAuth2/OpenID Connect identity provider
-- **[kong](https://kong.aldous.info/)** - API gateway admin interface
-
 ### Data Processing Services
 - **[submission](https://submission.aldous.info/)** - Handles form submissions
 - **[transform](https://transform.aldous.info/)** - Data transformation service
 - **[render](https://render.aldous.info/)** - PDF/report generation
 - **[redaction](https://redaction.aldous.info/)** - PII removal service
 - **[grapesjs](https://grapesjs.aldous.info/)** - Visual editor service
+
+### Authentication & Identity
+- **[keycloak](https://keycloak.aldous.info/)** - OAuth2/OpenID Connect identity provider
+- **[kong](https://kong.aldous.info/)** - API gateway admin interface
 
 ### Data Storage
 - **postgres** - Primary database (internal only)
@@ -43,6 +104,7 @@ All services are accessible externally via HTTPS when authenticated through Keyc
 - **[postgrest](https://postgrest.aldous.info/)** - REST API for PostgreSQL
 - **[swagger-ui](https://swagger-ui.aldous.info/)** - Interactive API documentation
 - **[redoc](https://redoc.aldous.info/)** - API documentation
+- **[prisma-studio](https://prisma-studio.aldous.info/)** - Database ORM UI
 
 ### Monitoring & Observability
 - **[grafana](https://grafana.aldous.info/)** - Metrics dashboards
@@ -59,8 +121,6 @@ All services are accessible externally via HTTPS when authenticated through Keyc
 ### Development Tools
 - **[storybook](https://storybook.aldous.info/)** - Component library
 - **[sonarqube](https://sonarqube.aldous.info/)** - Code quality analysis
-- **[prisma-studio](https://prisma-studio.aldous.info/)** - Database ORM UI
-- **[gitea](https://gitea.aldous.info/)** - Git repository management
 
 ### Infrastructure Services
 - **[rabbitmq](https://rabbitmq.aldous.info/)** - Message broker
@@ -69,15 +129,153 @@ All services are accessible externally via HTTPS when authenticated through Keyc
 - **[trivy](https://trivy.aldous.info/)** - Security scanning
 - **[otel-collector](https://otel-collector.aldous.info/)** - OpenTelemetry collector
 
-### Internal Services (No UI)
-- **postgres** - Primary database
-- **pgbouncer** - Connection pooling
-- **kong-database** - Kong configuration storage
-- **redis** - Caching layer
-- **promtail** - Log shipping
-- **node-exporter** - System metrics
-- **blackbox-exporter** - Endpoint monitoring
-- **backup** - Automated backups
+## Configuration
+
+### Environment Variables
+Key variables in `.env`:
+- `DOMAIN`: Your domain (e.g., aldous.info)
+- `LETSENCRYPT_EMAIL`: Email for SSL certificates
+- `KEYCLOAK_*`: Authentication settings
+- `DATABASE_URL`: PostgreSQL connection
+- `REDIS_URL`: Redis connection
+- `S3_*`: MinIO configuration
+
+### Keycloak Setup
+1. Access: https://keycloak.yourdomain.com
+2. Login: admin/admin (change immediately)
+3. Create realm: `mindfield`
+4. Create clients for each service
+5. Configure redirect URIs
+
+### Kong Configuration
+Routes are automatically configured via `kong-configure` service:
+- `/api/*` → API service
+- `/services/submission/*` → Submission service
+- `/services/transform/*` → Transform service
+- `/services/render/*` → Render service
+- `/services/redaction/*` → Redaction service
+- `/services/grapesjs/*` → GrapesJS service
+
+## Development Workflow
+
+### Make Commands
+```bash
+make help          # Show all available commands
+make setup         # Initial project setup
+make install       # Install dependencies
+make build         # Build all services
+make start         # Production mode (via Caddy)
+make dev           # Development mode (exposed ports)
+make ports         # Show development port mappings
+make test          # Run tests
+make lint          # Code linting
+make logs          # View service logs
+make stop          # Stop all services
+make clean         # Clean up images and volumes
+make reset         # Complete reset
+```
+
+### Development Ports (make dev)
+```
+Web App:           http://localhost:3000
+API:               http://localhost:3001
+Submission:        http://localhost:3002
+Transform:         http://localhost:3003
+Render:            http://localhost:3004
+Redaction:         http://localhost:3005
+GrapesJS:          http://localhost:3006
+Grafana:           http://localhost:3007
+PostgREST:         http://localhost:3008
+Hasura:            http://localhost:3009
+PostGraphile:      http://localhost:3010
+PgAdmin:           http://localhost:3011
+Prisma Studio:     http://localhost:3012
+Swagger UI:        http://localhost:3013
+ReDoc:             http://localhost:3014
+Storybook:         http://localhost:3015
+SonarQube:         http://localhost:3016
+Keycloak:          http://localhost:3017
+Uptime Kuma:       http://localhost:3018
+```
+
+## Operations
+
+### Backup Strategy
+- PostgreSQL: Daily automated backups via `backup` service
+- MinIO: Configure bucket replication
+- Configuration: Version control + regular snapshots
+
+### Monitoring
+- Grafana dashboards: https://grafana.yourdomain.com
+- Prometheus metrics: https://prometheus.yourdomain.com
+- Uptime monitoring: https://uptime-kuma.yourdomain.com
+
+### Scaling
+- Horizontal: Add service replicas
+- Vertical: Adjust `mem_limit` and `cpus` in docker-compose.yml
+- Database: Configure read replicas
+
+### Security
+- All external traffic via HTTPS
+- Internal communication on Docker networks
+- Secrets in environment variables (use Vault for production)
+- Regular security scans via Trivy
+
+## Troubleshooting
+
+### Common Issues
+
+**Certificate errors**
+- Verify all subdomains have A records
+- Check Caddy logs: `make logs`
+- Ensure ports 80/443 are accessible
+
+**Authentication loops**
+- Check Keycloak redirect URIs
+- Verify service environment variables
+- Review Kong OIDC plugin configuration
+
+**Service discovery failures**
+- Use Docker service names (e.g., `http://api:3000`)
+- Check network assignments in docker-compose.yml
+- Verify health checks are passing
+
+**Database connection issues**
+- Check pgbouncer is healthy
+- Verify DATABASE_URL format
+- Review PostgreSQL logs
+
+### Useful Commands
+
+```bash
+# View all logs
+make logs
+
+# Restart a service
+docker compose restart <service>
+
+# Execute commands in container
+docker compose exec <service> sh
+
+# Database backup
+docker compose exec postgres pg_dump -U mindfield mindfield > backup.sql
+
+# Clear all data (WARNING: destructive)
+make reset
+```
+
+## Production Checklist
+
+- [ ] Change all default passwords
+- [ ] Configure proper SMTP for emails
+- [ ] Set up monitoring alerts
+- [ ] Enable database backups
+- [ ] Configure log retention
+- [ ] Set up SSL certificate renewal monitoring
+- [ ] Implement secret management (Vault)
+- [ ] Configure firewall rules
+- [ ] Set up CI/CD pipeline
+- [ ] Document disaster recovery procedure
 
 ## API Access Patterns
 
@@ -98,24 +296,7 @@ https://api.aldous.info/services/redaction/* → Redaction service
 https://api.aldous.info/services/grapesjs/* → GrapesJS service
 ```
 
-## Development Setup
-
-### Environment Variables
-All services use environment variables from `.env` file. Key variables:
-- `DOMAIN` - Your domain (default: aldous.info)
-- `KEYCLOAK_*` - Authentication configuration
-- `DATABASE_URL` - PostgreSQL connection
-- `REDIS_URL` - Redis connection
-- `S3_*` - MinIO/S3 configuration
-
-### Authentication Setup
-1. Access Keycloak at `https://keycloak.aldous.info`
-2. Default admin credentials: `admin/admin`
-3. Create realm: `mindfield`
-4. Create clients for each service requiring authentication
-5. Configure redirect URIs for each client
-
-### Service Communication
+## Service Communication
 - Internal services communicate via Docker network names
 - External access requires authentication token from Keycloak
 - Kong handles rate limiting and request routing
