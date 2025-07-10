@@ -3,135 +3,134 @@
     email {$LETSENCRYPT_EMAIL:admin@mindfield.local}
 }
 
-(common) {
-    handle_path /api/* {
-        reverse_proxy kong:8000
-    }
-    handle_path /docs/* {
-        reverse_proxy mkdocs:8000
-    }
-    handle_path /grafana/* {
-        reverse_proxy grafana:3000
-    }
-    handle_path /grapesjs/* {
-        reverse_proxy grapesjs:3000
-    }
-    handle_path /keycloak/* {
-        reverse_proxy keycloak:8080
-    }
-    handle_path /minio/* {
-        reverse_proxy minio:9000
-    }
-    handle_path /minio-console/* {
-        reverse_proxy minio:9001
-    }
-    handle_path /mailhog/* {
-        reverse_proxy mailhog:8025
-    }
-    handle_path /prometheus/* {
-        reverse_proxy prometheus:9090
-    }
-    handle_path /loki/* {
-        reverse_proxy loki:3100
-    }
-    handle_path /jaeger/* {
-        reverse_proxy jaeger:16686
-    }
-    handle_path /alertmanager/* {
-        reverse_proxy alertmanager:9093
-    }
-    handle_path /rabbitmq/* {
-        reverse_proxy rabbitmq:15672
-    }
-    handle_path /opensearch/* {
-        reverse_proxy opensearch:9200
-    }
-    handle_path /opensearch-dashboards/* {
-        reverse_proxy opensearch-dashboards:5601
-    }
-    handle_path /otel-collector/* {
-        reverse_proxy otel-collector:8888
-    }
-    handle_path /node-exporter/* {
-        reverse_proxy node-exporter:9100
-    }
-    handle_path /blackbox-exporter/* {
-        reverse_proxy blackbox-exporter:9115
-    }
-    handle_path /uptime-kuma/* {
-        reverse_proxy uptime-kuma:3001
-    }
-    handle_path /trivy/* {
-        reverse_proxy trivy:8080
-    }
-    handle_path /step-ca/* {
-        reverse_proxy step-ca:9443
-    }
-    handle_path /postgrest/* {
-        reverse_proxy postgrest:3000
-    }
-    handle_path /hasura/* {
-        reverse_proxy hasura:8080
-    }
-    handle_path /postgraphile/* {
-        reverse_proxy postgraphile:5000
-    }
-    handle_path /pgadmin/* {
-        reverse_proxy pgadmin:80
-    }
-    handle_path /prisma-studio/* {
-        reverse_proxy prisma-studio:5555
-    }
-    handle_path /swagger-ui/* {
-        reverse_proxy swagger-ui:3000
-    }
-    handle_path /redoc/* {
-        reverse_proxy redoc:3000
-    }
-    handle_path /storybook/* {
-        reverse_proxy storybook:6006
-    }
-    handle_path /sonarqube/* {
-        reverse_proxy sonarqube:9000
-    }
-    handle_path /gitea/* {
-        reverse_proxy gitea:3000
-    }
-    handle_path /redaction/* {
-        reverse_proxy redaction:3000
-    }
-    handle_path /render/* {
-        reverse_proxy render:3000
-    }
-    handle_path /transform/* {
-        reverse_proxy transform:3000
-    }
-    handle_path /submission/* {
-        reverse_proxy submission:3000
-    }
-    handle {
-        reverse_proxy web:3000
-    }
-}
-
+# Localhost development
+# Main web app
 localhost, 127.0.0.1 {
     tls internal
-    route {
-        rate_limit {remote.ip} 100r/m 10000 429
-        import common
-    }
+    reverse_proxy web:3000
     log {
         output file /var/log/caddy/access.log
         format json
     }
 }
 
-{$DOMAIN:mindfield.local} {
-    tls {$LETSENCRYPT_EMAIL}
-    route {
-        rate_limit {remote.ip} 1000r/m 10000 429
-        import common
+# Wildcard for all other localhost services
+*.localhost, *.127.0.0.1 {
+    tls internal
+    @api host api.localhost api.127.0.0.1
+    reverse_proxy @api kong:8000
+
+    @keycloak host keycloak.localhost keycloak.127.0.0.1
+    reverse_proxy @keycloak keycloak:8080
+
+    @minio host minio.localhost minio.127.0.0.1
+    reverse_proxy @minio minio:9000
+
+    @minio-console host minio-console.localhost minio-console.127.0.0.1
+    reverse_proxy @minio-console minio:9001
+
+    @mailhog host mailhog.localhost mailhog.127.0.0.1
+    reverse_proxy @mailhog mailhog:8025
+
+    @prometheus host prometheus.localhost prometheus.127.0.0.1
+    reverse_proxy @prometheus prometheus:9090
+
+    @loki host loki.localhost loki.127.0.0.1
+    reverse_proxy @loki loki:3100
+
+    @jaeger host jaeger.localhost jaeger.127.0.0.1
+    reverse_proxy @jaeger jaeger:16686
+
+    @alertmanager host alertmanager.localhost alertmanager.127.0.0.1
+    reverse_proxy @alertmanager alertmanager:9093
+
+    @rabbitmq host rabbitmq.localhost rabbitmq.127.0.0.1
+    reverse_proxy @rabbitmq rabbitmq:15672
+
+    @opensearch host opensearch.localhost opensearch.127.0.0.1
+    reverse_proxy @opensearch opensearch:9200
+
+    @opensearch-dashboards host opensearch-dashboards.localhost opensearch-dashboards.127.0.0.1
+    reverse_proxy @opensearch-dashboards opensearch-dashboards:5601
+
+    @otel-collector host otel-collector.localhost otel-collector.127.0.0.1
+    reverse_proxy @otel-collector otel-collector:8888
+
+    @node-exporter host node-exporter.localhost node-exporter.127.0.0.1
+    reverse_proxy @node-exporter node-exporter:9100
+
+    @blackbox-exporter host blackbox-exporter.localhost blackbox-exporter.127.0.0.1
+    reverse_proxy @blackbox-exporter blackbox-exporter:9115
+
+    @uptime-kuma host uptime-kuma.localhost uptime-kuma.127.0.0.1
+    reverse_proxy @uptime-kuma uptime-kuma:3001
+
+    @trivy host trivy.localhost trivy.127.0.0.1
+    reverse_proxy @trivy trivy:8080
+
+    @step-ca host step-ca.localhost step-ca.127.0.0.1
+    reverse_proxy @step-ca step-ca:9443
+
+    @hasura host hasura.localhost hasura.127.0.0.1
+    reverse_proxy @hasura hasura:8080
+
+    @postgraphile host postgraphile.localhost postgraphile.127.0.0.1
+    reverse_proxy @postgraphile postgraphile:5000
+
+    @pgadmin host pgadmin.localhost pgadmin.127.0.0.1
+    reverse_proxy @pgadmin pgadmin:80
+
+    @prisma-studio host prisma-studio.localhost prisma-studio.127.0.0.1
+    reverse_proxy @prisma-studio prisma-studio:5555
+
+    @storybook host storybook.localhost storybook.127.0.0.1
+    reverse_proxy @storybook storybook:6006
+
+    @sonarqube host sonarqube.localhost sonarqube.127.0.0.1
+    reverse_proxy @sonarqube sonarqube:9000
+
+    # Default for services on port 3000
+    reverse_proxy {
+        to {host.labels.0}:3000
     }
+}
+
+# Production
+# Main web app and all subdomains for multi-SAN certificate
+{$DOMAIN:mindfield.local},
+api.{$DOMAIN:mindfield.local},
+docs.{$DOMAIN:mindfield.local},
+grafana.{$DOMAIN:mindfield.local},
+grapesjs.{$DOMAIN:mindfield.local},
+keycloak.{$DOMAIN:mindfield.local},
+minio.{$DOMAIN:mindfield.local},
+minio-console.{$DOMAIN:mindfield.local},
+mailhog.{$DOMAIN:mindfield.local},
+prometheus.{$DOMAIN:mindfield.local},
+loki.{$DOMAIN:mindfield.local},
+jaeger.{$DOMAIN:mindfield.local},
+alertmanager.{$DOMAIN:mindfield.local},
+rabbitmq.{$DOMAIN:mindfield.local},
+opensearch.{$DOMAIN:mindfield.local},
+opensearch-dashboards.{$DOMAIN:mindfield.local},
+otel-collector.{$DOMAIN:mindfield.local},
+node-exporter.{$DOMAIN:mindfield.local},
+blackbox-exporter.{$DOMAIN:mindfield.local},
+uptime-kuma.{$DOMAIN:mindfield.local},
+trivy.{$DOMAIN:mindfield.local},
+step-ca.{$DOMAIN:mindfield.local},
+hasura.{$DOMAIN:mindfield.local},
+postgraphile.{$DOMAIN:mindfield.local},
+pgadmin.{$DOMAIN:mindfield.local},
+prisma-studio.{$DOMAIN:mindfield.local},
+storybook.{$DOMAIN:mindfield.local},
+sonarqube.{$DOMAIN:mindfield.local},
+gitea.{$DOMAIN:mindfield.local},
+redaction.{$DOMAIN:mindfield.local},
+render.{$DOMAIN:mindfield.local},
+transform.{$DOMAIN:mindfield.local},
+submission.{$DOMAIN:mindfield.local} {
+    tls {$LETSENCRYPT_EMAIL}
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
         X-Content-Type-Options "nosniff"
@@ -142,5 +141,88 @@ localhost, 127.0.0.1 {
     log {
         output stdout
         format json
+    }
+
+    @web_app host {$DOMAIN:mindfield.local}
+    reverse_proxy @web_app web:3000
+
+    @api_prod host api.{$DOMAIN:mindfield.local}
+    reverse_proxy @api_prod kong:8000
+
+    @docs_prod host docs.{$DOMAIN:mindfield.local}
+    reverse_proxy @docs_prod mkdocs:8000
+
+    @keycloak_prod host keycloak.{$DOMAIN:mindfield.local}
+    reverse_proxy @keycloak_prod keycloak:8080
+
+    @minio_prod host minio.{$DOMAIN:mindfield.local}
+    reverse_proxy @minio_prod minio:9000
+
+    @minio-console_prod host minio-console.{$DOMAIN:mindfield.local}
+    reverse_proxy @minio-console_prod minio:9001
+
+    @mailhog_prod host mailhog.{$DOMAIN:mindfield.local}
+    reverse_proxy @mailhog_prod mailhog:8025
+
+    @prometheus_prod host prometheus.{$DOMAIN:mindfield.local}
+    reverse_proxy @prometheus_prod prometheus:9090
+
+    @loki_prod host loki.{$DOMAIN:mindfield.local}
+    reverse_proxy @loki_prod loki:3100
+
+    @jaeger_prod host jaeger.{$DOMAIN:mindfield.local}
+    reverse_proxy @jaeger_prod jaeger:16686
+
+    @alertmanager_prod host alertmanager.{$DOMAIN:mindfield.local}
+    reverse_proxy @alertmanager_prod alertmanager:9093
+
+    @rabbitmq_prod host rabbitmq.{$DOMAIN:mindfield.local}
+    reverse_proxy @rabbitmq_prod rabbitmq:15672
+
+    @opensearch_prod host opensearch.{$DOMAIN:mindfield.local}
+    reverse_proxy @opensearch_prod opensearch:9200
+
+    @opensearch-dashboards_prod host opensearch-dashboards.{$DOMAIN:mindfield.local}
+    reverse_proxy @opensearch-dashboards_prod opensearch-dashboards:5601
+
+    @otel-collector_prod host otel-collector.{$DOMAIN:mindfield.local}
+    reverse_proxy @otel-collector_prod otel-collector:8888
+
+    @node-exporter_prod host node-exporter.{$DOMAIN:mindfield.local}
+    reverse_proxy @node-exporter_prod node-exporter:9100
+
+    @blackbox-exporter_prod host blackbox-exporter.{$DOMAIN:mindfield.local}
+    reverse_proxy @blackbox-exporter_prod blackbox-exporter:9115
+
+    @uptime-kuma_prod host uptime-kuma.{$DOMAIN:mindfield.local}
+    reverse_proxy @uptime-kuma_prod uptime-kuma:3001
+
+    @trivy_prod host trivy.{$DOMAIN:mindfield.local}
+    reverse_proxy @trivy_prod trivy:8080
+
+    @step-ca_prod host step-ca.{$DOMAIN:mindfield.local}
+    reverse_proxy @step-ca_prod step-ca:9443
+
+    @hasura_prod host hasura.{$DOMAIN:mindfield.local}
+    reverse_proxy @hasura_prod hasura:8080
+
+    @postgraphile_prod host postgraphile.{$DOMAIN:mindfield.local}
+    reverse_proxy @postgraphile_prod postgraphile:5000
+
+    @pgadmin_prod host pgadmin.{$DOMAIN:mindfield.local}
+    reverse_proxy @pgadmin_prod pgadmin:80
+
+    @prisma-studio_prod host prisma-studio.{$DOMAIN:mindfield.local}
+    reverse_proxy @prisma-studio_prod prisma-studio:5555
+
+    @storybook_prod host storybook.{$DOMAIN:mindfield.local}
+    reverse_proxy @storybook_prod storybook:6006
+
+    @sonarqube_prod host sonarqube.{$DOMAIN:mindfield.local}
+    reverse_proxy @sonarqube_prod sonarqube:9000
+
+    # Default for services on port 3000
+    reverse_proxy {
+        to {host.labels.0}:3000
     }
 }
