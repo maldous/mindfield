@@ -9,8 +9,6 @@ MindField is a personality profiling app built with React. It helps users explor
 - backup: Daily Postgres dump & retention cleanup.
 - blackbox-exporter: Probes HTTP/TCP endpoints for uptime checks.
 - caddy: TLS-terminating reverse proxy for all web services.
-- [gitea](https://gitea.mindfield.local/): Self-hosted Git service.
-- gitea-db: PostgreSQL store for Gitea.
 - [grafana](https://grafana.mindfield.local/): Dashboard UI for Prometheus metrics.
 - [grapesjs](https://grapesjs.mindfield.local/): Headless editor service for dynamic forms.
 - [hasura](https://hasura.mindfield.local/): Instant GraphQL API on Postgres.

@@ -665,42 +665,9 @@ services:
     cpus: 1.0
     ports: ["3016:9000"]
 
-  gitea-db:
-    env_file:
-      - .env
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: ${GITEA_POSTGRES_DB}
-      POSTGRES_USER: ${GITEA_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${GITEA_POSTGRES_PASSWORD}
-    volumes: [gitea_db_data:/var/lib/postgresql/data]
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gitea"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    mem_limit: 256m
-    cpus: 0.5
-
-  gitea:
-    env_file:
-      - .env
-    image: gitea/gitea:latest
-    depends_on:
-      gitea-db: { condition: service_healthy }
-    volumes:
-      - gitea_data:/data
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    mem_limit: 512m
-    cpus: 0.5
-    ports: ["3017:3000", "2222:22"]
-
 volumes:
   caddy_config:
   caddy_data:
-  gitea_data:
-  gitea_db_data:
   grafana_data:
   keycloak_data:
   kong_db_data:

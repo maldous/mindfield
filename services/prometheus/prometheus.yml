@@ -155,12 +155,6 @@ scrape_configs:
     metrics_path: "/api/monitoring/metrics"
     scrape_interval: 60s
 
-  - job_name: "gitea"
-    static_configs:
-      - targets: ["gitea:3000"]
-    metrics_path: "/metrics"
-    scrape_interval: 30s
-
   # Blackbox Exporter - HTTP probes for new services
   - job_name: "blackbox-dev-tools"
     metrics_path: /probe
@@ -177,7 +171,6 @@ scrape_configs:
           - http://redoc:80
           - http://storybook:6006
           - http://sonarqube:9000
-          - http://gitea:3000
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
