@@ -492,6 +492,8 @@ services:
     depends_on:
       kong-database: { condition: service_healthy }
     restart: "no"
+    networks:
+      - backend
 
   kong:
     env_file:
