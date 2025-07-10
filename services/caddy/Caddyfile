@@ -28,7 +28,7 @@ localhost, 127.0.0.1 {
     reverse_proxy @minio minio:9000
 
     @minio-console host minio-console.localhost minio-console.127.0.0.1
-    reverse_proxy @minio-console minio-console:9001
+    reverse_proxy @minio-console minio:9001
 
     @mailhog host mailhog.localhost mailhog.127.0.0.1
     reverse_proxy @mailhog mailhog:8025
@@ -90,6 +90,18 @@ localhost, 127.0.0.1 {
     @sonarqube host sonarqube.localhost sonarqube.127.0.0.1
     reverse_proxy @sonarqube sonarqube:9000
 
+    @gitea host gitea.localhost gitea.127.0.0.1
+    reverse_proxy @gitea gitea:3000
+
+    @swagger-ui host swagger-ui.localhost swagger-ui.127.0.0.1
+    reverse_proxy @swagger-ui swagger-ui:8080
+
+    @redoc host redoc.localhost redoc.127.0.0.1
+    reverse_proxy @redoc redoc:80
+
+    @postgrest host postgrest.localhost postgrest.127.0.0.1
+    reverse_proxy @postgrest postgrest:3000
+
     # Default for services on port 3000
     reverse_proxy {
         to {host.labels.0}:3000
@@ -131,7 +143,11 @@ redaction.{$DOMAIN:mindfield.local},
 render.{$DOMAIN:mindfield.local},
 transform.{$DOMAIN:mindfield.local},
 submission.{$DOMAIN:mindfield.local},
-kong.{$DOMAIN:mindfield.local} {
+kong.{$DOMAIN:mindfield.local},
+swagger-ui.{$DOMAIN:mindfield.local},
+redoc.{$DOMAIN:mindfield.local},
+prisma-studio.{$DOMAIN:mindfield.local},
+postgrest.{$DOMAIN:mindfield.local} {
     tls {$LETSENCRYPT_EMAIL}
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -240,6 +256,15 @@ kong.{$DOMAIN:mindfield.local} {
 
     @submission_prod host submission.{$DOMAIN:mindfield.local}
     reverse_proxy @submission_prod submission:3000
+
+    @swagger-ui_prod host swagger-ui.{$DOMAIN:mindfield.local}
+    reverse_proxy @swagger-ui_prod swagger-ui:8080
+
+    @redoc_prod host redoc.{$DOMAIN:mindfield.local}
+    reverse_proxy @redoc_prod redoc:80
+
+    @postgrest_prod host postgrest.{$DOMAIN:mindfield.local}
+    reverse_proxy @postgrest_prod postgrest:3000
 
     # Default for services on port 3000
     reverse_proxy {
