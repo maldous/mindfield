@@ -1,20 +1,15 @@
 #!/usr/bin/env sh
+set -euo pipefail
 
-set -e
+mkdir -p "$BACKUP_DIR"
 
-echo "BACKUP_DIR=${BACKUP_DIR}, INTERVAL=${BACKUP_INTERVAL}s, RETENTION=${RETENTION_DAYS}d"
+TS=$(date +%Y%m%d_%H%M%S)
+DB_NAME=$(printf '%s\n' "$DATABASE_URL" | sed -E 's#.*/([^/?]+).*#\1#')
+OUT_FILE="${BACKUP_DIR}/${DB_NAME}_${TS}.sql"
 
-while true; do
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] Sleeping for ${BACKUP_INTERVAL}s"
-  sleep "$BACKUP_INTERVAL"
+echo "[$(date '+%F %T')] Dumping ${DB_NAME} → ${OUT_FILE}.${COMPRESS_CMD:+$COMPRESS_CMD}"
+pg_dump --dbname="$DATABASE_URL" --format=custom | ${COMPRESS_CMD:-cat} > "${OUT_FILE}${COMPRESS_CMD:+.$(basename $COMPRESS_CMD)}"
 
-  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-  FILE_TPL='${BACKUP_DIR}/backup_${TIMESTAMP}.sql'
-  BACKUP_FILE=$(echo "$FILE_TPL" | envsubst)
+echo "[$(date '+%F %T')] Removing dumps older than ${RETENTION_DAYS} day(s)"
+find "$BACKUP_DIR" -type f -name '*.sql*' -mtime +"$RETENTION_DAYS" -delete
 
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] Creating dump $BACKUP_FILE"
-  pg_dumpall > "$BACKUP_FILE"
-
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removing backups older than ${RETENTION_DAYS} days"
-  find "$BACKUP_DIR" -name '*.sql' -mtime +"$RETENTION_DAYS" -exec rm {} \;
-done

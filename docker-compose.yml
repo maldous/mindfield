@@ -58,7 +58,13 @@ services:
       - /tmp
 
   backup:
-    image: postgres:15-alpine
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.backup
+      cache_from:
+        - type=registry,ref=localhost:5001/mindfield-cache
+      cache_to:
+        - type=registry,ref=localhost:5001/mindfield-cache,mode=max
     depends_on:
       postgres:
         condition: service_healthy
@@ -70,7 +76,7 @@ services:
         bind:
           create_host_path: true
       - type: bind
-        source: ./backup.sh
+        source: ./services/backup/backup.sh
         target: /backup.sh
         bind:
           create_host_path: true
@@ -837,8 +843,6 @@ services:
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.redisinsight
-      args:
-        NODE_MAJOR: ${NODE_MAJOR}
       cache_from:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
