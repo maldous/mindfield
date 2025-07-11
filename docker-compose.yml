@@ -65,7 +65,7 @@ services:
         required: true
     volumes:
       - type: bind
-        source: ./backups
+        source: ./database/backups
         target: /backups
         bind:
           create_host_path: true
