@@ -1,3 +1,11 @@
+---
+
+x-build-env:
+
+  BUILDKIT_INLINE_CACHE: "1"
+  BUILDKIT_PROGRESS: plain
+  DOCKER_BUILDKIT: "1"
+
 name: mindfield
 
 services:
@@ -1226,10 +1234,3 @@ volumes:
 
   web_node_modules:
     name: mindfield_web_node_modules
-
-x-build-env:
-
-  BUILDKIT_INLINE_CACHE: "1"
-  BUILDKIT_PROGRESS: plain
-  DOCKER_BUILDKIT: "1"
-
