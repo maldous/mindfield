@@ -69,9 +69,6 @@ localhost, 127.0.0.1 {
     @trivy host trivy.localhost trivy.127.0.0.1
     reverse_proxy @trivy trivy:8080
 
-    @step-ca host step-ca.localhost step-ca.127.0.0.1
-    reverse_proxy @step-ca step-ca:9443
-
     @hasura host hasura.localhost hasura.127.0.0.1
     reverse_proxy @hasura hasura:8080
 
@@ -143,7 +140,6 @@ node-exporter.{$DOMAIN:mindfield.local},
 blackbox-exporter.{$DOMAIN:mindfield.local},
 uptime-kuma.{$DOMAIN:mindfield.local},
 trivy.{$DOMAIN:mindfield.local},
-step-ca.{$DOMAIN:mindfield.local},
 hasura.{$DOMAIN:mindfield.local},
 postgraphile.{$DOMAIN:mindfield.local},
 pgadmin.{$DOMAIN:mindfield.local},
@@ -233,9 +229,6 @@ postgrest.{$DOMAIN:mindfield.local} {
 
     @trivy_prod host trivy.{$DOMAIN:mindfield.local}
     reverse_proxy @trivy_prod trivy:8080
-
-    @step-ca_prod host step-ca.{$DOMAIN:mindfield.local}
-    reverse_proxy @step-ca_prod step-ca:9443
 
     @hasura_prod host hasura.{$DOMAIN:mindfield.local}
     reverse_proxy @hasura_prod hasura:8080

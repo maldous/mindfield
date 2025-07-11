@@ -118,9 +118,6 @@ services:
   trivy:
     ports: ["8004:8080"]
 
-  step-ca:
-    ports: ["9443:9443"]
-
   # Kong API Gateway
   kong:
     ports: ["8002:8000", "8444:8443", "8003:8001", "8445:8444"]

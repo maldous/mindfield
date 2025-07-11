@@ -145,7 +145,6 @@ http://localhost:3017  - Keycloak
 
 - **[rabbitmq](https://rabbitmq.aldous.info/)** - Message broker
 - **[mailhog](https://mailhog.aldous.info/)** - Email testing
-- **[step-ca](https://step-ca.aldous.info/)** - Internal certificate authority
 - **[trivy](https://trivy.aldous.info/)** - Security scanning
 - **[otel-collector](https://otel-collector.aldous.info/)** - OpenTelemetry collector
 
