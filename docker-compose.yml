@@ -259,8 +259,6 @@ services:
 
   redis-insight:
     image: redis/redisinsight:latest
-    ports:
-      - "8001:8001"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8001"]
       interval: 10s
@@ -400,8 +398,6 @@ services:
     networks:
       - frontend
       - monitoring
-    # Remove external port - will be accessed via Caddy
-    # ports: ["3007:3000"]
 
   loki:
     env_file:
