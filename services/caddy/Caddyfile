@@ -31,7 +31,7 @@ localhost, 127.0.0.1 {
     reverse_proxy @mailhog mailhog:8025
 
     @redis-insight host redis-insight.localhost redis-insight.127.0.0.1
-    reverse_proxy @redis-insight redis-insight:8025
+    reverse_proxy @redis-insight redis-insight:8001
 
     @prometheus host prometheus.localhost prometheus.127.0.0.1
     reverse_proxy @prometheus prometheus:9090
@@ -94,7 +94,7 @@ localhost, 127.0.0.1 {
     reverse_proxy @gitea gitea:3000
 
     @swagger-ui host swagger-ui.localhost swagger-ui.127.0.0.1
-    reverse_proxy @swagger-ui swagger-ui:8080
+    reverse_proxy @swagger-ui swagger-ui:80
 
     @redoc host redoc.localhost redoc.127.0.0.1
     reverse_proxy @redoc redoc:80
@@ -193,7 +193,7 @@ postgrest.{$DOMAIN:mindfield.local} {
     reverse_proxy @mailhog_prod mailhog:8025
 
     @redis-insight_prod host redis-insight.{$DOMAIN:mindfield.local}
-    reverse_proxy @redis-insight_prod redis-insight:8025
+    reverse_proxy @redis-insight_prod redis-insight:8001
 
     @prometheus_prod host prometheus.{$DOMAIN:mindfield.local}
     reverse_proxy @prometheus_prod prometheus:9090
@@ -277,7 +277,7 @@ postgrest.{$DOMAIN:mindfield.local} {
     reverse_proxy @submission_prod submission:3000
 
     @swagger-ui_prod host swagger-ui.{$DOMAIN:mindfield.local}
-    reverse_proxy @swagger-ui_prod swagger-ui:8080
+    reverse_proxy @swagger-ui_prod swagger-ui:80
 
     @redoc_prod host redoc.{$DOMAIN:mindfield.local}
     reverse_proxy @redoc_prod redoc:80
