@@ -65,10 +65,10 @@ services:
     ports: ["3012:3000"]
 
   swagger-ui:
-    ports: ["3013:80"]
+    ports: ["3013:3000"]
 
   redoc:
-    ports: ["3014:80"]
+    ports: ["3014:3000"]
 
   # Development Tools
   storybook:
@@ -113,7 +113,7 @@ services:
 
   # Monitoring Infrastructure
   uptime-kuma:
-    ports: ["3020:3001"]
+    ports: ["3020:3000"]
 
   trivy:
     ports: ["8004:8080"]
