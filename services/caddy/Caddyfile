@@ -64,7 +64,7 @@ localhost, 127.0.0.1 {
     reverse_proxy @blackbox-exporter blackbox-exporter:9115
 
     @uptime-kuma host uptime-kuma.localhost uptime-kuma.127.0.0.1
-    reverse_proxy @uptime-kuma uptime-kuma:3001
+    reverse_proxy @uptime-kuma uptime-kuma:3000
 
     @trivy host trivy.localhost trivy.127.0.0.1
     reverse_proxy @trivy trivy:8080
@@ -93,11 +93,14 @@ localhost, 127.0.0.1 {
     @gitea host gitea.localhost gitea.127.0.0.1
     reverse_proxy @gitea gitea:3000
 
+    @grafana host grafana.localhost grafana.127.0.0.1
+    reverse_proxy @grafana grafana:3000
+
     @swagger-ui host swagger-ui.localhost swagger-ui.127.0.0.1
-    reverse_proxy @swagger-ui swagger-ui:80
+    reverse_proxy @swagger-ui swagger-ui:3000
 
     @redoc host redoc.localhost redoc.127.0.0.1
-    reverse_proxy @redoc redoc:80
+    reverse_proxy @redoc redoc:3000
 
     @postgrest host postgrest.localhost postgrest.127.0.0.1
     reverse_proxy @postgrest postgrest:3000
@@ -226,7 +229,7 @@ postgrest.{$DOMAIN:mindfield.local} {
     reverse_proxy @blackbox-exporter_prod blackbox-exporter:9115
 
     @uptime-kuma_prod host uptime-kuma.{$DOMAIN:mindfield.local}
-    reverse_proxy @uptime-kuma_prod uptime-kuma:3001
+    reverse_proxy @uptime-kuma_prod uptime-kuma:3000
 
     @trivy_prod host trivy.{$DOMAIN:mindfield.local}
     reverse_proxy @trivy_prod trivy:8080
@@ -255,6 +258,9 @@ postgrest.{$DOMAIN:mindfield.local} {
     @gitea_prod host gitea.{$DOMAIN:mindfield.local}
     reverse_proxy @gitea_prod gitea:3000
 
+    @grafana_prod host grafana.{$DOMAIN:mindfield.local}
+    reverse_proxy @grafana_prod grafana:3000
+
     @presidio-analyzer_prod host presidio-analyzer.{$DOMAIN:mindfield.local}
     reverse_proxy @presidio-analyzer_prod presidio-analyzer:3000
 
@@ -277,10 +283,10 @@ postgrest.{$DOMAIN:mindfield.local} {
     reverse_proxy @submission_prod submission:3000
 
     @swagger-ui_prod host swagger-ui.{$DOMAIN:mindfield.local}
-    reverse_proxy @swagger-ui_prod swagger-ui:80
+    reverse_proxy @swagger-ui_prod swagger-ui:3000
 
     @redoc_prod host redoc.{$DOMAIN:mindfield.local}
-    reverse_proxy @redoc_prod redoc:80
+    reverse_proxy @redoc_prod redoc:3000
 
     @postgrest_prod host postgrest.{$DOMAIN:mindfield.local}
     reverse_proxy @postgrest_prod postgrest:3000
