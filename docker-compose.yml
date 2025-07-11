@@ -664,17 +664,6 @@ services:
       - backend
       - frontend
 
-  step-ca:
-    env_file:
-      - .env
-    image: smallstep/step-ca:latest
-    volumes: [step_ca_data:/home/step]
-    mem_limit: 128m
-    cpus: 0.25
-    networks:
-      - backend
-      - frontend
-
   postgrest:
     env_file:
       - .env
