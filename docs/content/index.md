@@ -206,27 +206,28 @@ make reset         # Complete reset
 ### Development Ports (make dev)
 
 ```
-Web App:           http://localhost:3000
-API:               http://localhost:3001
-Submission:        http://localhost:3002
-Transform:         http://localhost:3003
-Render:            http://localhost:3004
-Presidio Analyzer: http://localhost:3005
+Web App:             http://localhost:3000
+API:                 http://localhost:3001
+Submission:          http://localhost:3002
+Transform:           http://localhost:3003
+Render:              http://localhost:3004
+Presidio Analyzer:   http://localhost:3005
 Presidio Anonymizer: http://localhost:3006
-Presidio Image:    http://localhost:3007
-GrapesJS:          http://localhost:3008
-Grafana:           http://localhost:3009
-Hasura:            http://localhost:3010
-PostGraphile:      http://localhost:3011
-PostgREST:         http://localhost:3012
-Swagger UI:        http://localhost:3013
-ReDoc:             http://localhost:3014
-Storybook:         http://localhost:3015
-PgAdmin:           http://localhost:3016
-Prisma Studio:     http://localhost:3017
-SonarQube:         http://localhost:3018
-Keycloak:          http://localhost:3019
-Uptime Kuma:       http://localhost:3020
+Presidio Image:      http://localhost:3007
+GrapesJS:            http://localhost:3008
+Grafana:             http://localhost:3009
+Hasura:              http://localhost:3010
+PostGraphile:        http://localhost:3011
+PostgREST:           http://localhost:3012
+Swagger UI:          http://localhost:3013
+ReDoc:               http://localhost:3014
+Storybook:           http://localhost:3015
+PgAdmin:             http://localhost:3016
+Prisma Studio:       http://localhost:3017
+SonarQube:           http://localhost:3018
+Keycloak:            http://localhost:3019
+Uptime Kuma:         http://localhost:3020
+Redis Insight:       http://localhost:3021
 ```
 
 ## Operations
