@@ -54,9 +54,6 @@ localhost, 127.0.0.1 {
     @opensearch-dashboards host opensearch-dashboards.localhost opensearch-dashboards.127.0.0.1
     reverse_proxy @opensearch-dashboards opensearch-dashboards:5601
 
-    @otel-collector host otel-collector.localhost otel-collector.127.0.0.1
-    reverse_proxy @otel-collector otel-collector:8888
-
     @node-exporter host node-exporter.localhost node-exporter.127.0.0.1
     reverse_proxy @node-exporter node-exporter:9100
 
@@ -135,7 +132,6 @@ alertmanager.{$DOMAIN:mindfield.local},
 rabbitmq.{$DOMAIN:mindfield.local},
 opensearch.{$DOMAIN:mindfield.local},
 opensearch-dashboards.{$DOMAIN:mindfield.local},
-otel-collector.{$DOMAIN:mindfield.local},
 node-exporter.{$DOMAIN:mindfield.local},
 blackbox-exporter.{$DOMAIN:mindfield.local},
 uptime-kuma.{$DOMAIN:mindfield.local},
@@ -214,9 +210,6 @@ postgrest.{$DOMAIN:mindfield.local} {
 
     @opensearch-dashboards_prod host opensearch-dashboards.{$DOMAIN:mindfield.local}
     reverse_proxy @opensearch-dashboards_prod opensearch-dashboards:5601
-
-    @otel-collector_prod host otel-collector.{$DOMAIN:mindfield.local}
-    reverse_proxy @otel-collector_prod otel-collector:8888
 
     @node-exporter_prod host node-exporter.{$DOMAIN:mindfield.local}
     reverse_proxy @node-exporter_prod node-exporter:9100
