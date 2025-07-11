@@ -2,6 +2,72 @@
 
 MindField is a personality profiling app built with React. It helps users explore their traits through interactive questions and visual insights—like stepping into the landscape of your own mind.
 
+## Services
+
+### Core Application Services
+
+- **[web](https://aldous.info/)** - Next.js frontend for MindField
+- **[api](https://api.aldous.info/)** - Kong API Gateway (routes to internal services)
+- **[docs](https://docs.aldous.info/)** - This documentation site
+
+### Data Processing Services
+
+- **[submission](https://submission.aldous.info/)** - Handles form submissions
+- **[transform](https://transform.aldous.info/)** - Data transformation service
+- **[render](https://render.aldous.info/)** - PDF/report generation
+- **[presidio-analyzer](https://presidio-analyzer.aldous.info/)** - PII detection service
+- **[presidio-anonymizer](https://presidio-anonymizer.aldous.info/)** - PII anonymization service
+- **[presidio-image](https://presidio-image.aldous.info/)** - Image PII redaction service
+- **[grapesjs](https://grapesjs.aldous.info/)** - Visual editor service
+
+### Authentication & Identity
+
+- **[keycloak](https://keycloak.aldous.info/)** - OAuth2/OpenID Connect identity provider
+- **[kong](https://kong.aldous.info/)** - API gateway admin interface
+
+### Data Storage
+
+- **postgres** - Primary database (internal only)
+- **[pgadmin](https://pgadmin.aldous.info/)** - PostgreSQL admin interface
+- **redis** - Cache and session store
+- **[redis-insight](https://redis-insight.aldous.info/)** - Official GUI by Redis
+- **minio** - S3-compatible object storage (internal only)
+- **[minio-console](https://minio-console.aldous.info/)** - MinIO management UI
+
+### API Development Tools
+
+- **[hasura](https://hasura.aldous.info/)** - Instant GraphQL API
+- **[postgraphile](https://postgraphile.aldous.info/)** - GraphQL API for PostgreSQL
+- **[postgrest](https://postgrest.aldous.info/)** - REST API for PostgreSQL
+- **[swagger-ui](https://swagger-ui.aldous.info/)** - Interactive API documentation
+- **[redoc](https://redoc.aldous.info/)** - API documentation
+- **[prisma-studio](https://prisma-studio.aldous.info/)** - Database ORM UI
+
+### Monitoring & Observability
+
+- **[grafana](https://grafana.aldous.info/)** - Metrics dashboards
+- **[prometheus](https://prometheus.aldous.info/)** - Metrics collection
+- **[loki](https://loki.aldous.info/)** - Log aggregation
+- **[jaeger](https://jaeger.aldous.info/)** - Distributed tracing
+- **[alertmanager](https://alertmanager.aldous.info/)** - Alert management
+- **[uptime-kuma](https://uptime-kuma.aldous.info/)** - Uptime monitoring
+
+### Search & Analytics
+
+- **[opensearch](https://opensearch.aldous.info/)** - Search and analytics
+- **[opensearch-dashboards](https://opensearch-dashboards.aldous.info/)** - OpenSearch UI
+
+### Development Tools
+
+- **[storybook](https://storybook.aldous.info/)** - Component library
+- **[sonarqube](https://sonarqube.aldous.info/)** - Code quality analysis
+
+### Infrastructure Services
+
+- **[rabbitmq](https://rabbitmq.aldous.info/)** - Message broker
+- **[mailhog](https://mailhog.aldous.info/)** - Email testing
+- **[trivy](https://trivy.aldous.info/)** - Security scanning
+
 ## Quick Start
 
 ### Prerequisites
@@ -80,73 +146,6 @@ http://localhost:3001  - API
 http://localhost:3007  - Grafana
 http://localhost:3017  - Keycloak
 ```
-
-## Services
-
-### Core Application Services
-
-- **[web](https://aldous.info/)** - Next.js frontend for MindField
-- **[api](https://api.aldous.info/)** - Kong API Gateway (routes to internal services)
-- **[docs](https://docs.aldous.info/)** - This documentation site
-
-### Data Processing Services
-
-- **[submission](https://submission.aldous.info/)** - Handles form submissions
-- **[transform](https://transform.aldous.info/)** - Data transformation service
-- **[render](https://render.aldous.info/)** - PDF/report generation
-- **[presidio-analyzer](https://presidio-analyzer.aldous.info/)** - PII detection service
-- **[presidio-anonymizer](https://presidio-anonymizer.aldous.info/)** - PII anonymization service
-- **[presidio-image](https://presidio-image.aldous.info/)** - Image PII redaction service
-- **[grapesjs](https://grapesjs.aldous.info/)** - Visual editor service
-
-### Authentication & Identity
-
-- **[keycloak](https://keycloak.aldous.info/)** - OAuth2/OpenID Connect identity provider
-- **[kong](https://kong.aldous.info/)** - API gateway admin interface
-
-### Data Storage
-
-- **postgres** - Primary database (internal only)
-- **[pgadmin](https://pgadmin.aldous.info/)** - PostgreSQL admin interface
-- **redis** - Cache and session store
-- **[redis-insight](https://redis-insight.aldous.info/)** - Official GUI by Redis
-- **minio** - S3-compatible object storage (internal only)
-- **[minio-console](https://minio-console.aldous.info/)** - MinIO management UI
-
-### API Development Tools
-
-- **[hasura](https://hasura.aldous.info/)** - Instant GraphQL API
-- **[postgraphile](https://postgraphile.aldous.info/)** - GraphQL API for PostgreSQL
-- **[postgrest](https://postgrest.aldous.info/)** - REST API for PostgreSQL
-- **[swagger-ui](https://swagger-ui.aldous.info/)** - Interactive API documentation
-- **[redoc](https://redoc.aldous.info/)** - API documentation
-- **[prisma-studio](https://prisma-studio.aldous.info/)** - Database ORM UI
-
-### Monitoring & Observability
-
-- **[grafana](https://grafana.aldous.info/)** - Metrics dashboards
-- **[prometheus](https://prometheus.aldous.info/)** - Metrics collection
-- **[loki](https://loki.aldous.info/)** - Log aggregation
-- **[jaeger](https://jaeger.aldous.info/)** - Distributed tracing
-- **[alertmanager](https://alertmanager.aldous.info/)** - Alert management
-- **[uptime-kuma](https://uptime-kuma.aldous.info/)** - Uptime monitoring
-
-### Search & Analytics
-
-- **[opensearch](https://opensearch.aldous.info/)** - Search and analytics
-- **[opensearch-dashboards](https://opensearch-dashboards.aldous.info/)** - OpenSearch UI
-
-### Development Tools
-
-- **[storybook](https://storybook.aldous.info/)** - Component library
-- **[sonarqube](https://sonarqube.aldous.info/)** - Code quality analysis
-
-### Infrastructure Services
-
-- **[rabbitmq](https://rabbitmq.aldous.info/)** - Message broker
-- **[mailhog](https://mailhog.aldous.info/)** - Email testing
-- **[trivy](https://trivy.aldous.info/)** - Security scanning
-- **[otel-collector](https://otel-collector.aldous.info/)** - OpenTelemetry collector
 
 ## Configuration
 
