@@ -1,0 +1,11 @@
+FROM redis/redisinsight:latest
+
+USER root
+
+RUN \
+    --mount=type=cache,id=apk-cache,target=/var/cache/apk \
+    apk add --no-cache \
+    libsecret
+
+RUN \
+  mkdir -p /usr/src/app/redisinsight/api/dist/logs
