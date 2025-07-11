@@ -557,6 +557,10 @@ services:
         - localhost
         - -p
         - "5432"
+        - -U
+        - "${DB_USER}"     
+        - -d
+        - "${DB_NAME}"     
       timeout: 5s
       interval: 10s
       retries: 5
@@ -634,6 +638,8 @@ services:
       - random_page_cost=1.1
       - -c
       - effective_io_concurrency=200
+      - -c
+      - password_encryption=md5
     healthcheck:
       test:
         - CMD-SHELL
