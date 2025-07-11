@@ -125,7 +125,7 @@ base-image: docker-config
 	-f dockerfiles/Dockerfile.base \
 	-t $(REGISTRY_CACHE)/base-deps:$(NODE_MAJOR) .
 
-clean: stop
+clean: setup stop
 	@pnpm turbo run clean || true
 	@docker image prune -af || true
 	@docker buildx prune -af || true
