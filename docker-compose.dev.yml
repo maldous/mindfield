@@ -229,8 +229,8 @@ services:
   redis-insight:
     ports:
       - mode: ingress
-        target: 8001
-        published: "3021"
+        target: 5540
+        published: "5540"
         protocol: tcp
 
   redoc:
