@@ -146,5 +146,8 @@ vite.config.ts.timestamp-*
 pnpm-lock.yaml
 **/storybook-static
 sonar.json
-#/caddy/
+caddy/
+!services/caddy/
+!services/caddy/**
 database/init/01-init-keycloak.sql
+database/backups/
