@@ -102,7 +102,7 @@ services:
     ports: ["9000:9000", "9001:9001"]
 
   redis-insight:
-    ports: ["3020:8001"]
+    ports: ["3021:8001"]
 
   # Search & Analytics
   opensearch:
