@@ -259,7 +259,6 @@ services:
 
   redis-insight:
     image: redis/redisinsight:latest
-    container_name: redis-insight
     ports:
       - "8001:8001"
     healthcheck:
