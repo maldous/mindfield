@@ -124,7 +124,6 @@ scrape_configs:
       - targets:
           - postgres:5432
           - redis:6379
-          - rabbitmq:5672
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -146,11 +145,8 @@ scrape_configs:
       module: [http_2xx]
     static_configs:
       - targets:
-          - http://postgrest:3000
-          - http://hasura:8080/healthz
           - http://postgraphile:5000/graphiql
           - http://pgadmin:80
-          - http://prisma-studio:5555
           - http://swagger-ui:8080
           - http://redoc:80
           - http://storybook:6006

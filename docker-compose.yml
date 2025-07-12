@@ -1116,9 +1116,6 @@ volumes:
   prometheus_data:
     name: mindfield_prometheus_data
 
-  rabbitmq_data:
-    name: mindfield_rabbitmq_data
-
   redis_data:
     name: mindfield_redis_data
 
