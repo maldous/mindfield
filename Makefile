@@ -31,23 +31,23 @@ help:
 	@echo "make sonar           - Run SonarQube analysis"
 	@echo "make all             - Reset, setup & start"
 
-setup: ; @./setup.sh
-install: ; @if [ -d node_modules ]; then pnpm install --frozen-lockfile; else pnpm install; fi
-build: ; @pnpm turbo run build build-storybook
-test: ; @pnpm turbo run test -- --passWithNoTests --coverage --all
-lint: ; @pnpm turbo run lint
-format: ; @pnpm format
-tidy: ; @pnpm tidy
-type-check: ; @pnpm turbo run type-check
-logs: ; @docker compose ${DOCKER_COMPOSE} logs -f
-stop: ; @docker compose ${DOCKER_COMPOSE} down
-start: install build base-image ; docker compose ${DOCKER_COMPOSE} build --pull --parallel && docker compose ${DOCKER_COMPOSE} up -d --remove-orphans
-dev: install build base-image ; docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml build --pull --parallel && docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml up -d --remove-orphans
-stop-dev: ; @docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml down
-all: setup reset setup start
+setup: ; ./setup.sh
+install: ; if [ -d node_modules ]; then pnpm install --frozen-lockfile; else pnpm install; fi
+build: ; pnpm turbo run build build-storybook
+test: ; pnpm turbo run test -- --passWithNoTests --coverage --all
+lint: ; pnpm turbo run lint
+format: ; pnpm format
+tidy: ; pnpm tidy
+type-check: ; pnpm turbo run type-check
+logs: ; docker compose ${DOCKER_COMPOSE} logs -f
+stop: ; docker compose ${DOCKER_COMPOSE} down
+start: base-image build ; docker compose ${DOCKER_COMPOSE} build --pull --parallel && docker compose ${DOCKER_COMPOSE} up -d --remove-orphans
+dev: base-image build ; docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml build --pull --parallel && docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml up -d --remove-orphans
+stop-dev: ; docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml down
+all: setup reset setup install start
 
 sonar:
-	@if [ ! -f .env ]; then touch .env; fi; \
+	if [ ! -f .env ]; then touch .env; fi; \
 	if ! grep -q "SONAR_TOKEN" .env; then \
         token=$$(curl -s -u admin:admin -X POST 'http://localhost:3016/api/user_tokens/generate' -d name=admin | jq -r '.token'); \
         echo "SONAR_TOKEN=$$token" >> .env; \
@@ -63,13 +63,13 @@ sonar:
 	jq -r ".[] | select(.issueStatus != \"FIXED\") | \"\( (.component | split(\":\")[1])):\(.line) \(.message)\"" sonar.json'
 
 docker-config:
-	@if [ ! jq -e '.features.buildkit == true and .features["containerd-snapshotter"] == true and (.["registry-mirrors"] | index("http://localhost:5000"))' /etc/docker/daemon.json > /dev/null 2>&1 ]; then \
+	if [ ! jq -e '.features.buildkit == true and .features["containerd-snapshotter"] == true and (.["registry-mirrors"] | index("http://localhost:5000"))' /etc/docker/daemon.json > /dev/null 2>&1 ]; then \
 	echo 'Docker: enable buildkit, containerd-snapshotter & registry-mirrors (caching)'; \
 	exit 1; \
 	fi
 
 base-image: docker-config
-	@docker buildx build \
+	docker buildx build \
 	--push \
 	--compress \
 	--progress=plain \
@@ -80,13 +80,13 @@ base-image: docker-config
 	-t $(REGISTRY_CACHE)/base-deps:$(NODE_MAJOR) .
 
 clean: stop
-	@pnpm turbo run clean || true
-	@docker image prune -af || true
-	@docker buildx prune -af || true
-	@rm -rf .buildx_cache || true
-	@mkdir -p .buildx_cache || true
+	pnpm turbo run clean || true
+	docker image prune -af || true
+	docker buildx prune -af || true
+	rm -rf .buildx_cache || true
+	mkdir -p .buildx_cache || true
 
 reset: clean
-	@docker system prune -a --volumes -f || true
-	@docker volume ls -q | grep '^mindfield' | xargs -r docker volume rm || true
-	@git clean -xfd || true
+	docker system prune -a --volumes -f || true
+	docker volume ls -q | grep '^mindfield' | xargs -r docker volume rm || true
+	git clean -xfd || true
