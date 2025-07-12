@@ -3,19 +3,19 @@
 ---
 
 ## 0. Table of Contents
-1. [High-Level Overview](#1-high-level-overview)  
-2. [System Architecture](#2-system-architecture)  
-3. [Repository Layout](#3-repository-layout)  
-4. [Prerequisites](#4-prerequisites)  
-5. [Local & Production Setup](#5-local--production-setup)  
-6. [Service Catalogue](#6-service-catalogue)  
-7. [Make & Docker-Compose Workflow](#7-make--docker-compose-workflow)  
-8. [Ordered Task Roadmap](#8-ordered-task-roadmap)  
-9. [Operations Guide](#9-operations-guide)  
-10. [Security Hardening](#10-security-hardening)  
-11. [Disaster Recovery & Back-ups](#11-disaster-recovery--back-ups)  
-12. [Future Enhancements](#12-future-enhancements)  
-13. [License](#13-license)  
+1. [High-Level Overview](#1-high-level-overview)
+2. [System Architecture](#2-system-architecture)
+3. [Repository Layout](#3-repository-layout)
+4. [Prerequisites](#4-prerequisites)
+5. [Local & Production Setup](#5-local--production-setup)
+6. [Service Catalogue](#6-service-catalogue)
+7. [Make & Docker-Compose Workflow](#7-make--docker-compose-workflow)
+8. [Ordered Task Roadmap](#8-ordered-task-roadmap)
+9. [Operations Guide](#9-operations-guide)
+10. [Security Hardening](#10-security-hardening)
+11. [Disaster Recovery & Back-ups](#11-disaster-recovery--back-ups)
+12. [Future Enhancements](#12-future-enhancements)
+13. [License](#13-license)
 
 ---
 
@@ -25,7 +25,7 @@ Kong 3.x acting as the API edge behind a TLS-terminating Caddy reverse proxy.
 Keycloak provides single sign-on. Observability is handled by the
 Prometheus / Grafana / Loki / Jaeger stack. Billing is powered by
 Kill Bill, backed by PostgreSQL. Every component is **open-source and
-self-hostable** – no paid SaaS dependencies. 
+self-hostable** – no paid SaaS dependencies.
 
 ---
 
@@ -164,7 +164,7 @@ Health-checks are applied to every long-running container.
 
 ---
 
-## 8. Ordered Task Roadmap 
+## 8. Ordered Task Roadmap
 
 > **Must be executed sequentially** – each phase unblocks the next.
 
@@ -253,3 +253,4 @@ docker compose down -v   # Wipes data – be careful!
 * Blue/Green deploys via Argo-Rollouts
 * Kubecost show-back & budget alerts
 * Marketplace of Helm extensions (ChartMuseum)
+
