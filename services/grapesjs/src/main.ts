@@ -2,7 +2,7 @@ import { startExpress } from "@mindfield/logic";
 import routes from "./routes.js";
 
 startExpress({
-  serviceName: "grapejs",
-  registerRoutes: routes,
-  registerQueues: () => {},
+    serviceName: "grapejs",
+    registerRoutes: routes,
+    registerQueues: () => {},
 });

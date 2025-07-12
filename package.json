@@ -11,7 +11,7 @@
     "build:prod": "turbo run build:prod --filter=core/** --filter=apps/** --filter=services/**",
     "clean": "turbo run clean  --filter=core/** --filter=apps/** --filter=services/** && rm -rf node_modules",
     "dev": "turbo run dev --parallel --filter=core/** --filter=apps/** --filter=services/**",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format": "prettier --write \"core/**/*.{ts,tsx,js,jsx,json,md}\" \"apps/**/*.{ts,tsx,js,jsx,json,md}\" \"services/**/*.{ts,tsx,js,jsx,json,md}\"",
     "lint": "turbo run lint --filter=core/** --filter=apps/** --filter=services/**",
     "mobile": "turbo run dev --filter=apps/mobile",
     "storybook": "turbo run storybook --filter=@mindfield/web",
@@ -20,7 +20,14 @@
     "tidy:json": "prettier --write '**/package.json'",
     "tidy:pkg": "sort-package-json '**/package.json'",
     "type-check": "turbo run type-check --filter=core/** --filter=apps/** --filter=services/**",
-    "web": "turbo run dev --filter=apps/web"
+    "web": "turbo run dev --filter=apps/web",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,md,css,scss}": [
+      "pnpm lint -- --cache --fix",
+      "pnpm format"
+    ]
   },
   "dependencies": {
     "react-native-reanimated": "^3.18.0"
@@ -38,9 +45,11 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-native": "^5.0.0",
     "eslint-plugin-storybook": "^9.0.16",
+    "husky": "^9.1.7",
     "jest": "^30.0.4",
     "jest-environment-jsdom": "^30.0.4",
     "jest-util": "^30.0.2",
+    "lint-staged": "^16.1.2",
     "prettier": "^3.6.2",
     "sort-package-json": "^3.4.0",
     "ts-jest": "^29.4.0",
