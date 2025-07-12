@@ -13,7 +13,7 @@
 |---|------|-------------|-----------------|
 | ~~0.1~~ | ~~`.gitignore` refresh~~ | ~~Ignore `dist/`, `nx/cache`, `*.age`, `.DS_Store`~~ | ~~`git status` shows **no** unstaged build artefacts~~ |
 | ~~0.2~~ | ~~`.editorconfig`~~ | ~~2-space YAML, 4-space TS, final newline~~ | ~~VS Code detects config automatically~~ |
-| ~~0.3~~ | ~~`CODEOWNERS~~` | ~~`* @maldous` + domain folders~~ | ~~Opening a PR assigns owners automatically~~ |
+| ~~0.3~~ | ~~`CODEOWNERS`~~ | ~~`* @maldous` + domain folders~~ | ~~Opening a PR assigns owners automatically~~ |
 | ~~0.4~~ | ~~Directory skeleton~~ | ~~`infra/ secrets/ backups/` sub-dirs created~~ | ~~`tree -dL 1` lists the dirs :contentReference[oaicite:0]{index=0}~~ |
 | 0.5 | **Compose split** | `docker-compose.base.yml`, `docker-compose.dev.yml`, `docker-compose.monitoring.yml` with the service lists shown in project docs :contentReference[oaicite:1]{index=1} | `make dev` spins up the union without port conflicts |
 | 0.6 | **CI stub** | `.github/workflows/ci.yml` (lint+unit), `reusable-compose.yml` (future) :contentReference[oaicite:2]{index=2} | Green run on clean checkout |
