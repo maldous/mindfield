@@ -1,11 +1,5 @@
 # MindField – **Full-Stack OSS Platform**
 
-> A production-grade, **self-hostable** personality-profiling platform built on  
-> Docker Compose / k3s, Keycloak OIDC security, Kong API Gateway, and a complete
-> observability, billing, and CI/CD tool-chain – **100 % open source**.  
-> This README is the single **source-of-truth** for standing the stack up from
-> an empty Git repository to a fully-instrumented, revenue-ready SaaS.
-
 ---
 
 ## 0. Table of Contents
@@ -26,8 +20,6 @@
 ---
 
 ## 1. High-Level Overview
-MindField is a micro-service platform that helps users explore their
-personality through interactive questionnaires, analytics and PDF reports.  
 All services run in Docker containers and communicate through
 Kong 3.x acting as the API edge behind a TLS-terminating Caddy reverse proxy.
 Keycloak provides single sign-on. Observability is handled by the
@@ -93,7 +85,7 @@ mindfield/
 * **Docker 20.10+** & **Docker Compose v2**
 * **Git** and a GitHub account (optional for GitOps)
 * Open ports **80/443** (production)
-* DNS A-records for `*.yourdomain.com` pointing at the host
+* DNS A-records for `*.aldous.info` pointing at the host
 * *Optional / Production*: 4 vCPU, 8 GiB RAM VM or better
   (k3s, FluxCD, Velero, etc.)
 
@@ -172,7 +164,7 @@ Health-checks are applied to every long-running container.
 
 ---
 
-## 8. Ordered Task Roadmap <!-- copy these into issues/epics -->
+## 8. Ordered Task Roadmap 
 
 > **Must be executed sequentially** – each phase unblocks the next.
 
