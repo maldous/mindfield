@@ -40,11 +40,11 @@ format: ; pnpm format
 tidy: ; pnpm tidy
 type-check: ; pnpm turbo run type-check
 logs: ; docker compose ${DOCKER_COMPOSE} logs -f
-stop: ; docker compose ${DOCKER_COMPOSE} down
+stop: ; touch .env && docker compose ${DOCKER_COMPOSE} down
 start: base-image build ; docker compose ${DOCKER_COMPOSE} build --pull --parallel && docker compose ${DOCKER_COMPOSE} up -d --remove-orphans
 dev: base-image build ; docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml build --pull --parallel && docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml up -d --remove-orphans
 stop-dev: ; docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml down
-all: setup reset setup install start
+all: reset setup install start
 
 sonar:
 	if [ ! -f .env ]; then touch .env; fi; \
