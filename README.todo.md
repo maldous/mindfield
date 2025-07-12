@@ -1,20 +1,20 @@
 # MindField – **Execution Tracker (`README.todo.md`)**
 
-> **Read me line-by-line.**  
-> Every checkbox represents work that must be completed in **order**.  
+> **Read me line-by-line.**
+> Every checkbox represents work that must be completed in **order**.
 > A task is “Done” only when its **acceptance tests** pass in CI and the
 > corresponding **documentation** is updated.
 
 ---
 
-## 0  Scaffolding Baseline `P1 S` 
+## 0  Scaffolding Baseline `P1 S`
 
 | # | Item | Deliverable | Acceptance test |
 |---|------|-------------|-----------------|
 | ~~0.1~~ | ~~`.gitignore` refresh~~ | ~~Ignore `dist/`, `nx/cache`, `*.age`, `.DS_Store`~~ | ~~`git status` shows **no** unstaged build artefacts~~ |
 | ~~0.2~~ | ~~`.editorconfig`~~ | ~~2-space YAML, 4-space TS, final newline~~ | ~~VS Code detects config automatically~~ |
-| 0.3 | `CODEOWNERS` | `* @maldous` + domain folders | Opening a PR assigns owners automatically |
-| 0.4 | Directory skeleton | `infra/ secrets-templates/ backups/` sub-dirs created | `tree -dL 1` lists the dirs :contentReference[oaicite:0]{index=0} |
+| ~~0.3~~ | ~~`CODEOWNERS~~` | ~~`* @maldous` + domain folders~~ | ~~Opening a PR assigns owners automatically~~ |
+| ~~0.4~~ | ~~Directory skeleton~~ | ~~`infra/ secrets/ backups/` sub-dirs created~~ | ~~`tree -dL 1` lists the dirs :contentReference[oaicite:0]{index=0}~~ |
 | 0.5 | **Compose split** | `docker-compose.base.yml`, `docker-compose.dev.yml`, `docker-compose.monitoring.yml` with the service lists shown in project docs :contentReference[oaicite:1]{index=1} | `make dev` spins up the union without port conflicts |
 | 0.6 | **CI stub** | `.github/workflows/ci.yml` (lint+unit), `reusable-compose.yml` (future) :contentReference[oaicite:2]{index=2} | Green run on clean checkout |
 | 0.7 | **Husky + lint-staged** | Pre-commit runs `pnpm lint && pnpm format` :contentReference[oaicite:3]{index=3} | Commit with a lint error fails locally |
@@ -22,7 +22,7 @@
 
 ---
 
-## 1  Edge / Auth Hardening `P1 M` 
+## 1  Edge / Auth Hardening `P1 M`
 
 | # | Item | Deliverable | Acceptance test |
 |---|------|-------------|-----------------|
@@ -61,7 +61,7 @@ reverse_proxy @kong_openapi kong:8000
 
 ---
 
-## 2  Compose Refactor `P1 M` 
+## 2  Compose Refactor `P1 M`
 
 | #   | Item         | Deliverable                                                    | Acceptance                                           |
 | --- | ------------ | -------------------------------------------------------------- | ---------------------------------------------------- |
@@ -73,7 +73,7 @@ reverse_proxy @kong_openapi kong:8000
 
 ---
 
-## 3  CI Baseline `P1 S` 
+## 3  CI Baseline `P1 S`
 
 1. `ci.yml` steps: Checkout → Build **base** stack (`--abort-on-container-exit`) → `pnpm test` → **Trivy** scan fail-on-high.
 2. Badge added to README (`build: passing`).
@@ -83,7 +83,7 @@ Pass when `gh run watch` ends green.
 
 ---
 
-## 4  Web Testing Seed `P2 S` 
+## 4  Web Testing Seed `P2 S`
 
 | #   | Item           | Details                                                             |
 | --- | -------------- | ------------------------------------------------------------------- |
@@ -94,7 +94,7 @@ Pass when `gh run watch` ends green.
 
 ---
 
-## 5  PostGraphile Adoption `P2 M` 
+## 5  PostGraphile Adoption `P2 M`
 
 | Step | Command / File | Expectation                                       |                                            |
 | ---- | -------------- | ------------------------------------------------- | ------------------------------------------ |
@@ -106,7 +106,7 @@ Pass when `gh run watch` ends green.
 
 ---
 
-## 6  Frontend State + Styles `P2 M` 
+## 6  Frontend State + Styles `P2 M`
 
 | #   | Item          | Deliverable                                                       |
 | --- | ------------- | ----------------------------------------------------------------- |
@@ -118,7 +118,7 @@ Pass when `gh run watch` ends green.
 
 ---
 
-## 7  Billing Loop v0 `P2 L` 
+## 7  Billing Loop v0 `P2 L`
 
 | #   | Item                  | Deliverable                                               | Test                               |
 | --- | --------------------- | --------------------------------------------------------- | ---------------------------------- |
@@ -130,7 +130,7 @@ Pass when `gh run watch` ends green.
 
 ---
 
-## 8  Stripe Sandbox Gateway `P2 L` 
+## 8  Stripe Sandbox Gateway `P2 L`
 
 1. Deploy Kill Bill **Stripe** plugin (container `killbill-stripe`).
 2. Map env: `STRIPE_SECRET, STRIPE_PUBLISHABLE` .
@@ -139,7 +139,7 @@ Pass when `gh run watch` ends green.
 
 ---
 
-## 9  Secrets Hardening `P1 S` 
+## 9  Secrets Hardening `P1 S`
 
 | Step | Action                                                             |
 | ---- | ------------------------------------------------------------------ |
@@ -150,7 +150,7 @@ Pass when `gh run watch` ends green.
 
 ---
 
-## 10  GitOps Bootstrap `P3 L` 
+## 10  GitOps Bootstrap `P3 L`
 
 | #    | Item             | Deliverable                                                           | Validation                             |
 | ---- | ---------------- | --------------------------------------------------------------------- | -------------------------------------- |
@@ -162,7 +162,7 @@ Pass when `gh run watch` ends green.
 
 ---
 
-## 11  Backup & DR `P3 M` 
+## 11  Backup & DR `P3 M`
 
 | #    | Item            | Deliverable                                                      |
 | ---- | --------------- | ---------------------------------------------------------------- |
@@ -175,7 +175,7 @@ Pass when `gh run watch` ends green.
 
 ---
 
-## 12  Observability & Alerts `P3 M` 
+## 12  Observability & Alerts `P3 M`
 
 | Item           | Detail                                                                                       |
 | -------------- | -------------------------------------------------------------------------------------------- |
@@ -194,7 +194,7 @@ Pass when `gh run watch` ends green.
 
 ---
 
-## 14  Customer Portal MVP `P3 L` 
+## 14  Customer Portal MVP `P3 L`
 
 | Feature         | Implementation                                                           |
 | --------------- | ------------------------------------------------------------------------ |
@@ -205,7 +205,7 @@ Pass when `gh run watch` ends green.
 
 ---
 
-## 15  Performance Baseline `P3 S` 
+## 15  Performance Baseline `P3 S`
 
 1. `performance/k6-load.js` hitting `/api/questions` with 100 VU.
 2. Save p95 latency into `docs/perf-baseline.md`.
@@ -213,7 +213,7 @@ Pass when `gh run watch` ends green.
 
 ---
 
-## 16  Mobile (Expo) Readiness `P3 M` 
+## 16  Mobile (Expo) Readiness `P3 M`
 
 | Step        | Detail                                                        |
 | ----------- | ------------------------------------------------------------- |
@@ -226,7 +226,7 @@ Pass when `gh run watch` ends green.
 
 ## 17  Enterprise Enhancements (back-burner)
 
-* HashiCorp Vault injector 
+* HashiCorp Vault injector
 * Istio + mTLS mesh
 * Kubecost, Kiali, OPA Gatekeeper&#x20;
 * ChartMuseum / Harbor marketplace
