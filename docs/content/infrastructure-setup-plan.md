@@ -84,7 +84,6 @@ Transform the current development setup into a production-ready platform with pr
 
 - **postgres** - Primary database
 - **redis** - Cache and session store
-- **rabbitmq** - Message queue
 - **minio** - Object storage
 - **submission** - Form submission processing
 - **transform** - Data transformation
@@ -96,7 +95,6 @@ Transform the current development setup into a production-ready platform with pr
 ### Development/Admin Tools (Restricted access)
 
 - **pgadmin** - Database management
-- **prisma-studio** - ORM management
 - **sonarqube** - Code quality
 - **storybook** - Component library
 - **swagger-ui/redoc** - API documentation
