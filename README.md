@@ -8,10 +8,6 @@
 ### 0.1  Repo House-Keeping
 - [ ] **`.gitignore` refresh** → add: `/secrets/`, `/backups/`, `.env*`, `coverage/`, `.turbo/`, `*.age`, `*.tgz`.
 - [ ] **`.editorconfig`** → LF, UTF-8, `indent_style = space`, `yaml_indent_size = 2`, `ts_indent_size = 4`.
-- [ ] **`CODEOWNERS`** →  
-  ```text
-  * @maldous
-````
 
 ### 0.2  Top-level Layout Extensions
 
