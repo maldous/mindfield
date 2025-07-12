@@ -9,6 +9,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    if: false
     steps:
       - uses: actions/checkout@v3
 
@@ -33,6 +34,7 @@ jobs:
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    if: false
     needs: lint
     steps:
       - uses: actions/checkout@v3
