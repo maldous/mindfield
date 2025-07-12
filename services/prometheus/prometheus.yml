@@ -62,12 +62,6 @@ scrape_configs:
     metrics_path: "/minio/v2/metrics/cluster"
     scrape_interval: 30s
 
-  - job_name: "rabbitmq"
-    static_configs:
-      - targets: ["rabbitmq:15692"]
-    metrics_path: "/metrics"
-    scrape_interval: 30s
-
   # Caddy
   - job_name: "caddy"
     static_configs:
@@ -138,18 +132,6 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter:9115
-
-  # Development Tools
-  - job_name: "postgrest"
-    static_configs:
-      - targets: ["postgrest:3000"]
-    scrape_interval: 30s
-
-  - job_name: "hasura"
-    static_configs:
-      - targets: ["hasura:8080"]
-    metrics_path: "/v1/metrics"
-    scrape_interval: 30s
 
   - job_name: "sonarqube"
     static_configs:

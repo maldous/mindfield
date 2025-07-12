@@ -45,9 +45,6 @@ localhost, 127.0.0.1 {
     @alertmanager host alertmanager.localhost alertmanager.127.0.0.1
     reverse_proxy @alertmanager alertmanager:9093
 
-    @rabbitmq host rabbitmq.localhost rabbitmq.127.0.0.1
-    reverse_proxy @rabbitmq rabbitmq:15672
-
     @opensearch host opensearch.localhost opensearch.127.0.0.1
     reverse_proxy @opensearch opensearch:9200
 
@@ -66,17 +63,11 @@ localhost, 127.0.0.1 {
     @trivy host trivy.localhost trivy.127.0.0.1
     reverse_proxy @trivy trivy:8080
 
-    @hasura host hasura.localhost hasura.127.0.0.1
-    reverse_proxy @hasura hasura:8080
-
     @postgraphile host postgraphile.localhost postgraphile.127.0.0.1
     reverse_proxy @postgraphile postgraphile:5000
 
     @pgadmin host pgadmin.localhost pgadmin.127.0.0.1
     reverse_proxy @pgadmin pgadmin:80
-
-    @prisma-studio host prisma-studio.localhost prisma-studio.127.0.0.1
-    reverse_proxy @prisma-studio prisma-studio:5555
 
     @storybook host storybook.localhost storybook.127.0.0.1
     reverse_proxy @storybook storybook:6006
@@ -95,9 +86,6 @@ localhost, 127.0.0.1 {
 
     @redoc host redoc.localhost redoc.127.0.0.1
     reverse_proxy @redoc redoc:3000
-
-    @postgrest host postgrest.localhost postgrest.127.0.0.1
-    reverse_proxy @postgrest postgrest:3000
 
     @presidio-analyzer host presidio-analyzer.localhost presidio-analyzer.127.0.0.1
     reverse_proxy @presidio-analyzer presidio-analyzer:3000
@@ -129,17 +117,14 @@ prometheus.{$DOMAIN:mindfield.local},
 loki.{$DOMAIN:mindfield.local},
 jaeger.{$DOMAIN:mindfield.local},
 alertmanager.{$DOMAIN:mindfield.local},
-rabbitmq.{$DOMAIN:mindfield.local},
 opensearch.{$DOMAIN:mindfield.local},
 opensearch-dashboards.{$DOMAIN:mindfield.local},
 node-exporter.{$DOMAIN:mindfield.local},
 blackbox-exporter.{$DOMAIN:mindfield.local},
 uptime-kuma.{$DOMAIN:mindfield.local},
 trivy.{$DOMAIN:mindfield.local},
-hasura.{$DOMAIN:mindfield.local},
 postgraphile.{$DOMAIN:mindfield.local},
 pgadmin.{$DOMAIN:mindfield.local},
-prisma-studio.{$DOMAIN:mindfield.local},
 storybook.{$DOMAIN:mindfield.local},
 sonarqube.{$DOMAIN:mindfield.local},
 gitea.{$DOMAIN:mindfield.local},
@@ -152,7 +137,6 @@ submission.{$DOMAIN:mindfield.local},
 kong.{$DOMAIN:mindfield.local},
 swagger-ui.{$DOMAIN:mindfield.local},
 redoc.{$DOMAIN:mindfield.local},
-postgrest.{$DOMAIN:mindfield.local} {
     tls {$LETSENCRYPT_EMAIL}
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -202,9 +186,6 @@ postgrest.{$DOMAIN:mindfield.local} {
     @alertmanager_prod host alertmanager.{$DOMAIN:mindfield.local}
     reverse_proxy @alertmanager_prod alertmanager:9093
 
-    @rabbitmq_prod host rabbitmq.{$DOMAIN:mindfield.local}
-    reverse_proxy @rabbitmq_prod rabbitmq:15672
-
     @opensearch_prod host opensearch.{$DOMAIN:mindfield.local}
     reverse_proxy @opensearch_prod opensearch:9200
 
@@ -223,17 +204,11 @@ postgrest.{$DOMAIN:mindfield.local} {
     @trivy_prod host trivy.{$DOMAIN:mindfield.local}
     reverse_proxy @trivy_prod trivy:8080
 
-    @hasura_prod host hasura.{$DOMAIN:mindfield.local}
-    reverse_proxy @hasura_prod hasura:8080
-
     @postgraphile_prod host postgraphile.{$DOMAIN:mindfield.local}
     reverse_proxy @postgraphile_prod postgraphile:5000
 
     @pgadmin_prod host pgadmin.{$DOMAIN:mindfield.local}
     reverse_proxy @pgadmin_prod pgadmin:80
-
-    @prisma-studio_prod host prisma-studio.{$DOMAIN:mindfield.local}
-    reverse_proxy @prisma-studio_prod prisma-studio:5555
 
     @storybook_prod host storybook.{$DOMAIN:mindfield.local}
     reverse_proxy @storybook_prod storybook:6006
@@ -273,9 +248,6 @@ postgrest.{$DOMAIN:mindfield.local} {
 
     @redoc_prod host redoc.{$DOMAIN:mindfield.local}
     reverse_proxy @redoc_prod redoc:3000
-
-    @postgrest_prod host postgrest.{$DOMAIN:mindfield.local}
-    reverse_proxy @postgrest_prod postgrest:3000
 
     # Default for services on port 3000
     reverse_proxy {

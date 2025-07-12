@@ -57,39 +57,6 @@ services:
     tmpfs:
       - /tmp
 
-  backup:
-    build:
-      context: .
-      dockerfile: dockerfiles/Dockerfile.backup
-      cache_from:
-        - type=registry,ref=localhost:5001/mindfield-cache
-      cache_to:
-        - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-    depends_on:
-      postgres:
-        condition: service_healthy
-        required: true
-    volumes:
-      - type: bind
-        source: ./database/backups
-        target: /backups
-        bind:
-          create_host_path: true
-      - type: bind
-        source: ./services/backup/backup.sh
-        target: /backup.sh
-        bind:
-          create_host_path: true
-    env_file:
-      - .env
-    networks:
-      backend: null
-    command:
-      - sh
-      - /backup.sh
-    cpus: 0.25
-    mem_limit: "134217728"
-
   blackbox-exporter:
     image: prom/blackbox-exporter:latest
     volumes:
@@ -206,20 +173,6 @@ services:
       frontend: null
     cpus: 0.5
     mem_limit: "268435456"
-
-  hasura:
-    image: hasura/graphql-engine:latest
-    depends_on:
-      postgres:
-        condition: service_healthy
-        required: true
-    env_file:
-      - .env
-    networks:
-      backend: null
-      frontend: null
-    cpus: 0.5
-    mem_limit: "536870912"
 
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -650,20 +603,6 @@ services:
     cpus: 1
     mem_limit: "536870912"
 
-  postgrest:
-    image: postgrest/postgrest:latest
-    depends_on:
-      postgres:
-        condition: service_healthy
-        required: true
-    env_file:
-      - .env
-    networks:
-      backend: null
-      frontend: null
-    cpus: 0.25
-    mem_limit: "134217728"
-
   presidio-analyzer:
     image: mcr.microsoft.com/presidio-analyzer:latest
     depends_on:
@@ -715,20 +654,6 @@ services:
       backend: null
     cpus: 1
     mem_limit: "1073741824"
-
-  prisma-studio:
-    image: timothyjmiller/prisma-studio:latest
-    depends_on:
-      postgres:
-        condition: service_healthy
-        required: true
-    env_file:
-      - .env
-    networks:
-      backend: null
-      frontend: null
-    cpus: 0.5
-    mem_limit: "268435456"
 
   prometheus:
     image: prom/prometheus:latest
@@ -787,29 +712,6 @@ services:
       - -config.file=/etc/promtail/config.yml
     cpus: 0.25
     mem_limit: "134217728"
-
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    volumes:
-      - type: volume
-        source: rabbitmq_data
-        target: /var/lib/rabbitmq
-        volume: {}
-    env_file:
-      - .env
-    networks:
-      backend: null
-      frontend: null
-    healthcheck:
-      test:
-        - CMD
-        - rabbitmq-diagnostics
-        - ping
-      timeout: 10s
-      interval: 30s
-      retries: 5
-    cpus: 0.5
-    mem_limit: "268435456"
 
   redis:
     image: redis:7-alpine

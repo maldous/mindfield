@@ -47,7 +47,7 @@ prod: start
 restart: stop start
 restart-dev: stop dev
 stop-dev: ; @docker compose -f docker-compose.yml -f docker-compose.dev.yml down
-all: reset setup start
+all: setup reset setup start
 
 ports:
 	@echo "Development Ports (make dev):"
@@ -125,7 +125,7 @@ base-image: docker-config
 	-f dockerfiles/Dockerfile.base \
 	-t $(REGISTRY_CACHE)/base-deps:$(NODE_MAJOR) .
 
-clean: setup stop
+clean: stop
 	@pnpm turbo run clean || true
 	@docker image prune -af || true
 	@docker buildx prune -af || true
