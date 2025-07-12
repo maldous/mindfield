@@ -1,341 +1,267 @@
-# Mindfield – TODO
+# MindField – **Full-Stack OSS Platform**
+
+> A production-grade, **self-hostable** personality-profiling platform built on  
+> Docker Compose / k3s, Keycloak OIDC security, Kong API Gateway, and a complete
+> observability, billing, and CI/CD tool-chain – **100 % open source**.  
+> This README is the single **source-of-truth** for standing the stack up from
+> an empty Git repository to a fully-instrumented, revenue-ready SaaS.
 
 ---
 
-## 0  Repo & Scaffolding Baseline  `P1  S`
-> Establish clean git hygiene, directory conventions, split-compose skeleton, CI stub.
-
-### 0.1  Repo House-Keeping
-- [ ] **`.gitignore` refresh** → add: `/secrets/`, `/backups/`, `.env*`, `coverage/`, `.turbo/`, `*.age`, `*.tgz`.
-- [ ] **`.editorconfig`** → LF, UTF-8, `indent_style = space`, `yaml_indent_size = 2`, `ts_indent_size = 4`.
-
-### 0.2  Top-level Layout Extensions
-
-* [ ] Create folders:
-
-  ```text
-  infra/               # GitOps shim
-    k3s/               # bootstrap manifests
-    helmfile.yaml      # root Helmfile
-    flux/              # Flux Kustomizations
-    terraform/         # (empty) infra modules
-
-  secrets-templates/
-    oidc.env.example
-    stripe.env.example
-    db.env.example
-
-  backups/
-    policies/          # Velero Schedule CRDs
-    scripts/
-      backup.sh
-      restore.sh
-  ```
-
-### 0.3  Compose Split Stub
-
-* [ ] Copy current **`docker-compose.yml` ➜ `docker-compose.base.yml`**.
-* [ ] Generate blank overrides:
-
-  * `docker-compose.dev.yml`
-  * `docker-compose.monitoring.yml`
-* [ ] **Makefile** targets:
-
-  ```makefile
-  dev:  ; docker compose -f docker-compose.base.yml -f docker-compose.dev.yml        up -d
-  prod: ; docker compose -f docker-compose.base.yml                                  up -d
-  ```
-
-### 0.4  CI/CD Skeleton
-
-* [ ] `.github/workflows/ci.yml` – **lint + unit tests only**
-* [ ] `.github/workflows/reusable-compose.yml` – blank reusable job (future compose spin-up).
-
-### 0.5  Postgraphile On-Ramp
-
-* [ ] Add service **placeholder** to `docker-compose.base.yml`:
-
-  ```yaml
-  postgraphile:
-    image: graphile/postgraphile
-    command: >
-      --connection postgres://mindfield:mindfield@postgres:5432/mindfield
-      --schema public --watch
-    ports: ["5000:5000"]
-    depends_on: [postgres]
-  ```
-
-### 0.6  Frontend Conventions
-
-* [ ] Shared `tailwind.config.js` in repo root -> include `"core/ui/**/*.{ts,tsx}"`.
-* [ ] `src/features/README.md` in both `apps/web` & `apps/mobile` describing slice layout.
-
-### 0.7  Script Bootstrap
-
-* [ ] `scripts/scaffold-service.sh` → scaffold `services/<name>/` + `Dockerfile`.
-* [ ] `scripts/discover-services.sh` → `curl http://kong:8001/services | jq`.
-
-### 0.8  Docs & Runbooks
-
-* [ ] Move `docs/mkdocs.yml` to `docs/` root.
-* [ ] Add empty `docs/runbook.md`, `docs/perf-baseline.md`.
-
-### 0.9  Lint & Hooks
-
-* [ ] **Husky + lint-staged**:
-
-  ```bash
-  pnpm dlx husky-init && pnpm husky add .husky/pre-commit "pnpm lint && pnpm format"
-  ```
-
-### 0.10  ENV Examples
-
-* [ ] Consolidated `.env.example` including OIDC, Stripe, Postgres.
+## 0. Table of Contents
+1. [High-Level Overview](#1-high-level-overview)  
+2. [System Architecture](#2-system-architecture)  
+3. [Repository Layout](#3-repository-layout)  
+4. [Prerequisites](#4-prerequisites)  
+5. [Local & Production Setup](#5-local--production-setup)  
+6. [Service Catalogue](#6-service-catalogue)  
+7. [Make & Docker-Compose Workflow](#7-make--docker-compose-workflow)  
+8. [Ordered Task Roadmap](#8-ordered-task-roadmap)  
+9. [Operations Guide](#9-operations-guide)  
+10. [Security Hardening](#10-security-hardening)  
+11. [Disaster Recovery & Back-ups](#11-disaster-recovery--back-ups)  
+12. [Future Enhancements](#12-future-enhancements)  
+13. [License](#13-license)  
 
 ---
 
-## 1  Edge / Auth Hardening  `P1  M`
+## 1. High-Level Overview
+MindField is a micro-service platform that helps users explore their
+personality through interactive questionnaires, analytics and PDF reports.  
+All services run in Docker containers and communicate through
+Kong 3.x acting as the API edge behind a TLS-terminating Caddy reverse proxy.
+Keycloak provides single sign-on. Observability is handled by the
+Prometheus / Grafana / Loki / Jaeger stack. Billing is powered by
+Kill Bill, backed by PostgreSQL. Every component is **open-source and
+self-hostable** – no paid SaaS dependencies. 
 
-> Secure perimeter: Kong ↔ Keycloak (OIDC), social IdPs.
+---
 
-### 1.1  Add OIDC Vars
+## 2. System Architecture
+```text
+                       ┌────────────────────────┐
+Internet ──► HTTPS ───►│        Caddy           │◄─ Let's Encrypt
+                       │  (TLS + vHost router)  │
+                       └────────▲───────────────┘
+                                │
+                                │ /api/*
+                                ▼
+                       ┌────────────────────────┐
+                       │         Kong           │
+                       │  (OIDC, Rate-Limit,    │
+                       │   Transform, Metrics)  │
+                       └────────▲───────────────┘
+                                │ JWT
+             ┌──────────────────┼───────────────┐
+             │                  │               │
+             ▼                  ▼               ▼
+    ┌──────────────┐   ┌────────────────┐  ┌──────────────┐
+    │  services/api │   │  Kill Bill     │  │  Postgraphile│
+    │  NestJS REST  │   │  Billing       │  │  GraphQL     │
+    └──────────────┘   └────────────────┘  └──────────────┘
+             │               │                     │
+             ▼               │                     ▼
+    ┌──────────────┐         │            ┌────────────────┐
+    │ PostgreSQL    │◄───────┴────────────┤   PgBouncer    │
+    └──────────────┘                      └────────────────┘
+````
 
-```dotenv
-OIDC_ISSUER=https://keycloak.local/auth/realms/mindfield
-OIDC_CLIENT_ID=mindfield-client
-OIDC_SECRET=change-me
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-APPLE_CLIENT_ID=
-APPLE_TEAM_ID=
-APPLE_KEY_ID=
-APPLE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----
+Full description in *docs/architecture.md*.&#x20;
+
+---
+
+## 3. Repository Layout
+
+```text
+mindfield/
+├── apps/                 # Next.js web + Expo mobile
+├── core/                 # Shared business & UI packages
+├── services/             # API, workers, docs, etc.
+├── infra/                # k3s, Helmfile, Terraform, Flux
+├── dockerfiles/          # One Dockerfile per service
+├── docs/                 # MkDocs site (served by mkdocs svc)
+├── scripts/              # Bash helpers & scaffolding
+├── backups/              # Velero schedules & scripts
+├── secrets-templates/    # *.env.example & Vault policies
+└── Makefile              # Dev & CI shortcuts
 ```
 
-### 1.2  Update Kong Bootstrap
 
-* Inject `${OIDC_*}` envs in `services/kong/configure.sh`.
 
-### 1.3  Kong Declarative Config (`kong/kong.yml`)
+---
 
-* Under `openid-connect` plugin add Google & Apple IdP sections.
+## 4. Prerequisites
 
-### 1.4  End-to-End Validation
+* **Docker 20.10+** & **Docker Compose v2**
+* **Git** and a GitHub account (optional for GitOps)
+* Open ports **80/443** (production)
+* DNS A-records for `*.yourdomain.com` pointing at the host
+* *Optional / Production*: 4 vCPU, 8 GiB RAM VM or better
+  (k3s, FluxCD, Velero, etc.)&#x20;
+
+---
+
+## 5. Local & Production Setup
+
+### 5.1 One-Liner Quick Start (dev mode)
 
 ```bash
-docker compose up -d kong caddy keycloak api
-open https://app.local/api/secure
-# ✅ Redirect to Keycloak, Google sign-in, JWT → email + roles
+git clone https://github.com/you/mindfield.git
+cd mindfield
+./setup.sh        # creates .env with sane defaults
+make dev          # base + dev overrides + monitoring
+open http://localhost:3000   # Next.js web
 ```
 
----
-
-## 2  Compose Refactor  `P1  M`
-
-> Layered files, health-checks, smoother dev / CI.
-
-### 2.1  `docker-compose.base.yml`
-
-`api, postgres, redis, keycloak, kong, caddy`
-
-### 2.2  `docker-compose.dev.yml` *(extends base)*
-
-`mailhog, minio, mkdocs, presidio*`
-
-### 2.3  `docker-compose.monitoring.yml`
-
-`prometheus, grafana, loki, jaeger, alertmanager`
-
-### 2.4  Health-checks *(all core)*
-
-```yaml
-healthcheck:
-  test: ["CMD", "curl", "-f", "http://localhost/healthz"]
-  interval: 30s
-  timeout: 3s
-  retries: 5
-```
-
-### 2.5  Dev Shortcut
+### 5.2 Production on a Single Host
 
 ```bash
-make dev
+cp .env.example .env     # fill DOMAIN, LETSENCRYPT_EMAIL, passwords
+make start               # base compose via Caddy + HTTPS
 ```
 
----
-
-## 3  CI Baseline  `P1  S`
-
-* [ ] `.github/workflows/ci.yml`
-
-  1. Checkout
-  2. `docker compose -f docker-compose.base.yml up --abort-on-container-exit -d`
-  3. `pnpm test`
-  4. **Trivy** scan → fail on HIGH vulns.
-
----
-
-## 4  Web Testing Seed  `P2  S`
-
-* [ ] `apps/web`
-
-  ```bash
-  pnpm add -D jest @testing-library/react @testing-library/jest-dom
-  npx jest --init
-  ```
-* [ ] Add `__tests__/App.test.tsx` (renders `<App />`).
-* [ ] Include in CI step.
-
----
-
-## 5  Postgraphile Adoption  `P2  M`
-
-* [ ] Remove Hasura from compose if present.
-* [ ] Ensure **single** `postgraphile` service in base (0.5).
-* [ ] Caddy snippet:
-
-  ```caddyfile
-  reverse_proxy /graphql* postgraphile:5000
-  ```
-
----
-
-## 6  Frontend State & Styles Baseline  `P2  M`
+### 5.3 GitOps (k3s + Flux)
 
 ```bash
-pnpm add @reduxjs/toolkit react-redux @tanstack/react-query
+# Provision Ubuntu VM, then:
+curl -sfL https://get.k3s.io | sh -
+flux bootstrap github \
+  --owner=you --repository=mindfield-infra \
+  --path=clusters/dev
 ```
 
-* Shared `core/ui/tailwind.config.js`.
-* Scaffold `features/profile` slice with RTK Query calling Postgraphile.
+---
+
+## 6. Service Catalogue
+
+* **Edge & Auth** – Caddy, Kong, Keycloak&#x20;
+* **Core** – `services/api`, BullMQ workers, Postgraphile&#x20;
+* **Data Stores** – PostgreSQL 15 + PgBouncer, Redis 7, MinIO, OpenSearch
+* **Privacy** – Presidio (analyzer, anonymizer, image-redactor)
+* **Billing** – Kill Bill + Stripe plugin
+* **Observability** – Prometheus, Grafana, Loki, Jaeger, Alertmanager
+* **Developer Tools** – Storybook, Swagger-UI, ReDoc, SonarQube, PgAdmin,
+  Redis-Insight, Mailhog, MkDocs&#x20;
+
+*All UI containers are fronted by Caddy under `https://{service}.{DOMAIN}` when
+authenticated; internal-only services expose no public ports.*&#x20;
 
 ---
 
-## 7  Billing Loop v0  `P2  L`
+## 7. Make & Docker-Compose Workflow
 
-### 7.1  Kill Bill Catalog
-
-* `catalog.xml` units: `api_call`, `storage_gb`, `email_sent`; monthly plan.
-
-### 7.2  API Instrumentation
-
-```ts
-billingQueue.add('recordUsage',{
-  accountId: user.id,
-  unitType: 'api_call',
-  quantity: 1,
-  timestamp: new Date().toISOString()
-});
+```bash
+make help        # list every target
+make dev         # base + dev + monitoring overrides
+make start       # production-composition via Caddy TLS
+make stop        # stop & keep volumes
+make reset       # DANGER – remove volumes & images
+make logs        # follow all service logs
+make test        # pnpm test across monorepo
+make lint        # eslint + prettier
+make ports       # print local port map (dev mode)
 ```
 
-### 7.3  Billing Worker
+Compose layering strategy:
 
-`core/logic/src/billing.worker.ts` → BullMQ → Kill Bill Usage API.
+| File                            | Purpose                                                    |
+| ------------------------------- | ---------------------------------------------------------- |
+| `docker-compose.base.yml`       | Core runtime (api, postgres, redis, kong, keycloak, caddy) |
+| `docker-compose.dev.yml`        | Dev-only extras (mailhog, minio, mkdocs, presidio)         |
+| `docker-compose.monitoring.yml` | Prometheus, Grafana, Loki, etc.                            |
 
-### 7.4  Add Worker Container
-
-`billing-worker` in `docker-compose.base.yml`.
-
-### 7.5  Smoke Test
-
-* Generate fake `/items` call, verify invoice in Kill Bill UI.
+Health-checks are applied to every long-running container.&#x20;
 
 ---
 
-## 8  Stripe Sandbox Gateway  `P2  L`
+## 8. Ordered Task Roadmap <!-- copy these into issues/epics -->
 
-* Install Kill Bill Stripe plugin container.
-* `.env` sandbox keys → plugin config.
-* Issue **\$0.01** test invoice, expect success.
+> **Must be executed sequentially** – each phase unblocks the next.
+
+| #      | Task Group                      | Priority | Outcome                                        |
+| ------ | ------------------------------- | -------- | ---------------------------------------------- |
+| **0**  | **Repo & Scaffolding Baseline** | **P1 S** | Git hygiene, split compose, CI stub            |
+| **1**  | **Edge / Auth Hardening**       | **P1 M** | Kong OIDC plugin, social IdPs, flow validation |
+| **2**  | **Compose Refactor**            | **P1 M** | Layered \*.yml, health-checks, `make dev`      |
+| **3**  | **CI Baseline**                 | **P1 S** | GitHub Actions lint+test+Trivy                 |
+| **4**  | **Web Testing Seed**            | **P2 S** | Jest + RTL smoke test in apps/web              |
+| **5**  | **Postgraphile Adoption**       | **P2 M** | Replace Hasura, GraphQL reverse proxy          |
+| **6**  | **Frontend State/Styles**       | **P2 M** | RTK Query, Tailwind shared config              |
+| **7**  | **Billing Loop v0**             | **P2 L** | Kill Bill units, BullMQ usage worker           |
+| **8**  | **Stripe Sandbox Gateway**      | **P2 L** | Kill Bill Stripe plugin, \$0.01 test txn       |
+| **9**  | **Secrets Hardening**           | **P1 S** | Docker Secrets / Vault, remove plain envs      |
+| **10** | **GitOps Bootstrap**            | **P3 L** | k3s, FluxCD, Helmfile skeleton                 |
+| **11** | **Backup & DR**                 | **P3 M** | Velero daily schedule, runbook                 |
+| **12** | **Observability & Alerts**      | **P3 M** | Grafana dashboards, alert rules                |
+| **13** | **Feature Flags / Analytics**   | **P3 M** | PostHog, Unleash                               |
+| **14** | **Customer Portal MVP**         | **P3 L** | Next.js `/account` invoices + usage            |
+| **15** | **Performance Baseline**        | **P3 S** | k6 p95 latency test, perf-baseline doc         |
+
+Detailed check-boxes for every sub-task live in
+`README.todo.md` (generated from this table).&#x20;
 
 ---
 
-## 9  Secrets Hardening  `P1  S`
+## 9. Operations Guide
 
-* Move sensitive envs to `docker/secrets/{db,oidc,stripe}.txt`.
-* Update service definitions with:
+### 9.1 Back-ups
 
-  ```yaml
-  secrets:
-    - db_password
-  ```
+* **PostgreSQL** – nightly `pg_dump` via `backup` container
+* **MinIO** – bucket replication rule to secondary disk
+* **Velero** – cluster snapshot at 02:00 UTC
+  Back-ups land in `backups/` and are encrypted with **age**.
+
+### 9.2 Monitoring
+
+* Grafana dashboards auto-provisioned from `services/grafana/dashboards/`
+* Prometheus scrapes `/metrics` on every service
+* Alertmanager pages when:
+
+  * API p95 > 750 ms for 10 min
+  * billing-usage queue length > 100 for 10 min
+* Loki retains 14 days logs; Promtail tails `/var/log/containers/*.log`.&#x20;
+
+### 9.3 Common Commands
+
+```bash
+docker compose exec postgres psql -U mindfield
+docker compose exec kong curl -s localhost:8001/services | jq
+docker compose restart api
+docker compose down -v   # Wipes data – be careful!
+```
+
+
 
 ---
 
-## 10  GitOps Bootstrap  `P3  L`
+## 10. Security Hardening
 
-1. Provision VM (Ubuntu 22, 4 CPU, 8 GB RAM).
-2. Install k3s single-node.
-3. New repo **`mindfield-infra`**:
+* All ingress on TLS – automatic renewal via Caddy ACME
+* OIDC everywhere: Caddy ► Kong ► Keycloak ► services
+* Secrets stored in Docker Secrets / Vault
+* Trivy scans in CI – build fails on **HIGH** vulnerabilities
+* RBAC enforced in Keycloak; Kong OPA plugin gate-keeps admin routes.
+
+---
+
+## 11. Disaster Recovery & Back-ups
+
+1. **Detect failure** – Loki alert / Pingdom outage
+2. **Provision new VM / cluster** – `make deploy` (Terraform + Flux)
+3. **Restore** –
 
    ```bash
-   flux bootstrap github \
-     --owner=maldous --repository=mindfield-infra \
-     --path=clusters/dev
+   make restore                 # decrypt + velero restore + SQL import
    ```
-4. Helm releases: postgres, api, postgraphile, kong, keycloak, killbill.
+4. **Validate** – health probe `GET /healthz` returns 200
+5. **Post-mortem** – fill template in `docs/runbook.md`.&#x20;
 
 ---
 
-## 11  Backup & DR  `P3  M`
+## 12. Future Enhancements
 
-* Deploy Velero + MinIO (S3 backend).
-* `Schedule` CRD `daily-full` (02:00 UTC).
-* Document restore in `docs/runbook.md`.
-
----
-
-## 12  Observability & Alerts  `P3  M`
-
-* Grafana dashboards:
-
-  * API p95 latency
-  * Kong 5xx rate
-  * Kill Bill payment failures
-* Alertmanager rule: `billing-worker queue length > 100 for 10m`.
-
----
-
-## 13  Feature Flags / Analytics  `P3  M`
-
-* Deploy **PostHog** chart.
-* Env `POSTHOG_KEY` to web & mobile.
-* Flag `new_ui` gating experimental components.
-
----
-
-## 14  Customer Portal MVP  `P3  L`
-
-* Next.js `/account` route:
-
-  * Fetch invoices via Kill Bill API
-  * Usage chart (`react-chartjs-2`)
-  * “Pay with Stripe (test)” button → Checkout Session
-* Header social login buttons (Keycloak auth-link).
-
----
-
-## 15  Performance Baseline  `P3  S`
-
-```bash
-k6 run - <(cat <<'EOF'
-import http from 'k6/http';
-export const options = { vus: 100, duration: '60s' };
-export default () => { http.get('http://api.local/api/items'); };
-EOF
-)
-```
-
-* Record **p95** latency → append to `docs/perf-baseline.md` table.
-
----
-
-### ✨  Completion Definition
-
-Roadmap is **done** when:
-
-1. All check-boxes ticked ✔
-2. `make prod` spins up k3s cluster end-to-end with HTTPS, OIDC login, billing, monitoring.
-3. `docs/runbook.md` + `docs/perf-baseline.md` fully populated.
-
----
+* HashiCorp Vault side-car injector
+* Istio service mesh with mTLS for east-west traffic
+* Blue/Green deploys via Argo-Rollouts
+* Kubecost show-back & budget alerts
+* Marketplace of Helm extensions (ChartMuseum)&#x20;
