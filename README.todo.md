@@ -7,26 +7,7 @@
 
 ---
 
-## Legend
-
-| Emoji / Tag | Meaning |
-|-------------|---------|
-| 🧩 | Applies to **both** Docker-Compose & k3s |
-| 🐳 | Docker-Compose-only work |
-| ☁ | k3s / GitOps-only work |
-| 🔒 | Security-critical |
-| 💸 | Billing & payments |
-| 📈 | Observability / SLO |
-| 🛠  | Developer-experience |
-| 📝 | Docs / knowledge base |
-
-Effort: **S** ≤ 2 days, **M** ≤ 1 week, **L** > 1 week.  
-Priority: **P1** (immediate), **P2** (next), **P3** (later).  
-All file paths are **relative to repo root** unless otherwise stated.
-
----
-
-## 0  Scaffolding Baseline `P1 S` 🧩
+## 0  Scaffolding Baseline `P1 S` 
 
 | # | Item | Deliverable | Acceptance test |
 |---|------|-------------|-----------------|
@@ -37,18 +18,18 @@ All file paths are **relative to repo root** unless otherwise stated.
 | 0.5 | **Compose split** | `docker-compose.base.yml`, `docker-compose.dev.yml`, `docker-compose.monitoring.yml` with the service lists shown in project docs :contentReference[oaicite:1]{index=1} | `make dev` spins up the union without port conflicts |
 | 0.6 | **CI stub** | `.github/workflows/ci.yml` (lint+unit), `reusable-compose.yml` (future) :contentReference[oaicite:2]{index=2} | Green run on clean checkout |
 | 0.7 | **Husky + lint-staged** | Pre-commit runs `pnpm lint && pnpm format` :contentReference[oaicite:3]{index=3} | Commit with a lint error fails locally |
-| 0.8 | `.env.example` | Consolidated: `DOMAIN, LETSENCRYPT_EMAIL, OIDC_*, STRIPE_* …` 🔒 | `./setup.sh` copies → `.env` and `docker compose config` succeeds |
+| 0.8 | `.env.example` | Consolidated: `DOMAIN, LETSENCRYPT_EMAIL, OIDC_*, STRIPE_* …` | `./setup.sh` copies → `.env` and `docker compose config` succeeds |
 
 ---
 
-## 1  Edge / Auth Hardening `P1 M` 🔒
+## 1  Edge / Auth Hardening `P1 M` 
 
 | # | Item | Deliverable | Acceptance test |
 |---|------|-------------|-----------------|
 | 1.1 | OIDC envs | Add vars listed in docs (see README) :contentReference[oaicite:4]{index=4} | `grep OIDC_ .env` prints all |
 | 1.2 | `services/kong/configure.sh` | Template `${OIDC_*}` plus Google & Apple IdPs | Script exits 0; `kong reload` logs show plugin config |
 | 1.3 | `kong/kong.yml` | Declarative config sections per IdP :contentReference[oaicite:5]{index=5} | `curl :8001/routes` shows `/auth/google` & `/auth/apple` |
-| 1.4 | Health probe | Add `/status` route → `return 200` 📈 | Prometheus target up |
+| 1.4 | Health probe | Add `/status` route → `return 200` | Prometheus target up |
 | 1.5 | Flow validation | `curl -I https://app.local/api/secure` redirects → Keycloak | Cypress E2E passes |
 
 **Code snippets**
@@ -80,7 +61,7 @@ reverse_proxy @kong_openapi kong:8000
 
 ---
 
-## 2  Compose Refactor `P1 M` 🐳
+## 2  Compose Refactor `P1 M` 
 
 | #   | Item         | Deliverable                                                    | Acceptance                                           |
 | --- | ------------ | -------------------------------------------------------------- | ---------------------------------------------------- |
@@ -92,7 +73,7 @@ reverse_proxy @kong_openapi kong:8000
 
 ---
 
-## 3  CI Baseline `P1 S` 🧩
+## 3  CI Baseline `P1 S` 
 
 1. `ci.yml` steps: Checkout → Build **base** stack (`--abort-on-container-exit`) → `pnpm test` → **Trivy** scan fail-on-high.
 2. Badge added to README (`build: passing`).
@@ -113,7 +94,7 @@ reverse_proxy @kong_openapi kong:8000
 
 ---
 
-## 5  PostGraphile Adoption `P2 M` 🧩
+## 5  PostGraphile Adoption `P2 M` 
 
 | Step | Command / File | Expectation                                       |                                            |
 | ---- | -------------- | ------------------------------------------------- | ------------------------------------------ |
@@ -125,7 +106,7 @@ reverse_proxy @kong_openapi kong:8000
 
 ---
 
-## 6  Frontend State + Styles `P2 M` 🛠
+## 6  Frontend State + Styles `P2 M` 
 
 | #   | Item          | Deliverable                                                       |
 | --- | ------------- | ----------------------------------------------------------------- |
@@ -137,7 +118,7 @@ reverse_proxy @kong_openapi kong:8000
 
 ---
 
-## 7  Billing Loop v0 `P2 L` 💸
+## 7  Billing Loop v0 `P2 L` 
 
 | #   | Item                  | Deliverable                                               | Test                               |
 | --- | --------------------- | --------------------------------------------------------- | ---------------------------------- |
@@ -149,16 +130,16 @@ reverse_proxy @kong_openapi kong:8000
 
 ---
 
-## 8  Stripe Sandbox Gateway `P2 L` 💸
+## 8  Stripe Sandbox Gateway `P2 L` 
 
 1. Deploy Kill Bill **Stripe** plugin (container `killbill-stripe`).
-2. Map env: `STRIPE_SECRET, STRIPE_PUBLISHABLE` 🔒.
+2. Map env: `STRIPE_SECRET, STRIPE_PUBLISHABLE` .
 3. Execute `$0.01` checkout from `/account/billing`.
 4. Validate `Succeeded` event in Stripe dashboard webhook & Kill Bill invoice.
 
 ---
 
-## 9  Secrets Hardening `P1 S` 🔒
+## 9  Secrets Hardening `P1 S` 
 
 | Step | Action                                                             |
 | ---- | ------------------------------------------------------------------ |
@@ -169,7 +150,7 @@ reverse_proxy @kong_openapi kong:8000
 
 ---
 
-## 10  GitOps Bootstrap `P3 L` ☁
+## 10  GitOps Bootstrap `P3 L` 
 
 | #    | Item             | Deliverable                                                           | Validation                             |
 | ---- | ---------------- | --------------------------------------------------------------------- | -------------------------------------- |
@@ -181,7 +162,7 @@ reverse_proxy @kong_openapi kong:8000
 
 ---
 
-## 11  Backup & DR `P3 M` ☁ 🔒
+## 11  Backup & DR `P3 M` 
 
 | #    | Item            | Deliverable                                                      |
 | ---- | --------------- | ---------------------------------------------------------------- |
@@ -189,12 +170,12 @@ reverse_proxy @kong_openapi kong:8000
 | 11.2 | Schedule        | `daily-full` 02:00 UTC CRD                                       |
 | 11.3 | Restic hook     | Pre-backup `pg_dumpall` script                                   |
 | 11.4 | Encrypt         | `age` encryption script in `backups/restore-scripts/encrypt.sh`  |
-| 11.5 | Restore runbook | `docs/runbook.md` step-by-step 📝                                |
+| 11.5 | Restore runbook | `docs/runbook.md` step-by-step |
 | 11.6 | CI DR test      | Kind cluster → `make restore` → health 200                       |
 
 ---
 
-## 12  Observability & Alerts `P3 M` 📈
+## 12  Observability & Alerts `P3 M` 
 
 | Item           | Detail                                                                                       |
 | -------------- | -------------------------------------------------------------------------------------------- |
@@ -213,7 +194,7 @@ reverse_proxy @kong_openapi kong:8000
 
 ---
 
-## 14  Customer Portal MVP `P3 L` 💸
+## 14  Customer Portal MVP `P3 L` 
 
 | Feature         | Implementation                                                           |
 | --------------- | ------------------------------------------------------------------------ |
@@ -224,7 +205,7 @@ reverse_proxy @kong_openapi kong:8000
 
 ---
 
-## 15  Performance Baseline `P3 S` 📈
+## 15  Performance Baseline `P3 S` 
 
 1. `performance/k6-load.js` hitting `/api/questions` with 100 VU.
 2. Save p95 latency into `docs/perf-baseline.md`.
@@ -232,7 +213,7 @@ reverse_proxy @kong_openapi kong:8000
 
 ---
 
-## 16  Mobile (Expo) Readiness `P3 M` 🛠
+## 16  Mobile (Expo) Readiness `P3 M` 
 
 | Step        | Detail                                                        |
 | ----------- | ------------------------------------------------------------- |
@@ -245,7 +226,7 @@ reverse_proxy @kong_openapi kong:8000
 
 ## 17  Enterprise Enhancements (back-burner)
 
-* HashiCorp Vault injector 🔒
+* HashiCorp Vault injector 
 * Istio + mTLS mesh
 * Kubecost, Kiali, OPA Gatekeeper&#x20;
 * ChartMuseum / Harbor marketplace
