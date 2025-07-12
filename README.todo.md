@@ -11,7 +11,7 @@
 
 | # | Item | Deliverable | Acceptance test |
 |---|------|-------------|-----------------|
-| 0.1 | `.gitignore` refresh | Ignore `dist/`, `nx/cache`, `*.age`, `.DS_Store` | `git status` shows **no** unstaged build artefacts |
+| ~~0.1~~ | ~~`.gitignore` refresh~~ | ~~Ignore `dist/`, `nx/cache`, `*.age`, `.DS_Store`~~ | ~~`git status` shows **no** unstaged build artefacts~~ |
 | 0.2 | `.editorconfig` | 2-space YAML, 4-space TS, final newline | VS Code detects config automatically |
 | 0.3 | `CODEOWNERS` | `* @maldous` + domain folders | Opening a PR assigns owners automatically |
 | 0.4 | Directory skeleton | `infra/ secrets-templates/ backups/` sub-dirs created | `tree -dL 1` lists the dirs :contentReference[oaicite:0]{index=0} |
