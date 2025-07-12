@@ -18,7 +18,7 @@
 | 0.5 | **Compose split** | `docker-compose.base.yml`, `docker-compose.dev.yml`, `docker-compose.monitoring.yml` with the service lists shown in project docs :contentReference[oaicite:1]{index=1} | `make dev` spins up the union without port conflicts |
 | 0.6 | **CI stub** | `.github/workflows/ci.yml` (lint+unit), `reusable-compose.yml` (future) :contentReference[oaicite:2]{index=2} | Green run on clean checkout |
 | 0.7 | **Husky + lint-staged** | Pre-commit runs `pnpm lint && pnpm format` :contentReference[oaicite:3]{index=3} | Commit with a lint error fails locally |
-| 0.8 | `.env.example` | Consolidated: `DOMAIN, LETSENCRYPT_EMAIL, OIDC_*, STRIPE_* …` | `./setup.sh` copies → `.env` and `docker compose config` succeeds |
+| 0.8 | `.env.example` | Consolidated: `DOMAIN, LETSENCRYPT_EMAIL, OIDC_*, STRIPE_* ...` | `./setup.sh` copies → `.env` and `docker compose config` succeeds |
 
 ---
 
@@ -79,11 +79,11 @@ reverse_proxy @kong_openapi kong:8000
 2. Badge added to README (`build: passing`).
 3. Self-hosted runner image caching (GitHub Actions cache layer).
 
-✅  Pass when `gh run watch` ends green.
+Pass when `gh run watch` ends green.
 
 ---
 
-## 4  Web Testing Seed `P2 S` 🛠
+## 4  Web Testing Seed `P2 S` 
 
 | #   | Item           | Details                                                             |
 | --- | -------------- | ------------------------------------------------------------------- |

@@ -56,17 +56,17 @@ Internet ──► HTTPS ───►│        Caddy           │◄─ Let's 
              │                  │               │
              ▼                  ▼               ▼
     ┌──────────────┐   ┌────────────────┐  ┌──────────────┐
-    │  services/api │   │  Kill Bill     │  │  Postgraphile│
-    │  NestJS REST  │   │  Billing       │  │  GraphQL     │
+    │ services/api │   │  Kill Bill     │  │  Postgraphile│
+    │ NestJS REST  │   │  Billing       │  │  GraphQL     │
     └──────────────┘   └────────────────┘  └──────────────┘
              │               │                     │
              ▼               │                     ▼
     ┌──────────────┐         │            ┌────────────────┐
-    │ PostgreSQL    │◄───────┴────────────┤   PgBouncer    │
+    │ PostgreSQL   │◄────────┴────────────┤   PgBouncer    │
     └──────────────┘                      └────────────────┘
 ````
 
-Full description in *docs/architecture.md*.&#x20;
+Full description in *docs/architecture.md*.
 
 ---
 
@@ -86,8 +86,6 @@ mindfield/
 └── Makefile              # Dev & CI shortcuts
 ```
 
-
-
 ---
 
 ## 4. Prerequisites
@@ -97,7 +95,7 @@ mindfield/
 * Open ports **80/443** (production)
 * DNS A-records for `*.yourdomain.com` pointing at the host
 * *Optional / Production*: 4 vCPU, 8 GiB RAM VM or better
-  (k3s, FluxCD, Velero, etc.)&#x20;
+  (k3s, FluxCD, Velero, etc.)
 
 ---
 
@@ -134,17 +132,17 @@ flux bootstrap github \
 
 ## 6. Service Catalogue
 
-* **Edge & Auth** – Caddy, Kong, Keycloak&#x20;
-* **Core** – `services/api`, BullMQ workers, Postgraphile&#x20;
+* **Edge & Auth** – Caddy, Kong, Keycloak
+* **Core** – `services/api`, BullMQ workers, Postgraphile
 * **Data Stores** – PostgreSQL 15 + PgBouncer, Redis 7, MinIO, OpenSearch
 * **Privacy** – Presidio (analyzer, anonymizer, image-redactor)
 * **Billing** – Kill Bill + Stripe plugin
 * **Observability** – Prometheus, Grafana, Loki, Jaeger, Alertmanager
 * **Developer Tools** – Storybook, Swagger-UI, ReDoc, SonarQube, PgAdmin,
-  Redis-Insight, Mailhog, MkDocs&#x20;
+  Redis-Insight, Mailhog, MkDocs
 
 *All UI containers are fronted by Caddy under `https://{service}.{DOMAIN}` when
-authenticated; internal-only services expose no public ports.*&#x20;
+authenticated; internal-only services expose no public ports.*
 
 ---
 
@@ -170,7 +168,7 @@ Compose layering strategy:
 | `docker-compose.dev.yml`        | Dev-only extras (mailhog, minio, mkdocs, presidio)         |
 | `docker-compose.monitoring.yml` | Prometheus, Grafana, Loki, etc.                            |
 
-Health-checks are applied to every long-running container.&#x20;
+Health-checks are applied to every long-running container.
 
 ---
 
@@ -198,7 +196,7 @@ Health-checks are applied to every long-running container.&#x20;
 | **15** | **Performance Baseline**        | **P3 S** | k6 p95 latency test, perf-baseline doc         |
 
 Detailed check-boxes for every sub-task live in
-`README.todo.md` (generated from this table).&#x20;
+`README.todo.md` (generated from this table).
 
 ---
 
@@ -219,7 +217,7 @@ Detailed check-boxes for every sub-task live in
 
   * API p95 > 750 ms for 10 min
   * billing-usage queue length > 100 for 10 min
-* Loki retains 14 days logs; Promtail tails `/var/log/containers/*.log`.&#x20;
+* Loki retains 14 days logs; Promtail tails `/var/log/containers/*.log`.
 
 ### 9.3 Common Commands
 
@@ -229,8 +227,6 @@ docker compose exec kong curl -s localhost:8001/services | jq
 docker compose restart api
 docker compose down -v   # Wipes data – be careful!
 ```
-
-
 
 ---
 
@@ -254,7 +250,7 @@ docker compose down -v   # Wipes data – be careful!
    make restore                 # decrypt + velero restore + SQL import
    ```
 4. **Validate** – health probe `GET /healthz` returns 200
-5. **Post-mortem** – fill template in `docs/runbook.md`.&#x20;
+5. **Post-mortem** – fill template in `docs/runbook.md`.
 
 ---
 
@@ -264,4 +260,4 @@ docker compose down -v   # Wipes data – be careful!
 * Istio service mesh with mTLS for east-west traffic
 * Blue/Green deploys via Argo-Rollouts
 * Kubecost show-back & budget alerts
-* Marketplace of Helm extensions (ChartMuseum)&#x20;
+* Marketplace of Helm extensions (ChartMuseum)
