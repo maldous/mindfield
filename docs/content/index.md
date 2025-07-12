@@ -36,12 +36,9 @@ MindField is a personality profiling app built with React. It helps users explor
 
 ### API Development Tools
 
-- **[hasura](https://hasura.aldous.info/)** - Instant GraphQL API
 - **[postgraphile](https://postgraphile.aldous.info/)** - GraphQL API for PostgreSQL
-- **[postgrest](https://postgrest.aldous.info/)** - REST API for PostgreSQL
 - **[swagger-ui](https://swagger-ui.aldous.info/)** - Interactive API documentation
 - **[redoc](https://redoc.aldous.info/)** - API documentation
-- **[prisma-studio](https://prisma-studio.aldous.info/)** - Database ORM UI
 
 ### Monitoring & Observability
 
@@ -64,7 +61,6 @@ MindField is a personality profiling app built with React. It helps users explor
 
 ### Infrastructure Services
 
-- **[rabbitmq](https://rabbitmq.aldous.info/)** - Message broker
 - **[mailhog](https://mailhog.aldous.info/)** - Email testing
 - **[trivy](https://trivy.aldous.info/)** - Security scanning
 
