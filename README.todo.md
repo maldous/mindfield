@@ -14,10 +14,10 @@
 | ~~0.1~~ | ~~`.gitignore` refresh~~ | ~~Ignore `dist/`, `nx/cache`, `*.age`, `.DS_Store`~~ | ~~`git status` shows **no** unstaged build artefacts~~ |
 | ~~0.2~~ | ~~`.editorconfig`~~ | ~~2-space YAML, 4-space TS, final newline~~ | ~~VS Code detects config automatically~~ |
 | ~~0.3~~ | ~~`CODEOWNERS`~~ | ~~`* @maldous` + domain folders~~ | ~~Opening a PR assigns owners automatically~~ |
-| ~~0.4~~ | ~~Directory skeleton~~ | ~~`infra/ secrets/ backups/` sub-dirs created~~ | ~~`tree -dL 1` lists the dirs :contentReference[oaicite:0]{index=0}~~ |
-| 0.5 | **Compose split** | `docker-compose.base.yml`, `docker-compose.dev.yml`, `docker-compose.monitoring.yml` with the service lists shown in project docs :contentReference[oaicite:1]{index=1} | `make dev` spins up the union without port conflicts |
-| 0.6 | **CI stub** | `.github/workflows/ci.yml` (lint+unit), `reusable-compose.yml` (future) :contentReference[oaicite:2]{index=2} | Green run on clean checkout |
-| 0.7 | **Husky + lint-staged** | Pre-commit runs `pnpm lint && pnpm format` :contentReference[oaicite:3]{index=3} | Commit with a lint error fails locally |
+| ~~0.4~~ | ~~Directory skeleton~~ | ~~`infra/ secrets/ backups/` sub-dirs created~~ | ~~`tree -dL 1` lists the dirs~~ |
+| 0.5 | **Compose split** | `docker-compose.base.yml`, `docker-compose.dev.yml`, `docker-compose.monitoring.yml` with the service lists shown in project docs | `make dev` spins up the union without port conflicts |
+| 0.6 | **CI stub** | `.github/workflows/ci.yml` (lint+unit), `reusable-compose.yml` (future) | Green run on clean checkout |
+| 0.7 | **Husky + lint-staged** | Pre-commit runs `pnpm lint && pnpm format` | Commit with a lint error fails locally |
 | 0.8 | `.env.example` | Consolidated: `DOMAIN, LETSENCRYPT_EMAIL, OIDC_*, STRIPE_* ...` | `./setup.sh` copies → `.env` and `docker compose config` succeeds |
 
 ---
@@ -26,9 +26,9 @@
 
 | # | Item | Deliverable | Acceptance test |
 |---|------|-------------|-----------------|
-| 1.1 | OIDC envs | Add vars listed in docs (see README) :contentReference[oaicite:4]{index=4} | `grep OIDC_ .env` prints all |
+| 1.1 | OIDC envs | Add vars listed in docs (see README) | `grep OIDC_ .env` prints all |
 | 1.2 | `services/kong/configure.sh` | Template `${OIDC_*}` plus Google & Apple IdPs | Script exits 0; `kong reload` logs show plugin config |
-| 1.3 | `kong/kong.yml` | Declarative config sections per IdP :contentReference[oaicite:5]{index=5} | `curl :8001/routes` shows `/auth/google` & `/auth/apple` |
+| 1.3 | `kong/kong.yml` | Declarative config sections per IdP | `curl :8001/routes` shows `/auth/google` & `/auth/apple` |
 | 1.4 | Health probe | Add `/status` route → `return 200` | Prometheus target up |
 | 1.5 | Flow validation | `curl -I https://app.local/api/secure` redirects → Keycloak | Cypress E2E passes |
 
