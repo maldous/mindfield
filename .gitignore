@@ -1,7 +1,6 @@
 # Dependencies & lockfiles
 node_modules/
 jspm_packages/
-pnpm-lock.yaml
 .pnp.*
 
 # Build outputs & caches
