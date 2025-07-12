@@ -136,7 +136,7 @@ transform.{$DOMAIN:mindfield.local},
 submission.{$DOMAIN:mindfield.local},
 kong.{$DOMAIN:mindfield.local},
 swagger-ui.{$DOMAIN:mindfield.local},
-redoc.{$DOMAIN:mindfield.local},
+redoc.{$DOMAIN:mindfield.local} {
     tls {$LETSENCRYPT_EMAIL}
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
