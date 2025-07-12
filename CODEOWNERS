@@ -2,12 +2,12 @@
 * @maldous
 
 # Domain-specific folders
-apps/        @maldous
-core/        @maldous
-services/    @maldous
-infra/       @maldous
-dockerfiles/ @maldous
-docs/        @maldous
-scripts/     @maldous
-backups/     @maldous
-secrets/     @maldous
+apps/ @maldous
+core/ @maldous
+services/ @maldous
+infra/ @maldous
+docker/ @maldous
+docs/ @maldous
+scripts/ @maldous
+backups/ @maldous
+secrets/ @maldous

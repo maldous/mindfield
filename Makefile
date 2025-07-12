@@ -5,6 +5,7 @@ export COMPOSE_DOCKER_CLI_BUILD=1
 export COMPOSE_BAKE=1
 export NODE_MAJOR ?= $(shell cut -d. -f1 .node-version)
 export REGISTRY_CACHE ?= localhost:5001/mindfield-cache
+export DOCKER_COMPOSE = --project-directory . -f docker/docker-compose.api.yml -f docker/docker-compose.auth.yml -f docker/docker-compose.base.yml -f docker/docker-compose.core.yml -f docker/docker-compose.dev.yml -f docker/docker-compose.infra.yml -f docker/docker-compose.monitor.yml -f docker/docker-compose.process.yml -f docker/docker-compose.search.yml -f docker/docker-compose.storage.yml
 
 help:
 	@echo "make setup           - Initial project setup"
@@ -39,14 +40,11 @@ lint: ; @pnpm turbo run lint
 format: ; @pnpm format
 tidy: ; @pnpm tidy
 type-check: ; @pnpm turbo run type-check
-logs: ; @docker compose logs -f
-stop: ; @docker compose down
-start: install build base-image ; @docker compose build --pull --parallel && docker compose up -d --remove-orphans
-dev: install build base-image ; @docker compose -f docker-compose.yml -f docker-compose.dev.yml build --pull --parallel && docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --remove-orphans
-prod: start
-restart: stop start
-restart-dev: stop dev
-stop-dev: ; @docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+logs: ; @docker compose ${DOCKER_COMPOSE} logs -f
+stop: ; @docker compose ${DOCKER_COMPOSE} down
+start: install build base-image ; docker compose ${DOCKER_COMPOSE} build --pull --parallel && docker compose ${DOCKER_COMPOSE} up -d --remove-orphans
+dev: install build base-image ; docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml build --pull --parallel && docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml up -d --remove-orphans
+stop-dev: ; @docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml down
 all: setup reset setup start
 
 ports:
@@ -122,7 +120,7 @@ base-image: docker-config
 	--cache-from=type=registry,ref=$(REGISTRY_CACHE) \
 	--cache-to=type=registry,ref=$(REGISTRY_CACHE),mode=max,oci-mediatypes=true \
 	--build-arg NODE_MAJOR=$(NODE_MAJOR) \
-	-f dockerfiles/Dockerfile.base \
+	-f docker/Dockerfile.base \
 	-t $(REGISTRY_CACHE)/base-deps:$(NODE_MAJOR) .
 
 clean: stop
