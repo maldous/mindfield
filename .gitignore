@@ -1,49 +1,38 @@
-# Node dependencies
-/node_modules/
-/jspm_packages/
+# Dependencies & lockfiles
+node_modules/
+jspm_packages/
+pnpm-lock.yaml
+.pnp.*
 
-# Lockfiles
-/pnpm-lock.yaml
-/.pnp.*
+# Build outputs & caches
+.next/
+storybook-static/
+.turbo/
+dist/
+.cache/
+.temp/
+build/
+out/
+vitepress/cache/
+vitepress/dist/
+.docusaurus/
+.nuxt/
+.svelte-kit/
+.parcel-cache/
+.serverless/
+.nyc_output/
+.fusebox/
+scannerwork/
+babel-cache/
 
-# Caches & build outputs
-/.cache/
-/.temp/
-/build/
-/dist/
-/out/
-/.vitepress/cache/
-/. vitepress/dist/
-/storybook-static/
-/.docusaurus/
-/.nuxt/
-/.next/
-/.svelte-kit/
-/.parcel-cache/
-/serverless/
-/. nyc_output/
-/turbo/
-/.fusebox/
-/. scannerwork/
-/babel-cache/
-/. fusebox/
-/jspm_packages/
-/.turbo/
-/database/backups/
-
-# Coverage reports
-/coverage/
-/lcov-report/
-/*.lcov
+# Coverage
+coverage/
+lcov-report/
+*.lcov
 
 # Logs & pids
 *.log
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
-lerna-debug.log*
-*.pid
-*.pid.lock
+*.pid*
 
 # TypeScript
 *.tsbuildinfo
@@ -58,29 +47,29 @@ lerna-debug.log*
 Thumbs.db
 
 # Editors & IDEs
-/.vscode/
-/.idea/
-/*.suo
-/*.ntvs*
-/*.njsproj
-/*.sln
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 
 # Miscellaneous
-/node_repl_history
-/tern-port
-/lock-wscript
-/yarn-integrity
-/report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-/vite.config.js.timestamp-*
-/vite.config.ts.timestamp-*
+node_repl_history
+tern-port
+lock-wscript
+yarn-integrity
+report.[0-9]*.json
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
 
-# Service-specific folders
+# Service-specific
 /caddy/*
-!/**/services/caddy/**
+!services/caddy/**
 
 # Database fixtures & backups
-/database/backups/
-/database/init/01-init-keycloak.sql
+database/backups/
+database/init/01-init-keycloak.sql
 
 # Sonar report
-/sonar.json
+sonar.json
