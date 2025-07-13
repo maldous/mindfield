@@ -1,5 +1,13 @@
-services:
+---
+x-build-env:
 
+  BUILDKIT_INLINE_CACHE: "1"
+  BUILDKIT_PROGRESS: plain
+  DOCKER_BUILDKIT: "1"
+
+name: mindfield
+
+services:
   alertmanager:
     ports:
       - mode: ingress
@@ -38,12 +46,12 @@ services:
   jaeger:
     ports:
       - mode: ingress
-        target: 16686
-        published: "16686"
-        protocol: tcp
-      - mode: ingress
         target: 14268
         published: "14268"
+        protocol: tcp
+      - mode: ingress
+        target: 16686
+        published: "16686"
         protocol: tcp
 
   keycloak:
@@ -60,12 +68,12 @@ services:
         published: "8002"
         protocol: tcp
       - mode: ingress
-        target: 8443
-        published: "8444"
-        protocol: tcp
-      - mode: ingress
         target: 8001
         published: "8003"
+        protocol: tcp
+      - mode: ingress
+        target: 8443
+        published: "8444"
         protocol: tcp
       - mode: ingress
         target: 8444

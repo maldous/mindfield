@@ -5,23 +5,21 @@ KONG_ADMIN_URL=http://kong:8001
 
 until curl -s "$KONG_ADMIN_URL/status" >/dev/null; do sleep 2; done
 
-PLUGIN_ID=$(
-  curl -s "$KONG_ADMIN_URL/plugins" \
-    | jq -r '.data[]|select(.name=="oidc").id'
-)
-
 if ! curl -s "$KONG_ADMIN_URL/plugins" | grep -q '"name":"oidc"'; then
-  curl -s -X POST "$KONG_ADMIN_URL/plugins" -H "Content-Type: application/json" \
-    -d '{"name":"oidc","config":{
-         "client_id":"'"$OIDC_CLIENT_ID"'",
-         "client_secret":"'"$OIDC_CLIENT_SECRET"'",
-         "discovery":"https://keycloak.'"$DOMAIN"'/realms/mindfield",
-         "redirect_uri":"https://api.'"$DOMAIN"'/callback",
-         "scope":"openid profile email",
-         "use_jwks":"yes",
-         "realm":"mindfield",
-         "session_secret":"'"$OIDC_SESSION_SECRET"'"
-       }}'
+  curl -s -X POST "$KONG_ADMIN_URL/plugins" -H 'Content-Type: application/json' \
+  -d '{
+        "name": "oidc",
+        "config": {
+          "realm": "mindfield",
+	  "discovery":"https://keycloak.'"$DOMAIN"'/realms/mindfield/.well-known/openid-configuration",
+          "client_id": "'"$OIDC_CLIENT_ID"'",
+          "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+          "redirect_uri": "https://api.'"$DOMAIN"'/callback",
+          "scope": "openid profile email",
+          "session_secret": "'"$OIDC_SESSION_SECRET"'",
+          "use_jwks": "yes"
+        }
+      }'
 fi
 
 if ! curl -s "$KONG_ADMIN_URL/plugins" | grep -q '"name":"rate-limiting"'; then

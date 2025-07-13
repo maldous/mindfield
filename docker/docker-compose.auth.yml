@@ -1,9 +1,13 @@
 ---
+x-build-env:
+
+  BUILDKIT_INLINE_CACHE: "1"
+  BUILDKIT_PROGRESS: plain
+  DOCKER_BUILDKIT: "1"
 
 name: mindfield
 
 services:
-
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     depends_on:
@@ -29,90 +33,44 @@ services:
     mem_limit: "536870912"
 
   kong:
-    image: revomatico/docker-kong-oidc:3.4.0-2
+    image: kong/kong-gateway:latest
+    depends_on:
+      kong-bootstrap:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    networks:
+      - frontend
+      - backend
+    restart: on-failure
+
+  kong-bootstrap:
+    image: kong/kong-gateway:latest
     depends_on:
       kong-database:
         condition: service_healthy
-        required: true
-      kong-migrations:
-        condition: service_completed_successfully
-        required: true
     env_file:
       - .env
     networks:
-      backend: null
-      frontend: null
-    healthcheck:
-      test:
-        - CMD
-        - kong
-        - health
-      timeout: 10s
-      interval: 10s
-      retries: 3
-    cpus: 1
-    mem_limit: "1073741824"
-
-  kong-configure:
-    image: curlimages/curl:latest
-    depends_on:
-      kong:
-        condition: service_healthy
-        required: true
-    volumes:
-      - type: bind
-        source: ./services/kong/configure.sh
-        target: /configure.sh
-        bind:
-          create_host_path: true
-    env_file:
-      - .env
-    networks:
-      backend: null
-    command:
-      - sh
-      - /configure.sh
-    restart: "no"
-    cpus: 0.25
+      - backend
+    command: kong migrations bootstrap
+    restart: on-failure
 
   kong-database:
-    image: postgres:15-alpine
+    image: postgres:latest
     volumes:
-      - type: volume
-        source: kong_db_data
-        target: /var/lib/postgresql/data
-        volume: {}
-    environment:
-      POSTGRES_DB: ${KONG_POSTGRES_DB}
-      POSTGRES_USER: ${KONG_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${KONG_POSTGRES_PASSWORD}
+      - kong_db_data:/var/lib/postgresql/data
     env_file:
       - .env
     networks:
-      backend: null
+      - backend
+    restart: on-failure
     healthcheck:
       test:
-        - CMD-SHELL
-        - pg_isready -U kong
-      timeout: 5s
-      interval: 10s
-      retries: 5
-    cpus: 0.5
-    mem_limit: "268435456"
-
-  kong-migrations:
-    image: kong:3.4.0
-    depends_on:
-      kong-database:
-        condition: service_healthy
-        required: true
-    env_file:
-      - .env
-    networks:
-      backend: null
-    command:
-      - kong
-      - migrations
-      - bootstrap
-    restart: "no"
-    cpus: 0.25
+        - "CMD"
+        - "pg_isready"
+        - "-U"
+        - "kong"
+      interval: 5s
+      timeout: 10s
+      retries: 10

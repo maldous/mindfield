@@ -14,7 +14,7 @@ help:
 	@echo "make base-image      - Build & push base-deps image"
 	@echo "make docker-config   - Verify Docker daemon config"
 	@echo "make start           - Build & start full dev stack via Caddy"
-	@echo "make dev             - Build & start dev stack with exposed ports"
+	@echo "make start-dev       - Build & start dev stack with exposed ports"
 	@echo "make prod            - Alias for start (production mode)"
 	@echo "make test            - Run all tests"
 	@echo "make lint            - ESLint across workspace"
@@ -24,8 +24,6 @@ help:
 	@echo "make logs            - Tail docker logs"
 	@echo "make stop            - Stop all services"
 	@echo "make stop-dev        - Stop dev stack only"
-	@echo "make restart         - Stop and start all services"
-	@echo "make restart-dev     - Stop and start dev stack only"
 	@echo "make clean           - Tear down & prune images"
 	@echo "make reset           - Full reset (prune volumes, clean, etc.)"
 	@echo "make sonar           - Run SonarQube analysis"
@@ -41,10 +39,10 @@ tidy: ; pnpm tidy
 type-check: ; pnpm turbo run type-check
 logs: ; docker compose ${DOCKER_COMPOSE} logs -f
 
-start: base-image build ; docker compose ${DOCKER_COMPOSE} build --pull --parallel && docker compose ${DOCKER_COMPOSE} up -d --remove-orphans
+start: base-image build ; docker compose ${DOCKER_COMPOSE} build --no-cache --pull --parallel && docker compose ${DOCKER_COMPOSE} up -d --remove-orphans
 stop: ; touch .env && docker compose ${DOCKER_COMPOSE} down
 
-start-dev: base-image build ; docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml build --pull --parallel && docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml up -d --remove-orphans
+start-dev: base-image build ; docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml build --no-cache --pull --parallel && docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml up -d --remove-orphans
 stop-dev: ; docker compose ${DOCKER_COMPOSE} -f docker/docker-compose.net.yml down
 
 all: reset setup install start

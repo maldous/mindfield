@@ -1,5 +1,4 @@
 ---
-
 x-build-env:
 
   BUILDKIT_INLINE_CACHE: "1"
@@ -9,7 +8,6 @@ x-build-env:
 name: mindfield
 
 services:
-
   minio:
     image: minio/minio:latest
     volumes:
@@ -67,7 +65,7 @@ services:
     mem_limit: "67108864"
 
   postgres:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     volumes:
       - type: volume
         source: postgres_data

@@ -1,5 +1,4 @@
 ---
-
 x-build-env:
 
   BUILDKIT_INLINE_CACHE: "1"
@@ -9,7 +8,6 @@ x-build-env:
 name: mindfield
 
 services:
-
   opensearch:
     image: opensearchproject/opensearch:latest
     volumes:
