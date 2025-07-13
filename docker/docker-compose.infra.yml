@@ -14,10 +14,16 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
     volumes:
       - type: bind
+        source: /var/log/caddy/
+        target: /var/log/caddy/
+        bind:
+          create_host_path: true
+      - type: bind
         source: ./services/caddy/Caddyfile
         target: /etc/caddy/Caddyfile
         bind:
           create_host_path: true
+
       - type: bind
         source: ./caddy/data
         target: /data
