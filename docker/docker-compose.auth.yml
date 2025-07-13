@@ -24,7 +24,7 @@ services:
       backend: null
       frontend: null
     command:
-      - start-dev
+      - start
     cpus: 0.5
     mem_limit: "536870912"
 

@@ -163,7 +163,12 @@ redoc.{$DOMAIN:mindfield.local} {
     reverse_proxy @docs_prod mkdocs:8000
 
     @keycloak_prod host keycloak.{$DOMAIN:mindfield.local}
-    reverse_proxy @keycloak_prod keycloak:8080
+    reverse_proxy keycloak:8080 {
+        header_up Host {host}
+        header_up X-Forwarded-Host {host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-For {remote_host}
+    }
 
     @minio-console_prod host minio-console.{$DOMAIN:mindfield.local}
     reverse_proxy @minio-console_prod minio:9001
