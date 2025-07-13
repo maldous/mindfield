@@ -1,0 +1,2 @@
+"kong" "kong_dev_password"
+"mindfield" "md599904b48ee226d47936325683d353539"

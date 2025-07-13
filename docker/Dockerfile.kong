@@ -1,0 +1,13 @@
+FROM kong/kong-gateway:latest
+
+USER root
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends unzip \
+ && luarocks install kong-oidc-v3 \
+ && apt-get purge -y --auto-remove unzip \
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p /etc/kong \
+ && touch /etc/kong/kong.license
+
+USER kong

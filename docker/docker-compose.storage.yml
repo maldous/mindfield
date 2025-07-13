@@ -42,6 +42,13 @@ services:
       postgres:
         condition: service_healthy
         required: true
+    volumes:
+      - type: bind
+        source: ./services/pgbouncer
+        target: /etc/pgbouncer
+        bind:
+          create_host_path: true
+    user: root
     env_file:
       - .env
     networks:
@@ -72,7 +79,7 @@ services:
         target: /var/lib/postgresql/data
         volume: {}
       - type: bind
-        source: ./database/init
+        source: ./services/postgres/init
         target: /docker-entrypoint-initdb.d
         bind:
           create_host_path: true
