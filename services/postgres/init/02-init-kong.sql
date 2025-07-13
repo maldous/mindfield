@@ -1,3 +1,3 @@
 CREATE DATABASE kong;
+CREATE USER kong WITH PASSWORD 'kong_dev_password';
 GRANT ALL PRIVILEGES ON DATABASE kong TO kong;
-ALTER ROLE kong WITH PASSWORD 'kong_dev_password';
