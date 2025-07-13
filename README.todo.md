@@ -9,28 +9,28 @@
 
 ## 0 Scaffolding Baseline `P1 S`
 
-| #       | Item                        | Deliverable                                                                              | Acceptance test                                                   |
-| ------- | --------------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| ~~0.1~~ | ~~`.gitignore` refresh~~    | ~~Ignore `dist/`, `nx/cache`, `*.age`, `.DS_Store`~~                                     | ~~`git status` shows **no** unstaged build artefacts~~            |
-| ~~0.2~~ | ~~`.editorconfig`~~         | ~~2-space YAML, 4-space TS, final newline~~                                              | ~~VS Code detects config automatically~~                          |
-| ~~0.3~~ | ~~`CODEOWNERS`~~            | ~~`* @maldous` + domain folders~~                                                        | ~~Opening a PR assigns owners automatically~~                     |
-| ~~0.4~~ | ~~Directory skeleton~~      | ~~`infra/ secrets/ backups/` sub-dirs created~~                                          | ~~`tree -dL 1` lists the dirs~~                                   |
-| ~~0.5~~ | ~~**Compose split**~~       | ~~`docker-compose.base.yml`, `docker-compose.dev.yml`, `docker-compose.monitoring.yml`~~ | ~~`make dev` spins up the union without port conflicts~~          |
-| ~~0.6~~ | ~~**CI stub**~~             | ~~`.github/workflows/ci.yml` (lint+unit), `reusable-compose.yml` (future)~~              | ~~Green run on clean checkout~~                                   |
-| ~~0.7~~ | ~~**Husky + lint-staged**~~ | ~~Pre-commit runs `pnpm lint && pnpm format`~~                                           | ~~Commit with a lint error fails locally~~                        |
-| 0.8     | `.env.example`              | Consolidated: `DOMAIN, LETSENCRYPT_EMAIL, OIDC_*, STRIPE_* ...`                          | `./setup.sh` copies → `.env` and `docker compose config` succeeds |
+| ~~#~~   | ~~Item~~                    | ~~Deliverable~~                                                                          | ~~Acceptance test~~                                              |
+| ------- | --------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| ~~0.1~~ | ~~`.gitignore` refresh~~    | ~~Ignore `dist/`, `nx/cache`, `*.age`, `.DS_Store`~~                                     | ~~`git status` shows **no** unstaged build artefacts~~           |
+| ~~0.2~~ | ~~`.editorconfig`~~         | ~~2-space YAML, 4-space TS, final newline~~                                              | ~~VS Code detects config automatically~~                         |
+| ~~0.3~~ | ~~`CODEOWNERS`~~            | ~~`* @maldous` + domain folders~~                                                        | ~~Opening a PR assigns owners automatically~~                    |
+| ~~0.4~~ | ~~Directory skeleton~~      | ~~`infra/ secrets/ backups/` sub-dirs created~~                                          | ~~`tree -dL 1` lists the dirs~~                                  |
+| ~~0.5~~ | ~~**Compose split**~~       | ~~`docker-compose.base.yml`, `docker-compose.dev.yml`, `docker-compose.monitoring.yml`~~ | ~~`make dev` spins up the union without port conflicts~~         |
+| ~~0.6~~ | ~~**CI stub**~~             | ~~`.github/workflows/ci.yml` (lint+unit), `reusable-compose.yml` (future)~~              | ~~Green run on clean checkout~~                                  |
+| ~~0.7~~ | ~~**Husky + lint-staged**~~ | ~~Pre-commit runs `pnpm lint && pnpm format`~~                                           | ~~Commit with a lint error fails locally~~                       |
+| ~~0.8~~ | ~~`.env.example`~~          | ~~Consolidated: `DOMAIN, LETSENCRYPT_EMAIL, OIDC_*, STRIPE_* ...`~~                      | ~~./setup.sh`copies →`.env`and`docker compose config` succeeds~~ |
 
 ---
 
 ## 1 Edge / Auth Hardening `P1 M`
 
-| #   | Item                         | Deliverable                                                 | Acceptance test                                          |
-| --- | ---------------------------- | ----------------------------------------------------------- | -------------------------------------------------------- |
-| 1.1 | OIDC envs                    | Add vars listed in docs (see README)                        | `grep OIDC_ .env` prints all                             |
-| 1.2 | `services/kong/configure.sh` | Template `${OIDC_*}` plus Google & Apple IdPs               | Script exits 0; `kong reload` logs show plugin config    |
-| 1.3 | `kong/kong.yml`              | Declarative config sections per IdP                         | `curl :8001/routes` shows `/auth/google` & `/auth/apple` |
-| 1.4 | Health probe                 | Add `/status` route → `return 200`                          | Prometheus target up                                     |
-| 1.5 | Flow validation              | `curl -I https://app.local/api/secure` redirects → Keycloak | Cypress E2E passes                                       |
+| #       | Item                         | Deliverable                                                 | Acceptance test                                          |
+| ------- | ---------------------------- | ----------------------------------------------------------- | -------------------------------------------------------- |
+| ~~1.1~~ | ~~OIDC envs~~                | ~~Add vars listed in docs (see README)~~                    | ~~`grep OIDC_ .env` prints all~~                         |
+| 1.2     | `services/kong/configure.sh` | Template `${OIDC_*}` plus Google & Apple IdPs               | Script exits 0; `kong reload` logs show plugin config    |
+| 1.3     | `kong/kong.yml`              | Declarative config sections per IdP                         | `curl :8001/routes` shows `/auth/google` & `/auth/apple` |
+| 1.4     | Health probe                 | Add `/status` route → `return 200`                          | Prometheus target up                                     |
+| 1.5     | Flow validation              | `curl -I https://app.local/api/secure` redirects → Keycloak | Cypress E2E passes                                       |
 
 **Code snippets**
 
