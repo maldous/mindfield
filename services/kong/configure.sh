@@ -5,22 +5,8 @@ KONG_ADMIN_URL=http://kong:8001
 
 until curl -s "$KONG_ADMIN_URL/status" >/dev/null; do sleep 2; done
 
-if ! curl -s "$KONG_ADMIN_URL/plugins" | grep -q '"name":"oidc"'; then
-  curl -s -X POST "$KONG_ADMIN_URL/plugins" -H 'Content-Type: application/json' \
-  -d '{
-        "name": "oidc",
-        "config": {
-          "realm": "mindfield",
-	  "discovery":"https://keycloak.'"$DOMAIN"'/realms/mindfield/.well-known/openid-configuration",
-          "client_id": "'"$OIDC_CLIENT_ID"'",
-          "client_secret": "'"$OIDC_CLIENT_SECRET"'",
-          "redirect_uri": "https://api.'"$DOMAIN"'/callback",
-          "scope": "openid profile email",
-          "session_secret": "'"$OIDC_SESSION_SECRET"'",
-          "use_jwks": "yes"
-        }
-      }'
-fi
+# Remove global OIDC plugin - apply per service instead
+# Global OIDC causes session_secret issues
 
 if ! curl -s "$KONG_ADMIN_URL/plugins" | grep -q '"name":"rate-limiting"'; then
   curl -s -X POST "$KONG_ADMIN_URL/plugins" -H "Content-Type: application/json" \
@@ -86,5 +72,111 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"grapesjs-service"'; t
     -d '{"name":"grapesjs-service","url":"http://grapesjs:3000"}'
   curl -s -X POST "$KONG_ADMIN_URL/services/grapesjs-service/routes" -H "Content-Type: application/json" \
     -d '{"name":"grapesjs-route","paths":["/services/grapesjs"],"strip_path":true}'
+fi
+
+# Add protected routes for all services
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"web-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"web-service","url":"http://web:3000"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/web-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"web-route","hosts":["'"$DOMAIN"'"],"strip_path":false}'
+  # Add OIDC protection to web service
+  curl -s -X POST "$KONG_ADMIN_URL/services/web-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidc",
+      "config": {
+        "discovery": "https://keycloak.'"$DOMAIN"'/realms/mindfield/.well-known/openid-configuration",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri_scheme": "https",
+        "scope": "openid profile email",
+        "session_secret": "'"$OIDC_SESSION_SECRET"'",
+        "ssl_verify": "no"
+      }
+    }'
+fi
+
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"grafana-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"grafana-service","url":"http://grafana:3000"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/grafana-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"grafana-route","hosts":["grafana.'"$DOMAIN"'"],"strip_path":false}'
+  # Add OIDC protection to grafana service
+  curl -s -X POST "$KONG_ADMIN_URL/services/grafana-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidc",
+      "config": {
+        "discovery": "https://keycloak.'"$DOMAIN"'/realms/mindfield/.well-known/openid-configuration",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri_scheme": "https",
+        "scope": "openid profile email",
+        "session_secret": "'"$OIDC_SESSION_SECRET"'",
+        "ssl_verify": "no"
+      }
+    }'
+fi
+
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"minio-console-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"minio-console-service","url":"http://minio:9001"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/minio-console-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"minio-console-route","hosts":["minio-console.'"$DOMAIN"'"],"strip_path":false}'
+  # Add OIDC protection to minio-console service
+  curl -s -X POST "$KONG_ADMIN_URL/services/minio-console-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidc",
+      "config": {
+        "discovery": "https://keycloak.'"$DOMAIN"'/realms/mindfield/.well-known/openid-configuration",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri_scheme": "https",
+        "scope": "openid profile email",
+        "session_secret": "'"$OIDC_SESSION_SECRET"'",
+        "ssl_verify": "no"
+      }
+    }'
+fi
+
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"pgadmin-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"pgadmin-service","url":"http://pgadmin:80"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/pgadmin-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"pgadmin-route","hosts":["pgadmin.'"$DOMAIN"'"],"strip_path":false}'
+  # Add OIDC protection to pgadmin service
+  curl -s -X POST "$KONG_ADMIN_URL/services/pgadmin-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidc",
+      "config": {
+        "discovery": "https://keycloak.'"$DOMAIN"'/realms/mindfield/.well-known/openid-configuration",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri_scheme": "https",
+        "scope": "openid profile email",
+        "session_secret": "'"$OIDC_SESSION_SECRET"'",
+        "ssl_verify": "no"
+      }
+    }'
+fi
+
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"prometheus-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"prometheus-service","url":"http://prometheus:9090"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/prometheus-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"prometheus-route","hosts":["prometheus.'"$DOMAIN"'"],"strip_path":false}'
+  # Add OIDC protection to prometheus service
+  curl -s -X POST "$KONG_ADMIN_URL/services/prometheus-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidc",
+      "config": {
+        "discovery": "https://keycloak.'"$DOMAIN"'/realms/mindfield/.well-known/openid-configuration",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri_scheme": "https",
+        "scope": "openid profile email",
+        "session_secret": "'"$OIDC_SESSION_SECRET"'",
+        "ssl_verify": "no"
+      }
+    }'
 fi
 

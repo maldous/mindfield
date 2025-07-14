@@ -48,16 +48,10 @@ redoc.{$DOMAIN}
 	output file /var/log/caddy/access.log
         format json
     }
-    @web_app host {$DOMAIN}
-    reverse_proxy @web_app web:3000
-    @api_prod host api.{$DOMAIN}
-    reverse_proxy @api_prod kong:8000
-    @kong_prod host kong.{$DOMAIN}
-    reverse_proxy @kong_prod kong:8001
-    @docs_prod host docs.{$DOMAIN}
-    reverse_proxy @docs_prod mkdocs:8000
+    # Keycloak - direct access (needed for OIDC provider)
+    # Note: Keycloak cannot be protected by Kong due to circular dependency
+    # For admin access, use SSH tunnel: ssh -L 3019:localhost:3019 user@server
     @keycloak_prod host keycloak.{$DOMAIN}
-    @all path *
     header @keycloak_prod {
         -X-Frame-Options
         X-Frame-Options SAMEORIGIN
@@ -68,63 +62,17 @@ redoc.{$DOMAIN}
         header_up X-Forwarded-Proto {scheme}
         header_up X-Forwarded-For  {remote_host}
     }
-    @minio-console_prod host minio-console.{$DOMAIN}
-    reverse_proxy @minio-console_prod minio:9001
-    @mailhog_prod host mailhog.{$DOMAIN}
-    reverse_proxy @mailhog_prod mailhog:8025
-    @redis-insight_prod host redis-insight.{$DOMAIN}
-    reverse_proxy @redis-insight_prod redis-insight:5540
-    @prometheus_prod host prometheus.{$DOMAIN}
-    reverse_proxy @prometheus_prod prometheus:9090
-    @loki_prod host loki.{$DOMAIN}
-    reverse_proxy @loki_prod loki:3100
-    @jaeger_prod host jaeger.{$DOMAIN}
-    reverse_proxy @jaeger_prod jaeger:16686
-    @alertmanager_prod host alertmanager.{$DOMAIN}
-    reverse_proxy @alertmanager_prod alertmanager:9093
-    @opensearch_prod host opensearch.{$DOMAIN}
-    reverse_proxy @opensearch_prod opensearch:9200
-    @opensearch-dashboards_prod host opensearch-dashboards.{$DOMAIN}
-    reverse_proxy @opensearch-dashboards_prod opensearch-dashboards:5601
-    @node-exporter_prod host node-exporter.{$DOMAIN}
-    reverse_proxy @node-exporter_prod node-exporter:9100
-    @blackbox-exporter_prod host blackbox-exporter.{$DOMAIN}
-    reverse_proxy @blackbox-exporter_prod blackbox-exporter:9115
-    @uptime-kuma_prod host uptime-kuma.{$DOMAIN}
-    reverse_proxy @uptime-kuma_prod uptime-kuma:3000
-    @trivy_prod host trivy.{$DOMAIN}
-    reverse_proxy @trivy_prod trivy:8080
-    @postgraphile_prod host postgraphile.{$DOMAIN}
-    reverse_proxy @postgraphile_prod postgraphile:5000
-    @pgadmin_prod host pgadmin.{$DOMAIN}
-    reverse_proxy @pgadmin_prod pgadmin:80
-    @storybook_prod host storybook.{$DOMAIN}
-    reverse_proxy @storybook_prod storybook:6006
-    @sonarqube_prod host sonarqube.{$DOMAIN}
-    reverse_proxy @sonarqube_prod sonarqube:9000
-    @gitea_prod host gitea.{$DOMAIN}
-    reverse_proxy @gitea_prod gitea:3000
-    @grafana_prod host grafana.{$DOMAIN}
-    reverse_proxy @grafana_prod grafana:3000
-    @presidio-analyzer_prod host presidio-analyzer.{$DOMAIN}
-    reverse_proxy @presidio-analyzer_prod presidio-analyzer:3000
-    @presidio-anonymizer_prod host presidio-anonymizer.{$DOMAIN}
-    reverse_proxy @presidio-anonymizer_prod presidio-anonymizer:3000
-    @presidio-image_prod host presidio-image.{$DOMAIN}
-    reverse_proxy @presidio-image_prod presidio-image-redactor:3000
-    @render_prod host render.{$DOMAIN}
-    reverse_proxy @render_prod render:3000
-    @grapejs_prod host grapesjs.{$DOMAIN}
-    reverse_proxy @grapejs_prod grapesjs:3000
-    @transform_prod host transform.{$DOMAIN}
-    reverse_proxy @transform_prod transform:3000
-    @submission_prod host submission.{$DOMAIN}
-    reverse_proxy @submission_prod submission:3000
-    @swagger-ui_prod host swagger-ui.{$DOMAIN}
-    reverse_proxy @swagger-ui_prod swagger-ui:3000
-    @redoc_prod host redoc.{$DOMAIN}
-    reverse_proxy @redoc_prod redoc:3000
-    reverse_proxy {
-        to {host.labels.0}:3000
+    
+    # Kong Admin - direct access (for configuration)
+    @kong_admin host kong.{$DOMAIN}
+    reverse_proxy @kong_admin kong:8001
+    
+    # All other services through Kong for OIDC protection
+    reverse_proxy kong:8000 {
+        header_up Host             {host}
+        header_up X-Forwarded-Host {host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-For  {remote_host}
     }
+
 }
