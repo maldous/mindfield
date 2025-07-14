@@ -47,6 +47,11 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    environment:
+      - KONG_PLUGINS=bundled,oidcify
+      - KONG_PLUGINSERVER_NAMES=oidcify
+      - KONG_PLUGINSERVER_OIDCIFY_QUERY_CMD=/usr/local/bin/oidcify -dump
+      - KONG_PLUGINSERVER_OIDCIFY_START_CMD=/usr/local/bin/oidcify
     networks:
       - frontend
       - backend
