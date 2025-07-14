@@ -23,6 +23,21 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"api-service"'; then
     -d '{"name":"api-service","url":"http://api:3000"}'
   curl -s -X POST "$KONG_ADMIN_URL/services/api-service/routes" -H "Content-Type: application/json" \
     -d '{"name":"api-route","paths":["/api"],"strip_path":true}'
+  # Add oidcify protection to api service
+  curl -s -X POST "$KONG_ADMIN_URL/services/api-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://api.'"$DOMAIN"'/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "623a4b5c325d36e7cd3f567922ec0073d623a4b5c325d36e7cd3f567922ec0073",
+        "cookie_block_key_hex": "623a4b5c325d36e7cd3f567922ec0073"
+      }
+    }'
 fi
 
 if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"submission-service"'; then
@@ -30,6 +45,21 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"submission-service"';
     -d '{"name":"submission-service","url":"http://submission:3000"}'
   curl -s -X POST "$KONG_ADMIN_URL/services/submission-service/routes" -H "Content-Type: application/json" \
     -d '{"name":"submission-route","paths":["/services/submission"],"strip_path":true}'
+  # Add oidcify protection to submission service
+  curl -s -X POST "$KONG_ADMIN_URL/services/submission-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://'"$DOMAIN"'/services/submission/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "623a4b5c325d36e7cd3f567922ec0073d623a4b5c325d36e7cd3f567922ec0073",
+        "cookie_block_key_hex": "623a4b5c325d36e7cd3f567922ec0073"
+      }
+    }'
 fi
 
 if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"transform-service"'; then
@@ -37,6 +67,21 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"transform-service"'; 
     -d '{"name":"transform-service","url":"http://transform:3000"}'
   curl -s -X POST "$KONG_ADMIN_URL/services/transform-service/routes" -H "Content-Type: application/json" \
     -d '{"name":"transform-route","paths":["/services/transform"],"strip_path":true}'
+  # Add oidcify protection to transform service
+  curl -s -X POST "$KONG_ADMIN_URL/services/transform-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://'"$DOMAIN"'/services/transform/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "623a4b5c325d36e7cd3f567922ec0073d623a4b5c325d36e7cd3f567922ec0073",
+        "cookie_block_key_hex": "623a4b5c325d36e7cd3f567922ec0073"
+      }
+    }'
 fi
 
 if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"render-service"'; then
@@ -44,6 +89,21 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"render-service"'; the
     -d '{"name":"render-service","url":"http://render:3000"}'
   curl -s -X POST "$KONG_ADMIN_URL/services/render-service/routes" -H "Content-Type: application/json" \
     -d '{"name":"render-route","paths":["/services/render"],"strip_path":true}'
+  # Add oidcify protection to render service
+  curl -s -X POST "$KONG_ADMIN_URL/services/render-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://'"$DOMAIN"'/services/render/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "623a4b5c325d36e7cd3f567922ec0073d623a4b5c325d36e7cd3f567922ec0073",
+        "cookie_block_key_hex": "623a4b5c325d36e7cd3f567922ec0073"
+      }
+    }'
 fi
 
 if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"presidio-analyzer-service"'; then
@@ -72,6 +132,21 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"grapesjs-service"'; t
     -d '{"name":"grapesjs-service","url":"http://grapesjs:3000"}'
   curl -s -X POST "$KONG_ADMIN_URL/services/grapesjs-service/routes" -H "Content-Type: application/json" \
     -d '{"name":"grapesjs-route","paths":["/services/grapesjs"],"strip_path":true}'
+  # Add oidcify protection to grapesjs service
+  curl -s -X POST "$KONG_ADMIN_URL/services/grapesjs-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://grapesjs.'"$DOMAIN"'/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "623a4b5c325d36e7cd3f567922ec0073d623a4b5c325d36e7cd3f567922ec0073",
+        "cookie_block_key_hex": "623a4b5c325d36e7cd3f567922ec0073"
+      }
+    }'
 fi
 
 # Create Kong consumer for oidcify
@@ -91,7 +166,7 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"web-service"'; then
     -d '{
       "name": "oidcify",
       "config": {
-        "issuer": "https://keycloak.'"$DOMAIN"'/realms/mindfield",
+        "issuer": "http://keycloak:8080/realms/mindfield",
         "client_id": "'"$OIDC_CLIENT_ID"'",
         "client_secret": "'"$OIDC_CLIENT_SECRET"'",
         "redirect_uri": "https://'"$DOMAIN"'/cb",
@@ -113,7 +188,7 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"grafana-service"'; th
     -d '{
       "name": "oidcify",
       "config": {
-        "issuer": "https://keycloak.'"$DOMAIN"'/realms/mindfield",
+        "issuer": "http://keycloak:8080/realms/mindfield",
         "client_id": "'"$OIDC_CLIENT_ID"'",
         "client_secret": "'"$OIDC_CLIENT_SECRET"'",
         "redirect_uri": "https://grafana.'"$DOMAIN"'/cb",
@@ -135,7 +210,7 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"minio-console-service
     -d '{
       "name": "oidcify",
       "config": {
-        "issuer": "https://keycloak.'"$DOMAIN"'/realms/mindfield",
+        "issuer": "http://keycloak:8080/realms/mindfield",
         "client_id": "'"$OIDC_CLIENT_ID"'",
         "client_secret": "'"$OIDC_CLIENT_SECRET"'",
         "redirect_uri": "https://minio-console.'"$DOMAIN"'/cb",
@@ -157,7 +232,7 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"pgadmin-service"'; th
     -d '{
       "name": "oidcify",
       "config": {
-        "issuer": "https://keycloak.'"$DOMAIN"'/realms/mindfield",
+        "issuer": "http://keycloak:8080/realms/mindfield",
         "client_id": "'"$OIDC_CLIENT_ID"'",
         "client_secret": "'"$OIDC_CLIENT_SECRET"'",
         "redirect_uri": "https://pgadmin.'"$DOMAIN"'/cb",
@@ -179,7 +254,7 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"prometheus-service"';
     -d '{
       "name": "oidcify",
       "config": {
-        "issuer": "https://keycloak.'"$DOMAIN"'/realms/mindfield",
+        "issuer": "http://keycloak:8080/realms/mindfield",
         "client_id": "'"$OIDC_CLIENT_ID"'",
         "client_secret": "'"$OIDC_CLIENT_SECRET"'",
         "redirect_uri": "https://prometheus.'"$DOMAIN"'/cb",
