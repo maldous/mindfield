@@ -37,7 +37,7 @@ lcov-report/
 *.tsbuildinfo
 
 # Environment & secrets
-.env
+#.env
 .env.*.local
 *.age
 
