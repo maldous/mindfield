@@ -34,8 +34,8 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"api-service"'; then
         "redirect_uri": "https://api.'"$DOMAIN"'/cb",
         "consumer_name": "oidc-user",
         "scopes": ["openid", "profile", "email"],
-        "cookie_hash_key_hex": "623a4b5c325d36e7cd3f567922ec0073d623a4b5c325d36e7cd3f567922ec0073",
-        "cookie_block_key_hex": "623a4b5c325d36e7cd3f567922ec0073"
+        "cookie_hash_key_hex": "673c952eb3e76fb087653183a4b623a9867be97f6ab03ac602025dd2b937e1b3",
+        "cookie_block_key_hex": "084f90742fa758eb8a4036da8b1262fe3cadc771bb4d95c8703e5bd7cd9ba802"
       }
     }'
 fi
@@ -56,8 +56,8 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"submission-service"';
         "redirect_uri": "https://'"$DOMAIN"'/services/submission/cb",
         "consumer_name": "oidc-user",
         "scopes": ["openid", "profile", "email"],
-        "cookie_hash_key_hex": "623a4b5c325d36e7cd3f567922ec0073d623a4b5c325d36e7cd3f567922ec0073",
-        "cookie_block_key_hex": "623a4b5c325d36e7cd3f567922ec0073"
+        "cookie_hash_key_hex": "673c952eb3e76fb087653183a4b623a9867be97f6ab03ac602025dd2b937e1b3",
+        "cookie_block_key_hex": "084f90742fa758eb8a4036da8b1262fe3cadc771bb4d95c8703e5bd7cd9ba802"
       }
     }'
 fi
@@ -78,8 +78,8 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"transform-service"'; 
         "redirect_uri": "https://'"$DOMAIN"'/services/transform/cb",
         "consumer_name": "oidc-user",
         "scopes": ["openid", "profile", "email"],
-        "cookie_hash_key_hex": "623a4b5c325d36e7cd3f567922ec0073d623a4b5c325d36e7cd3f567922ec0073",
-        "cookie_block_key_hex": "623a4b5c325d36e7cd3f567922ec0073"
+        "cookie_hash_key_hex": "673c952eb3e76fb087653183a4b623a9867be97f6ab03ac602025dd2b937e1b3",
+        "cookie_block_key_hex": "084f90742fa758eb8a4036da8b1262fe3cadc771bb4d95c8703e5bd7cd9ba802"
       }
     }'
 fi
@@ -100,8 +100,8 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"render-service"'; the
         "redirect_uri": "https://'"$DOMAIN"'/services/render/cb",
         "consumer_name": "oidc-user",
         "scopes": ["openid", "profile", "email"],
-        "cookie_hash_key_hex": "623a4b5c325d36e7cd3f567922ec0073d623a4b5c325d36e7cd3f567922ec0073",
-        "cookie_block_key_hex": "623a4b5c325d36e7cd3f567922ec0073"
+        "cookie_hash_key_hex": "673c952eb3e76fb087653183a4b623a9867be97f6ab03ac602025dd2b937e1b3",
+        "cookie_block_key_hex": "084f90742fa758eb8a4036da8b1262fe3cadc771bb4d95c8703e5bd7cd9ba802"
       }
     }'
 fi
@@ -143,8 +143,8 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"grapesjs-service"'; t
         "redirect_uri": "https://grapesjs.'"$DOMAIN"'/cb",
         "consumer_name": "oidc-user",
         "scopes": ["openid", "profile", "email"],
-        "cookie_hash_key_hex": "623a4b5c325d36e7cd3f567922ec0073d623a4b5c325d36e7cd3f567922ec0073",
-        "cookie_block_key_hex": "623a4b5c325d36e7cd3f567922ec0073"
+        "cookie_hash_key_hex": "673c952eb3e76fb087653183a4b623a9867be97f6ab03ac602025dd2b937e1b3",
+        "cookie_block_key_hex": "084f90742fa758eb8a4036da8b1262fe3cadc771bb4d95c8703e5bd7cd9ba802"
       }
     }'
 fi
@@ -172,8 +172,8 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"web-service"'; then
         "redirect_uri": "https://'"$DOMAIN"'/cb",
         "consumer_name": "oidc-user",
         "scopes": ["openid", "profile", "email"],
-        "cookie_hash_key_hex": "623q4hR325t36VsCD3g567922IC0073T623q4hR325t36VsCD3g567922IC0073T",
-        "cookie_block_key_hex": "623q4hR325t36VsCD3g567922IC0073T"
+        "cookie_hash_key_hex": "673c952eb3e76fb087653183a4b623a9867be97f6ab03ac602025dd2b937e1b3",
+        "cookie_block_key_hex": "084f90742fa758eb8a4036da8b1262fe3cadc771bb4d95c8703e5bd7cd9ba802"
       }
     }'
 fi
@@ -194,8 +194,8 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"grafana-service"'; th
         "redirect_uri": "https://grafana.'"$DOMAIN"'/cb",
         "consumer_name": "oidc-user",
         "scopes": ["openid", "profile", "email"],
-        "cookie_hash_key_hex": "623q4hR325t36VsCD3g567922IC0073T623q4hR325t36VsCD3g567922IC0073T",
-        "cookie_block_key_hex": "623q4hR325t36VsCD3g567922IC0073T"
+        "cookie_hash_key_hex": "673c952eb3e76fb087653183a4b623a9867be97f6ab03ac602025dd2b937e1b3",
+        "cookie_block_key_hex": "084f90742fa758eb8a4036da8b1262fe3cadc771bb4d95c8703e5bd7cd9ba802"
       }
     }'
 fi
@@ -216,8 +216,8 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"minio-console-service
         "redirect_uri": "https://minio-console.'"$DOMAIN"'/cb",
         "consumer_name": "oidc-user",
         "scopes": ["openid", "profile", "email"],
-        "cookie_hash_key_hex": "623q4hR325t36VsCD3g567922IC0073T623q4hR325t36VsCD3g567922IC0073T",
-        "cookie_block_key_hex": "623q4hR325t36VsCD3g567922IC0073T"
+        "cookie_hash_key_hex": "673c952eb3e76fb087653183a4b623a9867be97f6ab03ac602025dd2b937e1b3",
+        "cookie_block_key_hex": "084f90742fa758eb8a4036da8b1262fe3cadc771bb4d95c8703e5bd7cd9ba802"
       }
     }'
 fi
@@ -238,8 +238,8 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"pgadmin-service"'; th
         "redirect_uri": "https://pgadmin.'"$DOMAIN"'/cb",
         "consumer_name": "oidc-user",
         "scopes": ["openid", "profile", "email"],
-        "cookie_hash_key_hex": "623q4hR325t36VsCD3g567922IC0073T623q4hR325t36VsCD3g567922IC0073T",
-        "cookie_block_key_hex": "623q4hR325t36VsCD3g567922IC0073T"
+        "cookie_hash_key_hex": "673c952eb3e76fb087653183a4b623a9867be97f6ab03ac602025dd2b937e1b3",
+        "cookie_block_key_hex": "084f90742fa758eb8a4036da8b1262fe3cadc771bb4d95c8703e5bd7cd9ba802"
       }
     }'
 fi
@@ -260,8 +260,8 @@ if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"prometheus-service"';
         "redirect_uri": "https://prometheus.'"$DOMAIN"'/cb",
         "consumer_name": "oidc-user",
         "scopes": ["openid", "profile", "email"],
-        "cookie_hash_key_hex": "623q4hR325t36VsCD3g567922IC0073T623q4hR325t36VsCD3g567922IC0073T",
-        "cookie_block_key_hex": "623q4hR325t36VsCD3g567922IC0073T"
+        "cookie_hash_key_hex": "673c952eb3e76fb087653183a4b623a9867be97f6ab03ac602025dd2b937e1b3",
+        "cookie_block_key_hex": "084f90742fa758eb8a4036da8b1262fe3cadc771bb4d95c8703e5bd7cd9ba802"
       }
     }'
 fi
