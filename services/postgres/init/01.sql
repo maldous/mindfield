@@ -1,0 +1,8 @@
+
+CREATE ROLE keycloak WITH LOGIN PASSWORD 'password';
+CREATE DATABASE keycloak OWNER keycloak;
+GRANT CONNECT ON DATABASE keycloak TO keycloak;
+
+CREATE ROLE kong WITH LOGIN PASSWORD 'password';
+CREATE DATABASE kong OWNER kong;
+GRANT CONNECT ON DATABASE kong TO kong;

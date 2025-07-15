@@ -1,4 +1,10 @@
 ---
+x-build-env:
+
+  BUILDKIT_INLINE_CACHE: "1"
+  BUILDKIT_PROGRESS: plain
+  DOCKER_BUILDKIT: "1"
+
 name: mindfield
 
 services:
@@ -23,20 +29,11 @@ services:
       frontend: null
     command:
       - start
-    healthcheck:
-      test: 
-        - CMD
-        - "true"
-      interval: 5s
-      timeout: 10s
-      retries: 12
-      start_period: 60s
     cpus: 0.5
     mem_limit: "536870912"
-    restart: on-failure
 
   keycloak-configure:
-    image: badouralix/curl-jq:latest
+    image: curlimages/curl:latest
     depends_on:
       keycloak:
         condition: service_healthy
@@ -51,17 +48,10 @@ services:
       - .env
     networks:
       backend: null
-    command: 
+    command:
+      - sh
       - /configure.sh
     restart: "no"
-    healthcheck:
-      test:
-        - CMD
-        - "true"
-      interval: 5s
-      timeout: 10s
-      retries: 12
-      start_period: 60s
     cpus: 0.25
 
   kong:
@@ -72,7 +62,6 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-    image: mindfield/kong:local
     depends_on:
       kong-bootstrap:
         condition: service_completed_successfully
@@ -86,7 +75,7 @@ services:
     restart: on-failure
 
   kong-bootstrap:
-    image: mindfield/kong:local
+    image: kong/kong-gateway:latest
     depends_on:
       pgbouncer:
         condition: service_healthy
@@ -98,7 +87,7 @@ services:
     restart: on-failure
 
   kong-configure:
-    image: badouralix/curl-jq:latest
+    image: curlimages/curl:latest
     depends_on:
       kong:
         condition: service_healthy
@@ -114,6 +103,7 @@ services:
     networks:
       backend: null
     command:
+      - sh
       - /configure.sh
     restart: "no"
     cpus: 0.25

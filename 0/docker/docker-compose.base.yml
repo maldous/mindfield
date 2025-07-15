@@ -1,4 +1,10 @@
 ---
+x-build-env:
+
+  BUILDKIT_INLINE_CACHE: "1"
+  BUILDKIT_PROGRESS: plain
+  DOCKER_BUILDKIT: "1"
+
 name: mindfield
 
 networks:
