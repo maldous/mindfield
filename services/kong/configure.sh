@@ -1,46 +1,44 @@
-#!/bin/sh
+#!/usr/bin/env sh
 set -euo pipefail
 set -x
 
 KONG_URL=http://kong:8001
 
-until curl -s "$KONG_URL/status" >/dev/null; do sleep 2; done
+until curl -fs "$KONG_URL/status" >/dev/null; do sleep 2; done
 
-if ! curl -s "$KONG_URL/plugins" | grep -q '"name":"rate-limiting"'; then
-  curl -s -X POST "$KONG_URL/plugins" -H "Content-Type: application/json" \
-    -d '{"name":"rate-limiting","config":{"minute":60,"policy":"local","limit_by":"ip"}}'
+if ! curl -fs "$KONG_URL/plugins" | jq -e '.data[] | select(.name=="rate-limiting")' >/dev/null; then
+  curl -fs -X POST "$KONG_URL/plugins" -H 'Content-Type: application/json' \
+       -d '{"name":"rate-limiting",
+            "config":{"minute":60,"policy":"local","limit_by":"ip"}}'
 fi
 
-curl -s -X POST "$KONG_URL/consumers" \
-     -H "Content-Type: application/json" \
-     -d '{"username":"oidcuser","custom_id":"oidcuser"}'
+curl -fs -X PUT "$KONG_URL/consumers/oidcuser" -H 'Content-Type: application/json' \
+     -d '{"username":"oidcuser","custom_id":"oidcuser"}' >/dev/null
 
-curl -s -X POST "$KONG_URL/services" \
-     -H "Content-Type: application/json" \
-     -d '{"name":"pgadmin","url":"http://pgadmin:80"}'
+SERVICE_JSON=$(curl -fs -X PUT "$KONG_URL/services/pgadmin" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"pgadmin","host":"pgadmin","port":80,"protocol":"http"}')
 
-curl -s -X POST "$KONG_URL/routes" \
-     -H "Content-Type: application/json" \
-     -d '{"service":{"name":"pgadmin"},"hosts":["pgadmin.'${DOMAIN}'"]}'
+SERVICE_ID=$(echo "$SERVICE_JSON" | jq -r '.id')
 
-curl -s -X POST "$KONG_URL/plugins" \
-     -H "Content-Type: application/json" \
-     -d '{
-           "name":"oidcify",
-           "service":{"name":"pgadmin"},
-           "config":{
-             "issuer":"https://keycloak.'${DOMAIN}'/realms/mindfield",
-             "client_id":"'"$CLIENT_ID_PGADMIN"'",
-             "client_secret":"'"$CLIENT_SECRET_PGADMIN"'",
-             "redirect_uri":"https://pgadmin.'${DOMAIN}'/callback",
-	     "consumer_name":"oidcuser",
-             "scopes":["openid","email","profile"],
-	     "session":{
-               "strategy":"cookie",
-               "cookie_name":"pgadmin_session",
-               "cookie_hash_key_hex":"'"$(openssl rand -hex 32)"'",
-               "cookie_block_key_hex":"'"$(openssl rand -hex 32)"'"
-             }
-           }
-         }'
+curl -fs -X PUT "$KONG_URL/routes/pgadmin-route" -H 'Content-Type: application/json' \
+  -d '{"name":"pgadmin-route",
+       "hosts":["pgadmin.'"$DOMAIN"'"],
+       "service":{"id":"'"$SERVICE_ID"'"}}' >/dev/null
 
+curl -fs -X POST "$KONG_URL/plugins" -H 'Content-Type: application/json' \
+  -d '{
+        "name":"oidcify",
+        "service":{"id":"'"$SERVICE_ID"'"},
+        "config":{
+          "issuer":"https://keycloak.'"$DOMAIN"'/realms/mindfield",
+          "client_id":"'"$CLIENT_ID_PGADMIN"'",
+          "client_secret":"'"$CLIENT_SECRET_PGADMIN"'",
+          "redirect_uri":"https://pgadmin.'"$DOMAIN"'/callback",
+          "consumer_name":"oidcuser",
+          "scopes":["openid","email","profile"],
+          "cookie_name":"pgadmin_session",
+          "cookie_hash_key_hex":"'"$KONG_COOKIE_HASH_PGADMIN"'",
+          "cookie_block_key_hex":"'"$KONG_COOKIE_BLOCK_PGADMIN"'"
+        }
+      }' | jq '.name, .service.id'
