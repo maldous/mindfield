@@ -38,6 +38,17 @@ CLIENT_JSON=$(jq -n \
 
 CID=$(curl -s -H "Authorization: Bearer $KC_TOKEN" "$KC_URL/admin/realms/$NAME/clients" | jq -r ".[] | select(.clientId==\"$NAME\") | .id")
 
+JSON_PGADMIN=$(jq -n --arg cid "$CLIENT_ID_PGADMIN" --arg sec "$CLIENT_SECRET_PGADMIN" --arg dom "pgadmin.${DOMAIN}" '
+  { clientId:$cid, enabled:true, clientAuthenticatorType:"client-secret",
+    secret:$sec, redirectUris:["https://\($dom)/callback"],
+    webOrigins:["https://\($dom)"], standardFlowEnabled:true }' )
+
+curl -s -H "Authorization: Bearer $KC_TOKEN" "$KC_URL/admin/realms/$NAME/clients" | \
+     jq -e ".[] | select(.clientId==\"$CLIENT_ID_PGADMIN\")" >/dev/null || \
+curl -s -X POST -H "Authorization: Bearer $KC_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "$JSON_PGADMIN" "$KC_URL/admin/realms/$NAME/clients"
+
 if [ -z "$CID" ]; then
   curl -s -X POST -H "Authorization: Bearer $KC_TOKEN" -H "Content-Type: application/json" "$KC_URL/admin/realms/$NAME/clients" -d "$CLIENT_JSON"
 else

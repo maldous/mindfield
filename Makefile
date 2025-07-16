@@ -98,6 +98,9 @@ setup:
 			echo "KONG_PLUGINS=bundled,rate-limiting,key-auth,oauth2,oidcify" >> .env
 			echo "KONG_PROXY_ACCESS_LOG=/dev/stdout" >> .env
 			echo "KONG_PROXY_ERROR_LOG=/dev/stderr" >> .env
+			echo "" >> .env
+			echo "CLIENT_ID_PGADMIN=pgadmin" >> .env
+			echo "CLIENT_SECRET_PGADMIN=$(openssl rand -hex 32)" >> .env
 			openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 		fi
 	fi

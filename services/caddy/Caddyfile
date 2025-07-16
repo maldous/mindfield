@@ -3,7 +3,7 @@
     email {$LETSENCRYPT_EMAIL}
 }
 
-keycloak.{$DOMAIN}, {$DOMAIN} {
+pgadmin.{$DOMAIN}, keycloak.{$DOMAIN}, {$DOMAIN} {
 
     tls {$LETSENCRYPT_EMAIL}
 

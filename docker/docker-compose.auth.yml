@@ -16,6 +16,11 @@ services:
         source: keycloak_data
         target: /opt/keycloak/data
         volume: {}
+      - type: bind
+        source: ./services/keycloak/themes
+        target: /opt/keycloak/themes
+        bind:
+          create_host_path: true
     env_file:
       - .env
     networks:
