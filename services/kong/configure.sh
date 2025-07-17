@@ -6,8 +6,20 @@ until curl -fs "${KONG_URL}/status" >/dev/null; do sleep 5; done
 
 ################################################################################
 
-curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
-  -d '{"name":"rate-limiting", "config":{"minute":6000,"policy":"local","limit_by":"ip"}}'
+curl -fs -X POST "${KONG_URL}/services/root/plugins" -H 'Content-Type: application/json' \
+  -d '{
+        "name":"rate-limiting",
+        "config":{
+          "policy":"redis",
+          "minute":6000,
+          "limit_by":"ip",
+          "redis_host":"redis",
+          "redis_port":6379,
+          "redis_database":0,
+          "redis_timeout":2000
+        }
+      }'
+
 curl -fs -X PUT "${KONG_URL}/consumers/oidcuser" -H 'Content-Type: application/json' \
   -d '{"username":"oidcuser","custom_id":"oidcuser"}' >/dev/null
 

@@ -58,6 +58,10 @@ services:
       backend: null
       frontend: null
       monitoring: null
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
     healthcheck:
       test:
         - CMD
