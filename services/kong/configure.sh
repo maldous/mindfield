@@ -1,72 +1,76 @@
 #!/usr/bin/env sh
 set -euo pipefail
-set -x
 
 KONG_URL=http://kong:8001
 
-until curl -fs "$KONG_URL/status" >/dev/null; do sleep 2; done
+until curl -fs "${KONG_URL}/status" >/dev/null; do sleep 5; done
 
-if ! curl -fs "$KONG_URL/plugins" | jq -e '.data[] | select(.name=="rate-limiting")' >/dev/null; then
-  curl -fs -X POST "$KONG_URL/plugins" -H 'Content-Type: application/json' \
-       -d '{"name":"rate-limiting",
-            "config":{"minute":6000,"policy":"local","limit_by":"ip"}}'
-fi
+################################################################################
 
-curl -fs -X PUT "$KONG_URL/consumers/oidcuser" -H 'Content-Type: application/json' \
-     -d '{"username":"oidcuser","custom_id":"oidcuser"}' >/dev/null
+curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
+  -d '{"name":"rate-limiting", "config":{"minute":6000,"policy":"local","limit_by":"ip"}}'
 
-PGADMIN_SERVICE_JSON=$(curl -fs -X PUT "$KONG_URL/services/pgadmin" \
+curl -fs -X PUT "${KONG_URL}/consumers/oidcuser" -H 'Content-Type: application/json' \
+  -d '{"username":"oidcuser","custom_id":"oidcuser"}' >/dev/null
+
+################################################################################
+
+PGADMIN_SERVICE_JSON=$(curl -fs -X PUT "${KONG_URL}/services/pgadmin" \
   -H 'Content-Type: application/json' \
   -d '{"name":"pgadmin","host":"pgadmin","port":80,"protocol":"http"}')
 
-PGADMIN_SERVICE_ID=$(echo "$PGADMIN_SERVICE_JSON" | jq -r '.id')
+PGADMIN_SERVICE_ID=$(echo "${PGADMIN_SERVICE_JSON}" | jq -r '.id')
 
-curl -fs -X PUT "$KONG_URL/routes/pgadmin-route" -H 'Content-Type: application/json' \
+curl -fs -X PUT "${KONG_URL}/routes/pgadmin-route" -H 'Content-Type: application/json' \
   -d '{"name":"pgadmin-route",
-       "hosts":["pgadmin.'"$DOMAIN"'"],
-       "service":{"id":"'"$PGADMIN_SERVICE_ID"'"}}' >/dev/null
+     "hosts":["pgadmin.'"${DOMAIN}"'"],
+     "service":{"id":"'"${PGADMIN_SERVICE_ID}"'"}}' >/dev/null
 
-curl -fs -X POST "$KONG_URL/plugins" -H 'Content-Type: application/json' \
+curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
   -d '{
-        "name":"oidcify",
-        "service":{"id":"'"$PGADMIN_SERVICE_ID"'"},
-        "config":{
-          "issuer":"https://keycloak.'"$DOMAIN"'/realms/mindfield",
-          "client_id":"'"$CLIENT_ID_PGADMIN"'",
-          "client_secret":"'"$CLIENT_SECRET_PGADMIN"'",
-          "redirect_uri":"https://pgadmin.'"$DOMAIN"'/callback",
-          "consumer_name":"oidcuser",
-          "scopes":["openid","email","profile"],
-          "cookie_name":"pgadmin_session",
-          "cookie_hash_key_hex":"'"$KONG_COOKIE_HASH_PGADMIN"'",
-          "cookie_block_key_hex":"'"$KONG_COOKIE_BLOCK_PGADMIN"'"
-        }
-      }' | jq '.name, .service.id'
+     "name":"oidcify",
+     "service":{"id":"'"${PGADMIN_SERVICE_ID}"'"},
+     "config":{
+       "issuer":"https://keycloak.'"${DOMAIN}"'/realms/mindfield",
+       "client_id":"'"${CLIENT_ID_PGADMIN}"'",
+       "client_secret":"'"${CLIENT_SECRET_PGADMIN}"'",
+       "redirect_uri":"https://pgadmin.'"${DOMAIN}"'/callback",
+       "consumer_name":"oidcuser",
+       "scopes":["openid","email","profile"],
+       "cookie_name":"pgadmin_session",
+       "cookie_hash_key_hex":"'"${KONG_COOKIE_HASH_PGADMIN}"'",
+       "cookie_block_key_hex":"'"${KONG_COOKIE_BLOCK_PGADMIN}"'"
+     }
+     }' | jq '.name, .service.id'
 
-MAILHOG_SERVICE_JSON=$(curl -fs -X PUT "$KONG_URL/services/mailhog" \
+################################################################################
+
+MAILHOG_SERVICE_JSON=$(curl -fs -X PUT "${KONG_URL}/services/mailhog" \
   -H 'Content-Type: application/json' \
   -d '{"name":"mailhog","host":"mailhog","port":8025,"protocol":"http"}')
 
-MAILHOG_SERVICE_ID=$(echo "$MAILHOG_SERVICE_JSON" | jq -r '.id')
+MAILHOG_SERVICE_ID=$(echo "${MAILHOG_SERVICE_JSON}" | jq -r '.id')
 
-curl -fs -X PUT "$KONG_URL/routes/mailhog-route" -H 'Content-Type: application/json' \
+curl -fs -X PUT "${KONG_URL}/routes/mailhog-route" -H 'Content-Type: application/json' \
   -d '{"name":"mailhog-route",
-       "hosts":["mailhog.'"$DOMAIN"'"],
-       "service":{"id":"'"$MAILHOG_SERVICE_ID"'"}}' >/dev/null
+       "hosts":["mailhog.'"${DOMAIN}"'"],
+       "service":{"id":"'"${MAILHOG_SERVICE_ID}"'"}}' >/dev/null
 
-curl -fs -X POST "$KONG_URL/plugins" -H 'Content-Type: application/json' \
+curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
   -d '{
         "name":"oidcify",
-        "service":{"id":"'"$MAILHOG_SERVICE_ID"'"},
+        "service":{"id":"'"${MAILHOG_SERVICE_ID}"'"},
         "config":{
-          "issuer":"https://keycloak.'"$DOMAIN"'/realms/mindfield",
-          "client_id":"'"$CLIENT_ID_MAILHOG"'",
-          "client_secret":"'"$CLIENT_SECRET_MAILHOG"'",
-          "redirect_uri":"https://mailhog.'"$DOMAIN"'/callback",
+          "issuer":"https://keycloak.'"${DOMAIN}"'/realms/mindfield",
+          "client_id":"'"${CLIENT_ID_MAILHOG}"'",
+          "client_secret":"'"${CLIENT_SECRET_MAILHOG}"'",
+          "redirect_uri":"https://mailhog.'"${DOMAIN}"'/callback",
           "consumer_name":"oidcuser",
           "scopes":["openid","email","profile"],
           "cookie_name":"mailhog_session",
-          "cookie_hash_key_hex":"'"$KONG_COOKIE_HASH_MAILHOG"'",
-          "cookie_block_key_hex":"'"$KONG_COOKIE_BLOCK_MAILHOG"'"
+          "cookie_hash_key_hex":"'"${KONG_COOKIE_HASH_MAILHOG}"'",
+          "cookie_block_key_hex":"'"${KONG_COOKIE_BLOCK_MAILHOG}"'"
         }
       }' | jq '.name, .service.id'
+
+################################################################################
