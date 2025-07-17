@@ -21,16 +21,6 @@ services:
         target: /etc/caddy/Caddyfile
         bind:
           create_host_path: true
-      - type: bind
-        source: ./caddy/data
-        target: /data
-        bind:
-          create_host_path: true
-      - type: bind
-        source: ./caddy/config
-        target: /config
-        bind:
-          create_host_path: true
     env_file:
       - .env
     ports:

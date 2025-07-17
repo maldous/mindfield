@@ -89,10 +89,11 @@ services:
   redis:
     image: redis:7-alpine
     volumes:
-      - type: volume
-        source: redis_data
+      - type: bind
+        source: ./data
         target: /data
-        volume: {}
+        bind:
+          create_host_path: true
     env_file:
       - .env
     networks:

@@ -99,6 +99,11 @@ setup:
 	    echo "KC_HOSTNAME_STRICT=true" >> .env
 	    echo "KC_SECRET=$${KC_SECRET}" >> .env
 	    echo "" >> .env
+	    echo "RI_ACCEPT_TERMS_AND_CONDITIONS=true" >> .env
+	    echo "RI_REDIS_HOST=redis" >> .env
+	    echo "RI_REDIS_PORT=6379" >> .env
+	    echo "RI_REDIS_ALIAS=redis" >> .env
+	    echo "" >> .env
 	    echo "KONG_ADMIN_ACCESS_LOG=/dev/stdout" >> .env
 	    echo "KONG_ADMIN_ERROR_LOG=/dev/stderr" >> .env
 	    echo "KONG_ADMIN_LISTEN=0.0.0.0:8001" >> .env
