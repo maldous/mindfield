@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 set -euo pipefail
+set -x
 
 KC_URL="http://keycloak:8080"
 
@@ -35,7 +36,7 @@ curl -fs -X PUT -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: applica
   --data "${REALM_JSON}" \
   "${KC_URL}/admin/realms/${NAME}"
 
-CLIENT_JSON=$(jq -nc --arg cid "${CLIENT_ID_PGADMIN}" --arg sec "${CLIENT_SECRET_PGADMIN}" --arg dom "pgadmin.${DOMAIN}" '{
+CLIENT_JSON_PGADMIN=$(jq -nc --arg cid "${CLIENT_ID_PGADMIN}" --arg sec "${CLIENT_SECRET_PGADMIN}" --arg dom "pgadmin.${DOMAIN}" '{
   clientId:$cid,
   enabled:true,
   clientAuthenticatorType:"client-secret",
@@ -47,17 +48,40 @@ CLIENT_JSON=$(jq -nc --arg cid "${CLIENT_ID_PGADMIN}" --arg sec "${CLIENT_SECRET
   protocol:"openid-connect"
 }')
 
-CID=$(curl -fs -H "Authorization: Bearer ${KC_TOKEN}" "${KC_URL}/admin/realms/${NAME}/clients" | \
-  jq -r '.[] | select(.clientId=="'"${CLIENT_ID_PGADMIN}"'") | .id')
+CLIENT_JSON_MAILHOG=$(jq -nc --arg cid "${CLIENT_ID_MAILHOG}" --arg sec "${CLIENT_SECRET_MAILHOG}" --arg dom "pgadmin.${DOMAIN}" '{
+  clientId:$cid,
+  enabled:true,
+  clientAuthenticatorType:"client-secret",
+  secret:$sec,
+  redirectUris:["https://\($dom)/callback"],
+  webOrigins:["https://\($dom)"],
+  standardFlowEnabled:true,
+  publicClient:false,
+  protocol:"openid-connect"
+}')
 
-if [ -z "${CID}" ]; then
+CID_PGADMIN=$(curl -fs -H "Authorization: Bearer ${KC_TOKEN}" "${KC_URL}/admin/realms/${NAME}/clients" | \
+  jq -r '.[] | select(.clientId=="'"${CLIENT_ID_PGADMIN}"'") | .id')
+if [ -z "${CID_PGADMIN}" ]; then
   curl -fs -X POST -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: application/json" \
-  -d "${CLIENT_JSON}" \
+  -d "${CLIENT_JSON_PGADMIN}" \
   "${KC_URL}/admin/realms/${NAME}/clients"
 else
   curl -fs -X PUT -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: application/json" \
-  -d "${CLIENT_JSON}" \
-  "${KC_URL}/admin/realms/${NAME}/clients/${CID}"
+  -d "${CLIENT_JSON_PGADMIN}" \
+  "${KC_URL}/admin/realms/${NAME}/clients/${CID_PGADMIN}"
+fi
+
+CID_MAILHOG=$(curl -fs -H "Authorization: Bearer ${KC_TOKEN}" "${KC_URL}/admin/realms/${NAME}/clients" | \
+  jq -r '.[] | select(.clientId=="'"${CLIENT_ID_MAILHOG}"'") | .id')
+if [ -z "${CID_MAILHOG}" ]; then
+  curl -fs -X POST -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: application/json" \
+  -d "${CLIENT_JSON_MAILHOG}" \
+  "${KC_URL}/admin/realms/${NAME}/clients"
+else
+  curl -fs -X PUT -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: application/json" \
+  -d "${CLIENT_JSON_MAILHOG}" \
+  "${KC_URL}/admin/realms/${NAME}/clients/${CID_MAILHOG}"
 fi
 
 USER_ROLE_ID=$(curl -fs -H "Authorization: Bearer ${KC_TOKEN}" "${KC_URL}/admin/realms/${NAME}/roles" | \

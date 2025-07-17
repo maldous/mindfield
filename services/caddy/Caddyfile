@@ -3,7 +3,7 @@
     email {$LETSENCRYPT_EMAIL}
 }
 
-pgadmin.{$DOMAIN}, keycloak.{$DOMAIN}, {$DOMAIN} {
+mailhog.{$DOMAIN}, pgadmin.{$DOMAIN}, keycloak.{$DOMAIN}, {$DOMAIN} {
 
     tls {$LETSENCRYPT_EMAIL}
 
@@ -21,6 +21,14 @@ pgadmin.{$DOMAIN}, keycloak.{$DOMAIN}, {$DOMAIN} {
     }
 
     rate_limit {remote.ip} 60r/m
+
+    @mailhog host mailhog.{$DOMAIN}
+
+    handle @mailhog {
+        reverse_proxy mailhog:8025 {
+            header_up Host {host}
+        }
+    }
 
     @keycloak host keycloak.{$DOMAIN}
 

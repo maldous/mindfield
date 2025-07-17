@@ -39,6 +39,11 @@ setup:
 			KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
 			CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
 
+			KONG_COOKIE_HASH_MAILHOG="$$(openssl rand -hex 32)"
+			KONG_COOKIE_BLOCK_MAILHOG="$$(openssl rand -hex 32)"
+			CLIENT_SECRET_MAILHOG="$$(openssl rand -hex 32)"
+
+
 			openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 			PASSWORD="password"
 			POSTGRES_PASSWORD="password"
@@ -105,9 +110,13 @@ setup:
 			echo "KONG_PROXY_ERROR_LOG=/dev/stderr" >> .env
 			echo "KONG_COOKIE_HASH_PGADMIN=$$KONG_COOKIE_HASH_PGADMIN" >> .env
 			echo "KONG_COOKIE_BLOCK_PGADMIN=$$KONG_COOKIE_BLOCK_PGADMIN" >> .env
+			echo "KONG_COOKIE_HASH_MAILHOG=$$KONG_COOKIE_HASH_MAILHOG" >> .env
+			echo "KONG_COOKIE_BLOCK_MAILHOG=$$KONG_COOKIE_BLOCK_MAILHOG" >> .env
 			echo "" >> .env
 			echo "CLIENT_ID_PGADMIN=pgadmin" >> .env
 			echo "CLIENT_SECRET_PGADMIN=$$CLIENT_SECRET_PGADMIN" >> .env
+			echo "CLIENT_ID_MAILHOG=mailhog" >> .env
+			echo "CLIENT_SECRET_MAILHOG=$$CLIENT_SECRET_MAILHOG" >> .env
 			openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 		fi
 	fi

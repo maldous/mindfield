@@ -3,306 +3,164 @@ name: mindfield
 
 services:
 
-#   alertmanager:
-#     ports:
-#       - mode: ingress
-#         target: 9093
-#         published: "9093"
-#         protocol: tcp
-#
-#   api:
-#     ports:
-#       - mode: ingress
-#         target: 3000
-#         published: "3001"
-#         protocol: tcp
-#
-#   blackbox-exporter:
-#     ports:
-#       - mode: ingress
-#         target: 9115
-#         published: "9115"
-#         protocol: tcp
-#
-#   grafana:
-#     ports:
-#       - mode: ingress
-#         target: 3000
-#         published: "3009"
-#         protocol: tcp
-#
-#   grapesjs:
-#     ports:
-#       - mode: ingress
-#         target: 3000
-#         published: "3008"
-#         protocol: tcp
-#
-#   jaeger:
-#     ports:
-#       - mode: ingress
-#         target: 14268
-#         published: "14268"
-#         protocol: tcp
-#       - mode: ingress
-#         target: 16686
-#         published: "16686"
-#         protocol: tcp
-#
-
   keycloak:
     ports:
-      - mode: ingress
-        target: 8080
-        published: "8080"
-        protocol: tcp
+      - "0.0.0.0:8080:8080"
+      - "0.0.0.0:9090:9000" # 9090
 
   kong:
     ports:
-      - mode: ingress
-        target: 8000
-        published: "8000"
-        protocol: tcp
-      - mode: ingress
-        target: 8001
-        published: "8001"
-        protocol: tcp
-      - mode: ingress
-        target: 8443
-        published: "8443"
-        protocol: tcp
-      - mode: ingress
-        target: 8444
-        published: "8444"
-        protocol: tcp
-
-#   loki:
-#     ports:
-#       - mode: ingress
-#         target: 3100
-#         published: "3100"
-#         protocol: tcp
+      - "0.0.0.0:8000:8000"
+      - "0.0.0.0:8001:8001"
+      - "0.0.0.0:8002:8002"
+      - "0.0.0.0:8003:8003"
+      - "0.0.0.0:8004:8004"
 
   mailhog:
     ports:
-      - mode: ingress
-        target: 1025
-        published: "1025"
-        protocol: tcp
-      - mode: ingress
-        target: 8025
-        published: "8025"
-        protocol: tcp
+      - "0.0.0.0:1025:1025"
+      - "0.0.0.0:8025:8025"
 
   minio:
     ports:
-      - mode: ingress
-        target: 9000
-        published: "9000"
-        protocol: tcp
-      - mode: ingress
-        target: 9001
-        published: "9001"
-        protocol: tcp
-
-#   mkdocs:
-#     ports:
-#       - mode: ingress
-#         target: 8000
-#         published: "8001"
-#         protocol: tcp
-#
-#   node-exporter:
-#     ports:
-#       - mode: ingress
-#         target: 9100
-#         published: "9100"
-#         protocol: tcp
-#
-#   opensearch:
-#     ports:
-#       - mode: ingress
-#         target: 9200
-#         published: "9200"
-#         protocol: tcp
-#       - mode: ingress
-#         target: 9600
-#         published: "9600"
-#         protocol: tcp
-#
-#   opensearch-dashboards:
-#     ports:
-#       - mode: ingress
-#         target: 5601
-#         published: "5601"
-#         protocol: tcp
-#
-#   otel-collector:
-#     ports:
-#       - mode: ingress
-#         target: 4317
-#         published: "4317"
-#         protocol: tcp
-#       - mode: ingress
-#         target: 4318
-#         published: "4318"
-#         protocol: tcp
-#       - mode: ingress
-#         target: 8888
-#         published: "8888"
-#         protocol: tcp
-#       - mode: ingress
-#         target: 8889
-#         published: "8889"
-#         protocol: tcp
-#
-#   pgadmin:
-#     ports:
-#       - mode: ingress
-#         target: 80
-#         published: "3016"
-#         protocol: tcp
-#
+      - "0.0.0.0:9000:9000"
+      - "0.0.0.0:9001:9001"
 
   postgres:
     ports:
-      - mode: ingress
-        target: 5432
-        published: "5432"
-        protocol: tcp
+      - "0.0.0.0:5432:5432"
 
   pgbouncer:
     ports:
-      - mode: ingress
-        target: 5433
-        published: "5433"
-        protocol: tcp
+      - "0.0.0.0:5433:5433"
 
   pgadmin:
     ports:
-      - mode: ingress
-        target: 80
-        published: "8081"
-        protocol: tcp
-      - mode: ingress
-        target: 443
-        published: "9443"
-        protocol: tcp
-
-#   postgraphile:
-#     ports:
-#       - mode: ingress
-#         target: 5000
-#         published: "3011"
-#         protocol: tcp
-#
-#   presidio-analyzer:
-#     ports:
-#       - mode: ingress
-#         target: 3000
-#         published: "3005"
-#         protocol: tcp
-#
-#   presidio-anonymizer:
-#     ports:
-#       - mode: ingress
-#         target: 3000
-#         published: "3006"
-#         protocol: tcp
-#
-#   presidio-image-redactor:
-#     ports:
-#       - mode: ingress
-#         target: 3000
-#         published: "3007"
-#         protocol: tcp
-#
-#   prometheus:
-#     ports:
-#       - mode: ingress
-#         target: 9090
-#         published: "9090"
-#         protocol: tcp
+      - "0.0.0.0:8081:80" # 8081
 
   redis:
     ports:
-      - mode: ingress
-        target: 6739
-        published: "6739"
+      - "0.0.0.0:6379:6379"
+
+#   alertmanager:
+#     ports:
+#       - "0.0.0.0:9093:9093"
+#
+#   api:
+#     ports:
+#       - "0.0.0.0:3000:3000"
+#
+#   blackbox-exporter:
+#     ports:
+#       - "0.0.0.0:9115:9115"
+#
+#   grafana:
+#     ports:
+#       - "0.0.0.0:3000:3000"
+#
+#   grapesjs:
+#     ports:
+#       - "0.0.0.0:3000:3000"
+#
+#   jaeger:
+#     ports:
+#       - "0.0.0.0:14268:14268"
+#       - "0.0.0.0:16686:16686"
+#
+
+#   loki:
+#     ports:
+#       - "0.0.0.0:3100:3100"
+
+#   mkdocs:
+#     ports:
+#       - "0.0.0.0:8000:8000"
+#
+#   node-exporter:
+#     ports:
+#       - "0.0.0.0:9100:9100"
+#
+#   opensearch:
+#     ports:
+#       - "0.0.0.0:9200:9209200"
+#       - "0.0.0.0:9600:9600"
+#
+#   opensearch-dashboards:
+#     ports:
+#       - "0.0.0.0:5601:5601"
+#
+#   otel-collector:
+#     ports:
+#       - "0.0.0.0:4317:4317"
+#       - "0.0.0.0:4318:4318"
+#       - "0.0.0.0:8888:8888"
+#       - "0.0.0.0:8889:8889"
+#
+#   pgadmin:
+#     ports:
+#       - "0.0.0.0:80:80"
+#
+
+#   postgraphile:
+#     ports:
+#       - "0.0.0.0:5000:5000"
+#
+#   presidio-analyzer:
+#     ports:
+#       - "0.0.0.0:3000:3000"
+#
+#   presidio-anonymizer:
+#     ports:
+#       - "0.0.0.0:3000:3000"
+#
+#   presidio-image-redactor:
+#     ports:
+#       - "0.0.0.0:3000:3000"
+#
+#   prometheus:
+#     ports:
+#       - "0.0.0.0:9090:9090"
 
 #   redis-insight:
 #     ports:
-#       - mode: ingress
-#         target: 5540
-#         published: "5540"
-#         protocol: tcp
+#       - "0.0.0.0:5540:5540"
 #
 #   redoc:
 #     ports:
-#       - mode: ingress
-#         target: 3000
-#         published: "3014"
-#         protocol: tcp
+#       - "0.0.0.0:3000:3000"
 #
 #   render:
 #     ports:
-#       - mode: ingress
-#         target: 3000
-#         published: "3004"
-#         protocol: tcp
+#       - "0.0.0.0:3000:3000"
 #
 #   sonarqube:
 #     ports:
-#       - mode: ingress
-#         target: 9000
-#         published: "3018"
-#         protocol: tcp
+#       - "0.0.0.0:9000:9000"
 #
 #   storybook:
 #     ports:
-#       - mode: ingress
-#         target: 6006
-#         published: "3015"
-#         protocol: tcp
+#       - "0.0.0.0:6006:6006"
 #
 #   submission:
 #     ports:
-#       - mode: ingress
-#         target: 3000
-#         published: "3002"
-#         protocol: tcp
+#       - "0.0.0.0:3000:3000"
 #
 #   swagger-ui:
 #     ports:
-#       - mode: ingress
-#         target: 3000
-#         published: "3013"
-#         protocol: tcp
+#       - "0.0.0.0:3000:3000"
 #
 #   transform:
 #     ports:
-#       - mode: ingress
-#         target: 3000
-#         published: "3003"
-#         protocol: tcp
+#       - "0.0.0.0:3000:3000"
 #
 #   trivy:
 #     ports:
-#       - mode: ingress
-#         target: 8080
-#         published: "8004"
-#         protocol: tcp
+#       - "0.0.0.0:8080:8080"
 #
 #   uptime-kuma:
 #     ports:
-#       - mode: ingress
-#         target: 3000
-#         published: "3020"
-#         protocol: tcp
+#       - "0.0.0.0:3000:3000"
 #
 #   web:
 #     ports:
-#       - mode: ingress
-#         target: 3000
-#         published: "3000"
-#         protocol: tcp
+#       - "0.0.0.0:3000:3000"
