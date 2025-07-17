@@ -4,8 +4,9 @@
 }
 mailhog.{$DOMAIN}, pgadmin.{$DOMAIN}, keycloak.{$DOMAIN}, {$DOMAIN} {
   tls {$LETSENCRYPT_EMAIL}
+  @hsts host {$DOMAIN}
+  header @hsts Strict-Transport-Security "max-age=31536000"
   header {
-    Strict-Transport-Security "max-age=31536000; includeSubDomains"
     X-Content-Type-Options "nosniff"
     X-Frame-Options "DENY"
     X-XSS-Protection "1; mode=block"
@@ -31,4 +32,7 @@ mailhog.{$DOMAIN}, pgadmin.{$DOMAIN}, keycloak.{$DOMAIN}, {$DOMAIN} {
       header_up Host {host}
     }
   }
+}
+http://*.{$DOMAIN} {
+    redir https://{$DOMAIN}{uri} 302
 }

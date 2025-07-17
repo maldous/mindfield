@@ -19,7 +19,7 @@ ROOT_SERVICE_JSON=$(curl -fs -X PUT "${KONG_URL}/services/root" \
 ROOT_SERVICE_ID=$(echo "${ROOT_SERVICE_JSON}" | jq -r '.id')
 curl -fs -X PUT "${KONG_URL}/routes/root-route" -H 'Content-Type: application/json' \
   -d '{"name":"root-route",
-     "hosts":["root.'"${DOMAIN}"'"],
+     "hosts":["'"${DOMAIN}"'"],
      "paths":["/"],"strip_path":false,
      "service":{"id":"'"${ROOT_SERVICE_ID}"'"}}' >/dev/null
 curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
@@ -30,7 +30,7 @@ curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
        "issuer":"https://keycloak.'"${DOMAIN}"'/realms/mindfield",
        "client_id":"'"${CLIENT_ID_ROOT}"'",
        "client_secret":"'"${CLIENT_SECRET_ROOT}"'",
-       "redirect_uri":"https://root.'"${DOMAIN}"'/callback",
+       "redirect_uri":"https://'"${DOMAIN}"'/callback",
        "consumer_name":"oidcuser",
        "scopes":["openid","email","profile"],
        "cookie_name":"root_session",
