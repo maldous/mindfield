@@ -2,7 +2,6 @@
 set -euo pipefail
 
 KC_URL=http://keycloak:8080
-
 until curl -fs "${KC_URL}/realms/master" >/dev/null; do sleep 5; done
 
 ################################################################################
@@ -13,9 +12,7 @@ KC_TOKEN=$(curl -fs \
   -d "password=${KC_BOOTSTRAP_ADMIN_PASSWORD}" \
   -d "grant_type=password" \
   "${KC_URL}/realms/master/protocol/openid-connect/token" | jq -r '.access_token')
-
 [ -z "${KC_TOKEN}" ] || [ "${KC_TOKEN}" = "null" ] && exit 1
-
 curl -fs -X POST -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: application/json" \
   "${KC_URL}/admin/realms" -d '{
   "realm":"'"${NAME}"'",
@@ -28,12 +25,28 @@ curl -fs -X POST -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: applic
   "passwordPolicy":"length(8) and notUsername() and digits(1) and lowerCase(1) and upperCase(1)",
   "displayName":"Mindfield"
 }'
-
 curl -fs -X PUT \
   -H "Authorization: Bearer ${KC_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{"smtpServer":{"host":"mailhog","port":"1025","from":"noreply@aldous.info","auth":false}}' \
   "${KC_URL}/admin/realms/${NAME}"
+
+################################################################################
+
+curl -fs -H "Authorization: Bearer ${KC_TOKEN}" \
+     -H "Content-Type: application/json" \
+     -d '{
+     "clientId": "'"${CLIENT_ID_ROOT}"'",
+     "enabled": true,
+     "clientAuthenticatorType": "client-secret",
+     "secret": "'"${CLIENT_SECRET_ROOT}"'",
+     "redirectUris": ["https://'"${DOMAIN}"'/callback"],
+     "webOrigins":   ["https://'"${DOMAIN}"'"],
+     "standardFlowEnabled": true,
+     "publicClient": false,
+     "protocol": "openid-connect"
+     }' \
+     "${KC_URL}/admin/realms/${NAME}/clients"
 
 ################################################################################
 

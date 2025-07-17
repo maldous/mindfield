@@ -2,30 +2,53 @@
 set -euo pipefail
 
 KONG_URL=http://kong:8001
-
 until curl -fs "${KONG_URL}/status" >/dev/null; do sleep 5; done
 
 ################################################################################
 
 curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
   -d '{"name":"rate-limiting", "config":{"minute":6000,"policy":"local","limit_by":"ip"}}'
-
 curl -fs -X PUT "${KONG_URL}/consumers/oidcuser" -H 'Content-Type: application/json' \
   -d '{"username":"oidcuser","custom_id":"oidcuser"}' >/dev/null
+
+################################################################################
+
+ROOT_SERVICE_JSON=$(curl -fs -X PUT "${KONG_URL}/services/root" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"root","host":"kong","port":8000,"protocol":"http"}')
+ROOT_SERVICE_ID=$(echo "${ROOT_SERVICE_JSON}" | jq -r '.id')
+curl -fs -X PUT "${KONG_URL}/routes/root-route" -H 'Content-Type: application/json' \
+  -d '{"name":"root-route",
+     "hosts":["root.'"${DOMAIN}"'"],
+     "paths":["/"],"strip_path":false,
+     "service":{"id":"'"${ROOT_SERVICE_ID}"'"}}' >/dev/null
+curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
+  -d '{
+     "name":"oidcify",
+     "service":{"id":"'"${ROOT_SERVICE_ID}"'"},
+     "config":{
+       "issuer":"https://keycloak.'"${DOMAIN}"'/realms/mindfield",
+       "client_id":"'"${CLIENT_ID_ROOT}"'",
+       "client_secret":"'"${CLIENT_SECRET_ROOT}"'",
+       "redirect_uri":"https://root.'"${DOMAIN}"'/callback",
+       "consumer_name":"oidcuser",
+       "scopes":["openid","email","profile"],
+       "cookie_name":"root_session",
+       "cookie_hash_key_hex":"'"${KONG_COOKIE_HASH_ROOT}"'",
+       "cookie_block_key_hex":"'"${KONG_COOKIE_BLOCK_ROOT}"'"
+     }
+     }' | jq '.name, .service.id'
 
 ################################################################################
 
 PGADMIN_SERVICE_JSON=$(curl -fs -X PUT "${KONG_URL}/services/pgadmin" \
   -H 'Content-Type: application/json' \
   -d '{"name":"pgadmin","host":"pgadmin","port":80,"protocol":"http"}')
-
 PGADMIN_SERVICE_ID=$(echo "${PGADMIN_SERVICE_JSON}" | jq -r '.id')
-
 curl -fs -X PUT "${KONG_URL}/routes/pgadmin-route" -H 'Content-Type: application/json' \
   -d '{"name":"pgadmin-route",
      "hosts":["pgadmin.'"${DOMAIN}"'"],
      "service":{"id":"'"${PGADMIN_SERVICE_ID}"'"}}' >/dev/null
-
 curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
   -d '{
      "name":"oidcify",
@@ -48,14 +71,11 @@ curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
 MAILHOG_SERVICE_JSON=$(curl -fs -X PUT "${KONG_URL}/services/mailhog" \
   -H 'Content-Type: application/json' \
   -d '{"name":"mailhog","host":"mailhog","port":8025,"protocol":"http"}')
-
 MAILHOG_SERVICE_ID=$(echo "${MAILHOG_SERVICE_JSON}" | jq -r '.id')
-
 curl -fs -X PUT "${KONG_URL}/routes/mailhog-route" -H 'Content-Type: application/json' \
   -d '{"name":"mailhog-route",
        "hosts":["mailhog.'"${DOMAIN}"'"],
        "service":{"id":"'"${MAILHOG_SERVICE_ID}"'"}}' >/dev/null
-
 curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
   -d '{
         "name":"oidcify",
