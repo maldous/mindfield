@@ -43,7 +43,6 @@ setup:
 			KONG_COOKIE_BLOCK_MAILHOG="$$(openssl rand -hex 32)"
 			CLIENT_SECRET_MAILHOG="$$(openssl rand -hex 32)"
 
-
 			openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 			PASSWORD="password"
 			POSTGRES_PASSWORD="password"
