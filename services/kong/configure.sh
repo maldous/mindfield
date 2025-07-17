@@ -9,7 +9,7 @@ until curl -fs "$KONG_URL/status" >/dev/null; do sleep 2; done
 if ! curl -fs "$KONG_URL/plugins" | jq -e '.data[] | select(.name=="rate-limiting")' >/dev/null; then
   curl -fs -X POST "$KONG_URL/plugins" -H 'Content-Type: application/json' \
        -d '{"name":"rate-limiting",
-            "config":{"minute":60,"policy":"local","limit_by":"ip"}}'
+            "config":{"minute":6000,"policy":"local","limit_by":"ip"}}'
 fi
 
 curl -fs -X PUT "$KONG_URL/consumers/oidcuser" -H 'Content-Type: application/json' \
@@ -45,7 +45,7 @@ curl -fs -X POST "$KONG_URL/plugins" -H 'Content-Type: application/json' \
 
 MAILHOG_SERVICE_JSON=$(curl -fs -X PUT "$KONG_URL/services/mailhog" \
   -H 'Content-Type: application/json' \
-  -d '{"name":"mailhog","host":"mailhog","port":80,"protocol":"http"}')
+  -d '{"name":"mailhog","host":"mailhog","port":8025,"protocol":"http"}')
 
 MAILHOG_SERVICE_ID=$(echo "$MAILHOG_SERVICE_JSON" | jq -r '.id')
 

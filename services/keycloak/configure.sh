@@ -48,7 +48,7 @@ CLIENT_JSON_PGADMIN=$(jq -nc --arg cid "${CLIENT_ID_PGADMIN}" --arg sec "${CLIEN
   protocol:"openid-connect"
 }')
 
-CLIENT_JSON_MAILHOG=$(jq -nc --arg cid "${CLIENT_ID_MAILHOG}" --arg sec "${CLIENT_SECRET_MAILHOG}" --arg dom "pgadmin.${DOMAIN}" '{
+CLIENT_JSON_MAILHOG=$(jq -nc --arg cid "${CLIENT_ID_MAILHOG}" --arg sec "${CLIENT_SECRET_MAILHOG}" --arg dom "mailhog.${DOMAIN}" '{
   clientId:$cid,
   enabled:true,
   clientAuthenticatorType:"client-secret",

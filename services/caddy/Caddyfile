@@ -20,15 +20,7 @@ mailhog.{$DOMAIN}, pgadmin.{$DOMAIN}, keycloak.{$DOMAIN}, {$DOMAIN} {
         format json
     }
 
-    rate_limit {remote.ip} 60r/m
-
-    @mailhog host mailhog.{$DOMAIN}
-
-    handle @mailhog {
-        reverse_proxy mailhog:8025 {
-            header_up Host {host}
-        }
-    }
+    rate_limit {remote.ip} 6000r/m
 
     @keycloak host keycloak.{$DOMAIN}
 
