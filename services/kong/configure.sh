@@ -97,29 +97,31 @@ curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
 
 ################################################################################
 
-REDIS_INSIGHT_SERVICE_JSON=$(curl -fs -X PUT "${KONG_URL}/services/redis-insight" \
+REDISINSIGHT_SERVICE_JSON=$(curl -fs -X PUT "${KONG_URL}/services/redisinsight" \
   -H 'Content-Type: application/json' \
-  -d '{"name":"redis-insight","host":"redis-insight","port":5540,"protocol":"http"}')
-REDIS_INSIGHT_SERVICE_ID=$(echo "${REDIS_INSIGHT_SERVICE_JSON}" | jq -r '.id')
-curl -fs -X PUT "${KONG_URL}/routes/redis-insight-route" -H 'Content-Type: application/json' \
-  -d '{"name":"redis-insight-route",
-       "hosts":["redis-insight.'"${DOMAIN}"'"],
-       "service":{"id":"'"${REDIS_INSIGHT_SERVICE_ID}"'"}}' >/dev/null
+  -d '{"name":"redisinsight","host":"redisinsight","port":5540,"protocol":"http"}')
+REDISINSIGHT_SERVICE_ID=$(echo "${REDISINSIGHT_SERVICE_JSON}" | jq -r '.id')
+curl -fs -X PUT "${KONG_URL}/routes/redisinsight-route" -H 'Content-Type: application/json' \
+  -d '{"name":"redisinsight-route",
+       "hosts":["redisinsight.'"${DOMAIN}"'"],
+       "service":{"id":"'"${REDISINSIGHT_SERVICE_ID}"'"}}' >/dev/null
 curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
   -d '{
         "name":"oidcify",
-        "service":{"id":"'"${REDIS_INSIGHT_SERVICE_ID}"'"},
+        "service":{"id":"'"${REDISINSIGHT_SERVICE_ID}"'"},
         "config":{
           "issuer":"https://keycloak.'"${DOMAIN}"'/realms/mindfield",
-          "client_id":"'"${CLIENT_ID_REDIS_INSIGHT}"'",
-          "client_secret":"'"${CLIENT_SECRET_REDIS_INSIGHT}"'",
-          "redirect_uri":"https://redis-insight.'"${DOMAIN}"'/callback",
+          "client_id":"'"${CLIENT_ID_REDISINSIGHT}"'",
+          "client_secret":"'"${CLIENT_SECRET_REDISINSIGHT}"'",
+          "redirect_uri":"https://redisinsight.'"${DOMAIN}"'/callback",
           "consumer_name":"oidcuser",
           "scopes":["openid","email","profile"],
-          "cookie_name":"redis-insight",
-          "cookie_hash_key_hex":"'"${KONG_COOKIE_HASH_REDIS_INSIGHT}"'",
-          "cookie_block_key_hex":"'"${KONG_COOKIE_BLOCK_REDIS_INSIGHT}"'"
+          "cookie_name":"redisinsight_session",
+          "cookie_hash_key_hex":"'"${KONG_COOKIE_HASH_REDISINSIGHT}"'",
+          "cookie_block_key_hex":"'"${KONG_COOKIE_BLOCK_REDISINSIGHT}"'"
         }
       }' | jq '.name, .service.id'
 
 ################################################################################
+
+echo "services/kong/configure.sh"

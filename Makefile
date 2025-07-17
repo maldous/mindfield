@@ -49,17 +49,17 @@ setup:
 	    KONG_COOKIE_HASH_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_PGADMIN="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_MAILHOG="$$(openssl rand -hex 32)"
-	    KONG_COOKIE_HASH_REDIS_INSIGHT="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_REDISINSIGHT="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_MAILHOG="$$(openssl rand -hex 32)"
-	    KONG_COOKIE_BLOCK_REDIS_INSIGHT="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_REDISINSIGHT="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_MAILHOG="$$(openssl rand -hex 32)"
-	    CLIENT_SECRET_REDIS_INSIGHT="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_REDISINSIGHT="$$(openssl rand -hex 32)"
 
 	    echo "PASSWORD=$$PASSWORD" >> .env
 	    echo "" >> .env
@@ -113,23 +113,28 @@ setup:
 	    echo "KONG_PLUGINS=bundled,rate-limiting,oidcify" >> .env
 	    echo "KONG_PROXY_ACCESS_LOG=/dev/stdout" >> .env
 	    echo "KONG_PROXY_ERROR_LOG=/dev/stderr" >> .env
+
 	    echo "KONG_COOKIE_HASH_ROOT=$$KONG_COOKIE_HASH_ROOT" >> .env
 	    echo "KONG_COOKIE_HASH_PGADMIN=$$KONG_COOKIE_HASH_PGADMIN" >> .env
 	    echo "KONG_COOKIE_HASH_MAILHOG=$$KONG_COOKIE_HASH_MAILHOG" >> .env
-	    echo "KONG_COOKIE_HASH_REDIS_INSIGHT=$$KONG_COOKIE_HASH_REDIS_INSIGHT" >> .env
+	    echo "KONG_COOKIE_HASH_REDISINSIGHT=$$KONG_COOKIE_HASH_REDISINSIGHT" >> .env
+
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
 	    echo "KONG_COOKIE_BLOCK_PGADMIN=$$KONG_COOKIE_BLOCK_PGADMIN" >> .env
 	    echo "KONG_COOKIE_BLOCK_MAILHOG=$$KONG_COOKIE_BLOCK_MAILHOG" >> .env
-	    echo "KONG_COOKIE_BLOCK_REDIS_INSIGHT=$$KONG_COOKIE_BLOCK_REDIS_INSIGHT" >> .env
+	    echo "KONG_COOKIE_BLOCK_REDISINSIGHT=$$KONG_COOKIE_BLOCK_REDISINSIGHT" >> .env
 	    echo "" >> .env
+
 	    echo "CLIENT_ID_ROOT=root" >> .env
 	    echo "CLIENT_ID_PGADMIN=pgadmin" >> .env
 	    echo "CLIENT_ID_MAILHOG=mailhog" >> .env
-	    echo "CLIENT_ID_REDIS_INSIGHT=redis-insight" >> .env
+	    echo "CLIENT_ID_REDISINSIGHT=redisinsight" >> .env
+
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
 	    echo "CLIENT_SECRET_PGADMIN=$$CLIENT_SECRET_PGADMIN" >> .env
 	    echo "CLIENT_SECRET_MAILHOG=$$CLIENT_SECRET_MAILHOG" >> .env
-	    echo "CLIENT_SECRET_REDIS_INSIGHT=$$CLIENT_SECRET_REDIS_INSIGHT" >> .env
+	    echo "CLIENT_SECRET_REDISINSIGHT=$$CLIENT_SECRET_REDISINSIGHT" >> .env
+
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 	  fi
 	fi

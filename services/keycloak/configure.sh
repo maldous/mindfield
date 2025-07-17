@@ -20,7 +20,6 @@ curl -fs -X POST -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: applic
   "enabled":true,
   "registrationAllowed":true,
   "verifyEmail":true,
-  "mail":true,
   "resetPasswordAllowed":true,
   "sslRequired":"external",
   "bruteForceProtected":true,
@@ -90,12 +89,12 @@ curl -fs -H "Authorization: Bearer ${KC_TOKEN}" \
 curl -fs -H "Authorization: Bearer ${KC_TOKEN}" \
      -H "Content-Type: application/json" \
      -d '{
-     "clientId": "'"${CLIENT_ID_REDIS_INSIGHT}"'",
+     "clientId": "'"${CLIENT_ID_REDISINSIGHT}"'",
      "enabled": true,
      "clientAuthenticatorType": "client-secret",
-     "secret": "'"${CLIENT_SECRET_REDIS_INSIGHT}"'",
-     "redirectUris": ["https://redis-insight.'"${DOMAIN}"'/callback"],
-     "webOrigins":   ["https://redis-insight.'"${DOMAIN}"'"],
+     "secret": "'"${CLIENT_SECRET_REDISINSIGHT}"'",
+     "redirectUris": ["https://redisinsight.'"${DOMAIN}"'/callback"],
+     "webOrigins":   ["https://redisinsight.'"${DOMAIN}"'"],
      "standardFlowEnabled": true,
      "publicClient": false,
      "protocol": "openid-connect"
@@ -110,3 +109,5 @@ curl -fs -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: application/js
      "${KC_URL}/admin/realms/${NAME}/default-roles/${NAME}/roles"
 
 ################################################################################
+
+echo "services/keycloak/configure.sh"
