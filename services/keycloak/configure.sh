@@ -26,7 +26,7 @@ curl -fs -X POST -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: applic
   "passwordPolicy":"length(8) and notUsername() and digits(1) and lowerCase(1) and upperCase(1)",
   "displayName":"Mindfield"
   }' \
-  "${KC_URL}/admin/realms"
+  "${KC_URL}/admin/realms" 
 curl -fs -X PUT \
   -H "Authorization: Bearer ${KC_TOKEN}" \
   -H "Content-Type: application/json" \
@@ -103,10 +103,16 @@ curl -fs -H "Authorization: Bearer ${KC_TOKEN}" \
 
 ################################################################################
 
-curl -fs -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: application/json" \
-     -d '[{"id":"'"$(curl -fs -X POST -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: application/json" \
-     -d "{\"name\":\"user\"}" "${KC_URL}/admin/realms/${NAME}/roles" | jq -r .id)"'","name":"user"}]' \
-     "${KC_URL}/admin/realms/${NAME}/default-roles/${NAME}/roles"
+curl -fs -X PUT \
+     -H "Authorization: Bearer ${KC_TOKEN}" \
+     -H "Content-Type: application/json" \
+     -d "[{\"id\":\"$(curl -fs -X POST \
+     -H \"Authorization: Bearer ${KC_TOKEN}\" \
+     -H \"Content-Type: application/json\" \
+     -d '{\"name\":\"user\"}' \
+     \"${KC_URL}/admin/realms/${NAME}/roles\" \
+     | jq -r .id)\",\"name\":\"user\"}]" \
+     "${KC_URL}/admin/realms/${NAME}/default-roles"
 
 ################################################################################
 

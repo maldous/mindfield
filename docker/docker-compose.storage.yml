@@ -111,7 +111,7 @@ services:
     mem_limit: "268435456"
     restart: on-failure
 
-  redis-insight:
+  redisinsight:
     build:
       context: .
       dockerfile: docker/Dockerfile.redisinsight

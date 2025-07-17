@@ -42,7 +42,7 @@ services:
     ports:
       - "0.0.0.0:6379:6379"
 
-  redis-insight:
+  redisinsight:
     ports:
       - "0.0.0.0:5540:5540"
 
