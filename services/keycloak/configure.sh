@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 set -euo pipefail
+set -x
 
 KC_URL=http://keycloak:8080
 until curl -fs "${KC_URL}/realms/master" >/dev/null; do sleep 5; done
@@ -14,7 +15,7 @@ KC_TOKEN=$(curl -fs \
   "${KC_URL}/realms/master/protocol/openid-connect/token" | jq -r '.access_token')
 [ -z "${KC_TOKEN}" ] || [ "${KC_TOKEN}" = "null" ] && exit 1
 curl -fs -X POST -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: application/json" \
-  "${KC_URL}/admin/realms" -d '{
+  -d '{
   "realm":"'"${NAME}"'",
   "enabled":true,
   "registrationAllowed":true,
@@ -25,7 +26,8 @@ curl -fs -X POST -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: applic
   "bruteForceProtected":true,
   "passwordPolicy":"length(8) and notUsername() and digits(1) and lowerCase(1) and upperCase(1)",
   "displayName":"Mindfield"
-}'
+  }' \
+  "${KC_URL}/admin/realms"
 curl -fs -X PUT \
   -H "Authorization: Bearer ${KC_TOKEN}" \
   -H "Content-Type: application/json" \
