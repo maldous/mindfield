@@ -7,7 +7,7 @@
   }
 }
 
-mailhog.{$DOMAIN}, pgadmin.{$DOMAIN}, keycloak.{$DOMAIN}, {$DOMAIN} {
+redis-insight.{$DOMAIN}, mailhog.{$DOMAIN}, pgadmin.{$DOMAIN}, keycloak.{$DOMAIN}, {$DOMAIN} {
   tls {$LETSENCRYPT_EMAIL}
   @hsts host {$DOMAIN}
   header @hsts Strict-Transport-Security "max-age=31536000"

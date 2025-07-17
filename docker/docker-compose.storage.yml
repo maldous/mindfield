@@ -110,3 +110,29 @@ services:
     cpus: 0.5
     mem_limit: "268435456"
     restart: on-failure
+
+  redis-insight:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.redisinsight
+      cache_from:
+        - type=registry,ref=localhost:5001/mindfield-cache
+      cache_to:
+        - type=registry,ref=localhost:5001/mindfield-cache,mode=max
+    depends_on:
+      redis:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://localhost:5540
+      timeout: 5s
+      interval: 10s
+      retries: 5
+    cpus: 0.5
+    mem_limit: "536870912"

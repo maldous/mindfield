@@ -1,24 +1,14 @@
 #!/usr/bin/env sh
 set -euo pipefail
+set -x
 
 KONG_URL=http://kong:8001
 until curl -fs "${KONG_URL}/status" >/dev/null; do sleep 5; done
 
 ################################################################################
 
-curl -fs -X POST "${KONG_URL}/services/root/plugins" -H 'Content-Type: application/json' \
-  -d '{
-        "name":"rate-limiting",
-        "config":{
-          "policy":"redis",
-          "minute":6000,
-          "limit_by":"ip",
-          "redis_host":"redis",
-          "redis_port":6379,
-          "redis_database":0,
-          "redis_timeout":2000
-        }
-      }'
+curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
+  -d '{"name":"rate-limiting", "config":{"minute":6000,"policy":"local","limit_by":"ip"}}'
 
 curl -fs -X PUT "${KONG_URL}/consumers/oidcuser" -H 'Content-Type: application/json' \
   -d '{"username":"oidcuser","custom_id":"oidcuser"}' >/dev/null
@@ -102,6 +92,33 @@ curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
           "cookie_name":"mailhog_session",
           "cookie_hash_key_hex":"'"${KONG_COOKIE_HASH_MAILHOG}"'",
           "cookie_block_key_hex":"'"${KONG_COOKIE_BLOCK_MAILHOG}"'"
+        }
+      }' | jq '.name, .service.id'
+
+################################################################################
+
+REDIS_INSIGHT_SERVICE_JSON=$(curl -fs -X PUT "${KONG_URL}/services/redis-insight" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"redis-insight","host":"redis-insight","port":5540,"protocol":"http"}')
+REDIS_INSIGHT_SERVICE_ID=$(echo "${REDIS_INSIGHT_SERVICE_JSON}" | jq -r '.id')
+curl -fs -X PUT "${KONG_URL}/routes/redis-insight-route" -H 'Content-Type: application/json' \
+  -d '{"name":"redis-insight-route",
+       "hosts":["redis-insight.'"${DOMAIN}"'"],
+       "service":{"id":"'"${REDIS_INSIGHT_SERVICE_ID}"'"}}' >/dev/null
+curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
+  -d '{
+        "name":"oidcify",
+        "service":{"id":"'"${REDIS_INSIGHT_SERVICE_ID}"'"},
+        "config":{
+          "issuer":"https://keycloak.'"${DOMAIN}"'/realms/mindfield",
+          "client_id":"'"${CLIENT_ID_REDIS_INSIGHT}"'",
+          "client_secret":"'"${CLIENT_SECRET_REDIS_INSIGHT}"'",
+          "redirect_uri":"https://redis-insight.'"${DOMAIN}"'/callback",
+          "consumer_name":"oidcuser",
+          "scopes":["openid","email","profile"],
+          "cookie_name":"redis-insight",
+          "cookie_hash_key_hex":"'"${KONG_COOKIE_HASH_REDIS_INSIGHT}"'",
+          "cookie_block_key_hex":"'"${KONG_COOKIE_BLOCK_REDIS_INSIGHT}"'"
         }
       }' | jq '.name, .service.id'
 

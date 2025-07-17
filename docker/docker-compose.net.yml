@@ -42,6 +42,10 @@ services:
     ports:
       - "0.0.0.0:6379:6379"
 
+  redis-insight:
+    ports:
+      - "0.0.0.0:5540:5540"
+
 #   alertmanager:
 #     ports:
 #       - "0.0.0.0:9093:9093"
@@ -121,9 +125,6 @@ services:
 #     ports:
 #       - "0.0.0.0:9090:9090"
 
-#   redis-insight:
-#     ports:
-#       - "0.0.0.0:5540:5540"
 #
 #   redoc:
 #     ports:

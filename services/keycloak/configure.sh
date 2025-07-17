@@ -19,6 +19,7 @@ curl -fs -X POST -H "Authorization: Bearer ${KC_TOKEN}" -H "Content-Type: applic
   "enabled":true,
   "registrationAllowed":true,
   "verifyEmail":true,
+  "mail":true,
   "resetPasswordAllowed":true,
   "sslRequired":"external",
   "bruteForceProtected":true,
@@ -76,6 +77,23 @@ curl -fs -H "Authorization: Bearer ${KC_TOKEN}" \
      "secret": "'"${CLIENT_SECRET_MAILHOG}"'",
      "redirectUris": ["https://mailhog.'"${DOMAIN}"'/callback"],
      "webOrigins":   ["https://mailhog.'"${DOMAIN}"'"],
+     "standardFlowEnabled": true,
+     "publicClient": false,
+     "protocol": "openid-connect"
+     }' \
+     "${KC_URL}/admin/realms/${NAME}/clients"
+
+################################################################################
+
+curl -fs -H "Authorization: Bearer ${KC_TOKEN}" \
+     -H "Content-Type: application/json" \
+     -d '{
+     "clientId": "'"${CLIENT_ID_REDIS_INSIGHT}"'",
+     "enabled": true,
+     "clientAuthenticatorType": "client-secret",
+     "secret": "'"${CLIENT_SECRET_REDIS_INSIGHT}"'",
+     "redirectUris": ["https://redis-insight.'"${DOMAIN}"'/callback"],
+     "webOrigins":   ["https://redis-insight.'"${DOMAIN}"'"],
      "standardFlowEnabled": true,
      "publicClient": false,
      "protocol": "openid-connect"
