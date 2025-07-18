@@ -12,10 +12,11 @@ services:
         condition: service_healthy
         required: true
     volumes:
-      - type: volume
-        source: keycloak_data
+      - type: bind
+        source: ./data/keycloak
         target: /opt/keycloak/data
-        volume: {}
+        bind:
+          create_host_path: true
       - type: bind
         source: ./services/keycloak/themes
         target: /opt/keycloak/themes
