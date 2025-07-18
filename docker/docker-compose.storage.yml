@@ -60,10 +60,11 @@ services:
   postgres:
     image: postgres:17-alpine
     volumes:
-      - type: volume
-        source: postgres_data
+      - type: bind
+        source: ./data/postgres
         target: /var/lib/postgresql/data
-        volume: {}
+        bind:
+          create_host_path: true
       - type: bind
         source: ./services/postgres/init
         target: /docker-entrypoint-initdb.d
