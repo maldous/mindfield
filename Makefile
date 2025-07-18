@@ -89,7 +89,7 @@ setup:
 	    echo "" >> .env
 	    echo 'PGADMIN_DEFAULT_EMAIL=root@$${DOMAIN}' >> .env
 	    echo "PGADMIN_CONFIG_SERVER_MODE=True" >> .env
-	    echo "PGADMIN_CONFIG_CONFIG_DATABASE_URI=\"'postgresql+psycopg://pgadmin:${PGADMIN_DEFAULT_PASSWORD}@pgbouncer:5433/pgadmin'\"" >> .env
+	    echo "PGADMIN_CONFIG_CONFIG_DATABASE_URI=\"'postgresql+psycopg://pgadmin:$${PGADMIN_DEFAULT_PASSWORD}@pgbouncer:5433/pgadmin'\"" >> .env
 	    echo "" >> .env
 	    echo 'LETSENCRYPT_EMAIL=root@$${DOMAIN}' >> .env
 	    echo "" >> .env
@@ -124,6 +124,9 @@ setup:
 	    echo "KONG_PLUGINS=bundled,rate-limiting,oidcify" >> .env
 	    echo "KONG_PROXY_ACCESS_LOG=/dev/stdout" >> .env
 	    echo "KONG_PROXY_ERROR_LOG=/dev/stderr" >> .env
+	    echo "KONG_NGINX_WORKER_PROCESSES=2" >> .env
+	    echo 'KONG_DB_CACHE_WARMUP_ENTITIES=""' >> .env
+	    echo "KONG_LICENSING_ENABLED=false" >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_HASH_ROOT=$$KONG_COOKIE_HASH_ROOT" >> .env
