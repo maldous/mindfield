@@ -121,6 +121,24 @@ curl -fs \
 
 ################################################################################
 
+curl -fs \
+  -H "Authorization: Bearer ${KC_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+  "clientId": "'"${CLIENT_ID_MINIO}"'",
+  "enabled": true,
+  "clientAuthenticatorType": "client-secret",
+  "secret": "'"${CLIENT_SECRET_MINIO}"'",
+  "redirectUris": ["https://minio.'"${DOMAIN}"'/callback"],
+  "webOrigins":   ["https://minio.'"${DOMAIN}"'"],
+  "standardFlowEnabled": true,
+  "publicClient": false,
+  "protocol": "openid-connect"
+  }' \
+  "${KC_URL}/admin/realms/${NAME}/clients"
+
+################################################################################
+
 curl -fs -X POST \
   -H "Authorization: Bearer $KC_TOKEN" \
   -H "Content-Type: application/json" \

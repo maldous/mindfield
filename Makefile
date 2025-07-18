@@ -50,16 +50,19 @@ setup:
 	    KONG_COOKIE_HASH_PGADMIN="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_MAILHOG="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_REDISINSIGHT="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_MINIO="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_MAILHOG="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_REDISINSIGHT="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_MINIO="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_MAILHOG="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_REDISINSIGHT="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_MINIO="$$(openssl rand -hex 32)"
 
 	    echo "PASSWORD=$$PASSWORD" >> .env
 	    echo "" >> .env
@@ -82,7 +85,7 @@ setup:
 	    echo 'POSTGRES_USER=$${NAME}' >> .env
 	    echo 'POSTGRES_DB=$${NAME}' >> .env
 	    echo "" >> .env
-	    echo 'MINIO_ROOT_USER=$${NAME}' >> .env
+	    echo 'MINIO_ROOT_USER=admin' >> .env
 	    echo "" >> .env
 	    echo 'PGADMIN_DEFAULT_EMAIL=root@$${DOMAIN}' >> .env
 	    echo 'LETSENCRYPT_EMAIL=root@$${DOMAIN}' >> .env
@@ -123,22 +126,26 @@ setup:
 	    echo "KONG_COOKIE_HASH_PGADMIN=$$KONG_COOKIE_HASH_PGADMIN" >> .env
 	    echo "KONG_COOKIE_HASH_MAILHOG=$$KONG_COOKIE_HASH_MAILHOG" >> .env
 	    echo "KONG_COOKIE_HASH_REDISINSIGHT=$$KONG_COOKIE_HASH_REDISINSIGHT" >> .env
+	    echo "KONG_COOKIE_HASH_MINIO=$$KONG_COOKIE_HASH_MINIO" >> .env
 
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
 	    echo "KONG_COOKIE_BLOCK_PGADMIN=$$KONG_COOKIE_BLOCK_PGADMIN" >> .env
 	    echo "KONG_COOKIE_BLOCK_MAILHOG=$$KONG_COOKIE_BLOCK_MAILHOG" >> .env
 	    echo "KONG_COOKIE_BLOCK_REDISINSIGHT=$$KONG_COOKIE_BLOCK_REDISINSIGHT" >> .env
+	    echo "KONG_COOKIE_BLOCK_MINIO=$$KONG_COOKIE_BLOCK_MINIO" >> .env
 	    echo "" >> .env
 
 	    echo "CLIENT_ID_ROOT=root" >> .env
 	    echo "CLIENT_ID_PGADMIN=pgadmin" >> .env
 	    echo "CLIENT_ID_MAILHOG=mailhog" >> .env
 	    echo "CLIENT_ID_REDISINSIGHT=redisinsight" >> .env
+	    echo "CLIENT_ID_MINIO=minio" >> .env
 
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
 	    echo "CLIENT_SECRET_PGADMIN=$$CLIENT_SECRET_PGADMIN" >> .env
 	    echo "CLIENT_SECRET_MAILHOG=$$CLIENT_SECRET_MAILHOG" >> .env
 	    echo "CLIENT_SECRET_REDISINSIGHT=$$CLIENT_SECRET_REDISINSIGHT" >> .env
+	    echo "CLIENT_SECRET_MINIO=$$CLIENT_SECRET_MINIO" >> .env
 
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 	  fi
