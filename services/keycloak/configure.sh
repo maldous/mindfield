@@ -172,4 +172,16 @@ curl -fs -X POST \
 
 ################################################################################
 
+curl -fs -X PUT \
+  -H "Authorization: Bearer $KC_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cookieSameSite": "none",
+    "cookieSecure": true,
+    "authSessionCookiePath": "/"
+  }' \
+  "${KC_URL}/admin/realms/${NAME}"
+
+################################################################################
+
 echo "services/keycloak/configure.sh"
