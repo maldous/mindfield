@@ -5,7 +5,7 @@ set -x
 KONG_URL=http://kong:8001
 until curl -fs "${KONG_URL}/status" >/dev/null; do sleep 5; done
 
-if curl -fs -X GET "${KC_URL}/services/root" >/dev/null; then
+if curl -fs -X GET "${KONG_URL}/services/root" >/dev/null; then
   exit 0
 fi
 
