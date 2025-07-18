@@ -13,11 +13,6 @@ services:
         required: true
     volumes:
       - type: bind
-        source: ./data/keycloak
-        target: /opt/keycloak/data
-        bind:
-          create_host_path: true
-      - type: bind
         source: ./services/keycloak/themes
         target: /opt/keycloak/themes
         bind:

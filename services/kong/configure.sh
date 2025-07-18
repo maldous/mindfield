@@ -5,6 +5,10 @@ set -x
 KONG_URL=http://kong:8001
 until curl -fs "${KONG_URL}/status" >/dev/null; do sleep 5; done
 
+if curl -fs -X GET "${KC_URL}/services/root" >/dev/null; then
+  exit 0
+fi
+
 ################################################################################
 
 curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \

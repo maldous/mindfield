@@ -5,6 +5,10 @@ set -x
 KC_URL=http://keycloak:8080
 until curl -fs "${KC_URL}/realms/master" >/dev/null; do sleep 5; done
 
+if curl -fs -X GET "${KC_URL}/realms/${NAME}" >/dev/null; then
+  exit 0
+fi
+
 ################################################################################
 
 KC_TOKEN=$(curl -fs \
