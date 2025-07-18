@@ -35,9 +35,6 @@ volumes:
   opensearch_data:
     name: mindfield_opensearch_data
 
-  pgadmin_data:
-    name: mindfield_pgadmin_data
-
   postgres_data:
     name: mindfield_postgres_data
 

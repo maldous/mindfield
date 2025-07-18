@@ -88,6 +88,9 @@ setup:
 	    echo 'MINIO_ROOT_USER=admin' >> .env
 	    echo "" >> .env
 	    echo 'PGADMIN_DEFAULT_EMAIL=root@$${DOMAIN}' >> .env
+	    echo "PGADMIN_CONFIG_SERVER_MODE=True" >> .env
+	    echo "PGADMIN_CONFIG_CONFIG_DATABASE_URI=\"'postgresql+psycopg://pgadmin:${PGADMIN_DEFAULT_PASSWORD}@pgbouncer:5433/pgadmin'\"" >> .env
+	    echo "" >> .env
 	    echo 'LETSENCRYPT_EMAIL=root@$${DOMAIN}' >> .env
 	    echo "" >> .env
 	    echo "KC_HTTP_ENABLED=true" >> .env
@@ -158,6 +161,7 @@ setup:
 	export PGBOUNCER_POSTGRES_PASSWORD=md5$$(printf '%s' "$$POSTGRES_PASSWORD$$NAME" | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_KC_PASSWORD=md5$$(printf '%s' "$$KC_DB_PASSWORD"keycloak | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_KONG_PASSWORD=md5$$(printf '%s' "$$KONG_PG_PASSWORD"kong | md5sum | cut -d' ' -f1)
+	export PGBOUNCER_PGADMIN_PASSWORD=md5$$(printf '%s' "$$PGADMIN_DEFAULT_PASSWORD"pgadmin | md5sum | cut -d' ' -f1)
 	echo "[databases]" > services/pgbouncer/databases.ini
 	echo "" > services/pgbouncer/userlist.txt
 	echo "$$NAME = host=postgres port=5432 dbname=$$NAME user=$$NAME password=$$POSTGRES_PASSWORD" >> services/pgbouncer/databases.ini
@@ -166,6 +170,8 @@ setup:
 	echo "\"keycloak\" \"$$PGBOUNCER_KC_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "kong = host=postgres port=5432 dbname=kong user=kong password=$$KONG_PG_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "\"kong\" \"$$PGBOUNCER_KONG_PASSWORD\"" >> services/pgbouncer/userlist.txt
+	echo "pgadmin = host=postgres port=5432 dbname=pgadmin user=pgadmin password=$$PGADMIN_DEFAULT_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "\"pgadmin\" \"$$PGBOUNCER_PGADMIN_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "" > services/postgres/init/01.sql
 	echo "CREATE ROLE keycloak WITH LOGIN PASSWORD '$$KC_DB_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE keycloak OWNER keycloak;" >> services/postgres/init/01.sql
@@ -174,6 +180,11 @@ setup:
 	echo "CREATE ROLE kong WITH LOGIN PASSWORD '$$KONG_PG_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE kong OWNER kong;" >> services/postgres/init/01.sql
 	echo "GRANT CONNECT ON DATABASE kong TO kong;" >> services/postgres/init/01.sql
+	echo "" >> services/postgres/init/01.sql
+	echo "CREATE ROLE pgadmin WITH LOGIN PASSWORD '$$PGADMIN_DEFAULT_PASSWORD';" >> services/postgres/init/01.sql
+	echo "CREATE DATABASE pgadmin OWNER pgadmin;" >> services/postgres/init/01.sql
+	echo "GRANT CONNECT ON DATABASE pgadmin TO pgadmin;" >> services/postgres/init/01.sql
+	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v node >/dev/null; then volta install node@"$$NODE_VERSION"; fi
 	if ! command -v pnpm >/dev/null; then volta install pnpm@latest; fi

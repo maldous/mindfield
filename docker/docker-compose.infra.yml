@@ -89,11 +89,6 @@ services:
       postgres:
         condition: service_healthy
         required: true
-    volumes:
-      - type: volume
-        source: pgadmin_data
-        target: /var/lib/pgadmin
-        volume: {}
     env_file:
       - .env
     networks:
