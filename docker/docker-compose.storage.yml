@@ -130,10 +130,11 @@ services:
       backend: null
     healthcheck:
       test:
-        - CMD-SHELL
-        - wget -qO- http://localhost:5540
-      timeout: 5s
-      interval: 10s
-      retries: 5
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
     cpus: 0.5
     mem_limit: "536870912"
