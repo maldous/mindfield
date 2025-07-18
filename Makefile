@@ -122,25 +122,28 @@ setup:
 	    echo "KONG_PROXY_ACCESS_LOG=/dev/stdout" >> .env
 	    echo "KONG_PROXY_ERROR_LOG=/dev/stderr" >> .env
 
+	    echo "" >> .env
 	    echo "KONG_COOKIE_HASH_ROOT=$$KONG_COOKIE_HASH_ROOT" >> .env
 	    echo "KONG_COOKIE_HASH_PGADMIN=$$KONG_COOKIE_HASH_PGADMIN" >> .env
 	    echo "KONG_COOKIE_HASH_MAILHOG=$$KONG_COOKIE_HASH_MAILHOG" >> .env
 	    echo "KONG_COOKIE_HASH_REDISINSIGHT=$$KONG_COOKIE_HASH_REDISINSIGHT" >> .env
 	    echo "KONG_COOKIE_HASH_MINIO=$$KONG_COOKIE_HASH_MINIO" >> .env
 
+	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
 	    echo "KONG_COOKIE_BLOCK_PGADMIN=$$KONG_COOKIE_BLOCK_PGADMIN" >> .env
 	    echo "KONG_COOKIE_BLOCK_MAILHOG=$$KONG_COOKIE_BLOCK_MAILHOG" >> .env
 	    echo "KONG_COOKIE_BLOCK_REDISINSIGHT=$$KONG_COOKIE_BLOCK_REDISINSIGHT" >> .env
 	    echo "KONG_COOKIE_BLOCK_MINIO=$$KONG_COOKIE_BLOCK_MINIO" >> .env
-	    echo "" >> .env
 
+	    echo "" >> .env
 	    echo "CLIENT_ID_ROOT=root" >> .env
 	    echo "CLIENT_ID_PGADMIN=pgadmin" >> .env
 	    echo "CLIENT_ID_MAILHOG=mailhog" >> .env
 	    echo "CLIENT_ID_REDISINSIGHT=redisinsight" >> .env
 	    echo "CLIENT_ID_MINIO=minio" >> .env
 
+	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
 	    echo "CLIENT_SECRET_PGADMIN=$$CLIENT_SECRET_PGADMIN" >> .env
 	    echo "CLIENT_SECRET_MAILHOG=$$CLIENT_SECRET_MAILHOG" >> .env

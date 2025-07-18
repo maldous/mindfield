@@ -124,4 +124,31 @@ curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
 
 ################################################################################
 
+MINIO_SERVICE_JSON=$(curl -fs -X PUT "${KONG_URL}/services/minio" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"minio","host":"minio","port":9001,"protocol":"http"}')
+MINIO_SERVICE_ID=$(echo "${MINIO_SERVICE_JSON}" | jq -r '.id')
+curl -fs -X PUT "${KONG_URL}/routes/minio-route" -H 'Content-Type: application/json' \
+  -d '{"name":"minio-route",
+       "hosts":["minio.'"${DOMAIN}"'"],
+       "service":{"id":"'"${MINIO_SERVICE_ID}"'"}}' >/dev/null
+curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
+  -d '{
+        "name":"oidcify",
+        "service":{"id":"'"${MINIO_SERVICE_ID}"'"},
+        "config":{
+          "issuer":"https://keycloak.'"${DOMAIN}"'/realms/mindfield",
+          "client_id":"'"${CLIENT_ID_MINIO}"'",
+          "client_secret":"'"${CLIENT_SECRET_MINIO}"'",
+          "redirect_uri":"https://minio.'"${DOMAIN}"'/callback",
+          "consumer_name":"oidcuser",
+          "scopes":["openid","email","profile"],
+          "cookie_name":"minio_session",
+          "cookie_hash_key_hex":"'"${KONG_COOKIE_HASH_MINIO}"'",
+          "cookie_block_key_hex":"'"${KONG_COOKIE_BLOCK_MINIO}"'"
+        }
+      }' | jq '.name, .service.id'
+
+################################################################################
+
 echo "services/kong/configure.sh"

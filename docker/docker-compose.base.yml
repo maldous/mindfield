@@ -35,9 +35,6 @@ volumes:
   kong_db_data:
     name: mindfield_kong_db_data
 
-  minio_data:
-    name: mindfield_minio_data
-
   opensearch_data:
     name: mindfield_opensearch_data
 
@@ -49,9 +46,6 @@ volumes:
 
   prometheus_data:
     name: mindfield_prometheus_data
-
-  redis_data:
-    name: mindfield_redis_data
 
   sonarqube_db_data:
     name: mindfield_sonarqube_db_data

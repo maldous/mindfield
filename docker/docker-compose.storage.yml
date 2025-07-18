@@ -5,10 +5,11 @@ services:
   minio:
     image: minio/minio:latest
     volumes:
-      - type: volume
-        source: minio_data
+      - type: bind
+        source: ./data/minio
         target: /data
-        volume: {}
+        bind:
+          create_host_path: true
     env_file:
       - .env
     networks:
@@ -90,7 +91,7 @@ services:
     image: redis:7-alpine
     volumes:
       - type: bind
-        source: ./data
+        source: ./data/redis
         target: /data
         bind:
           create_host_path: true
