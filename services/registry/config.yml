@@ -20,7 +20,7 @@ proxy:
 http:
   addr: :5000              
   headers:
-    X-Content-Type-Options: [nosniff]  # harden MIME handling
+    X-Content-Type-Options: [nosniff]
 
 health:
   storagedriver:
