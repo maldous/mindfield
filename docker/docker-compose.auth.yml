@@ -28,8 +28,9 @@ services:
       frontend: null
     command:
       - start
+    restart: always
     healthcheck:
-      test: 
+      test:
         - CMD
         - "true"
       interval: 5s
@@ -38,7 +39,6 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "536870912"
-    restart: always
 
   keycloak-configure:
     image: badouralix/curl-jq:latest
@@ -56,9 +56,9 @@ services:
       - .env
     networks:
       backend: null
-    command: 
+    command:
       - /configure.sh
-    restart: "no"
+    restart: no
     healthcheck:
       test:
         - CMD
@@ -77,7 +77,6 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-    image: mindfield/kong:local
     depends_on:
       kong-bootstrap:
         condition: service_completed_successfully
@@ -102,7 +101,7 @@ services:
     networks:
       - backend
     command: kong migrations bootstrap
-    restart: always
+    restart: no
 
   kong-configure:
     image: badouralix/curl-jq:latest

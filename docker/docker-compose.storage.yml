@@ -15,6 +15,7 @@ services:
       backend: null
     command: >
       server /data --console-address :9001
+    restart: always
     healthcheck:
       test:
         - CMD-SHELL
@@ -25,7 +26,6 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "268435456"
-    restart: always
 
   pgbouncer:
     image: edoburu/pgbouncer:latest
@@ -39,11 +39,11 @@ services:
         target: /etc/pgbouncer
         bind:
           create_host_path: true
-    user: root
     env_file:
       - .env
     networks:
       backend: null
+    restart: always
     healthcheck:
       test:
         - CMD-SHELL
@@ -52,9 +52,9 @@ services:
       interval: 5s
       retries: 12
       start_period: 60s
+    user: root
     cpus: 0.25
     mem_limit: "67108864"
-    restart: always
 
   postgres:
     image: postgres:17-alpine
@@ -74,6 +74,7 @@ services:
       backend: null
     command: >
       postgres -c shared_buffers=256MB -c effective_cache_size=1GB -c maintenance_work_mem=64MB -c checkpoint_completion_target=0.9 -c wal_buffers=16MB -c default_statistics_target=100 -c random_page_cost=1.1 -c effective_io_concurrency=200 -c password_encryption=md5
+    restart: always
     healthcheck:
       test:
         - CMD-SHELL
@@ -84,7 +85,6 @@ services:
       start_period: 60s
     cpus: 1
     mem_limit: "536870912"
-    restart: always
 
   redis:
     image: redis:7-alpine
@@ -100,6 +100,7 @@ services:
       backend: null
     command: >
       redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru --save 900 1 --save 300 10 --save 60 10000
+    restart: always
     healthcheck:
       test:
         - CMD-SHELL
@@ -110,7 +111,6 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "268435456"
-    restart: always
 
   redisinsight:
     build:

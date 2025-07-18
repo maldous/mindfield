@@ -1,5 +1,4 @@
-ARG REDISINSIGHT_VERSION=2.70.1
-FROM redis/redisinsight:${REDISINSIGHT_VERSION}
+FROM redis/redisinsight:2.70.1
 
 USER root
 

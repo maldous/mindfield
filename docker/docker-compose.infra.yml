@@ -10,6 +10,10 @@ services:
         - type=registry,ref=localhost:5001/mindfield-cache
       cache_to:
         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
     volumes:
       - type: bind
         source: /var/log/caddy/
@@ -48,10 +52,7 @@ services:
       backend: null
       frontend: null
       monitoring: null
-    depends_on:
-      postgres:
-        condition: service_healthy
-        required: true
+    restart: always
     healthcheck:
       test:
         - CMD
@@ -62,7 +63,6 @@ services:
       start_period: 60s
     cpus: 0.25
     mem_limit: "134217728"
-    restart: always
 
   mailhog:
     image: mailhog/mailhog:latest
@@ -71,6 +71,7 @@ services:
     networks:
       backend: null
       frontend: null
+    restart: always
     healthcheck:
       test:
         - CMD
@@ -81,7 +82,6 @@ services:
       start_period: 60s
     cpus: 0.25
     mem_limit: "134217728"
-    restart: always
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -99,6 +99,7 @@ services:
     networks:
       backend: null
       frontend: null
+    restart: always
     healthcheck:
       test:
         - CMD
@@ -109,4 +110,3 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "268435456"
-    restart: always
