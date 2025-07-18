@@ -1,4 +1,4 @@
-.PHONY: setup env reset docker install help
+.PHONY: *
 .DEFAULT_GOAL := help
 
 .ONESHELL:
@@ -165,7 +165,6 @@ setup:
 	echo "CREATE DATABASE kong OWNER kong;" >> services/postgres/init/01.sql
 	echo "GRANT CONNECT ON DATABASE kong TO kong;" >> services/postgres/init/01.sql
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
-	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v node >/dev/null; then volta install node@"$$NODE_VERSION"; fi
 	if ! command -v pnpm >/dev/null; then volta install pnpm@latest; fi
 	if ! command -v turbo >/dev/null; then volta install turbo@latest; fi
@@ -190,12 +189,12 @@ env:
 
 reset: clean
 	@rm -f .env
-	@docker rm -f registry-proxy registry-write
-	@docker volume rm -f registry_proxy_data registry_write_data
+	@docker rm -f registry-proxy registry-write || exit 1
+	@docker volume rm -f registry_proxy_data registry_write_data || exit 1
 
 install: setup
-	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) build --pull --parallel
-	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) up -d --remove-orphans
+	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) build --pull --parallel || exit 1
+	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) up -d --remove-orphans || exit 1
 
 clean: env
 	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down -v --remove-orphans

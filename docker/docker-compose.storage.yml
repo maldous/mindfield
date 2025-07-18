@@ -25,7 +25,7 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "268435456"
-    restart: on-failure
+    restart: always
 
   pgbouncer:
     image: edoburu/pgbouncer:latest
@@ -54,7 +54,7 @@ services:
       start_period: 60s
     cpus: 0.25
     mem_limit: "67108864"
-    restart: on-failure
+    restart: always
 
   postgres:
     image: postgres:17-alpine
@@ -84,7 +84,7 @@ services:
       start_period: 60s
     cpus: 1
     mem_limit: "536870912"
-    restart: on-failure
+    restart: always
 
   redis:
     image: redis:7-alpine
@@ -110,7 +110,7 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "268435456"
-    restart: on-failure
+    restart: always
 
   redisinsight:
     build:

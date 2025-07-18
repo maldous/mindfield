@@ -62,7 +62,7 @@ services:
       start_period: 60s
     cpus: 0.25
     mem_limit: "134217728"
-    restart: on-failure
+    restart: always
 
   mailhog:
     image: mailhog/mailhog:latest
@@ -81,7 +81,7 @@ services:
       start_period: 60s
     cpus: 0.25
     mem_limit: "134217728"
-    restart: on-failure
+    restart: always
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -109,4 +109,4 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "268435456"
-    restart: on-failure
+    restart: always
