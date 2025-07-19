@@ -155,4 +155,31 @@ curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
 
 ################################################################################
 
+ALERTMANAGER_SERVICE_JSON=$(curl -fs -X PUT "${KONG_URL}/services/alertmanager" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"alertmanager","host":"alertmanager","port":9093,"protocol":"http"}')
+ALERTMANAGER_SERVICE_ID=$(echo "${ALERTMANAGER_SERVICE_JSON}" | jq -r '.id')
+curl -fs -X PUT "${KONG_URL}/routes/alertmanager-route" -H 'Content-Type: application/json' \
+  -d '{"name":"alertmanager-route",
+       "hosts":["alertmanager.'"${DOMAIN}"'"],
+       "service":{"id":"'"${ALERTMANAGER_SERVICE_ID}"'"}}' >/dev/null
+curl -fs -X POST "${KONG_URL}/plugins" -H 'Content-Type: application/json' \
+  -d '{
+        "name":"oidcify",
+        "service":{"id":"'"${ALERTMANAGER_SERVICE_ID}"'"},
+        "config":{
+          "issuer":"https://keycloak.'"${DOMAIN}"'/realms/mindfield",
+          "client_id":"'"${CLIENT_ID_ALERTMANAGER}"'",
+          "client_secret":"'"${CLIENT_SECRET_ALERTMANAGER}"'",
+          "redirect_uri":"https://alertmanager.'"${DOMAIN}"'/callback",
+          "consumer_name":"oidcuser",
+          "scopes":["openid","email","profile"],
+          "cookie_name":"alertmanager",
+          "cookie_hash_key_hex":"'"${KONG_COOKIE_HASH_ALERTMANAGER}"'",
+          "cookie_block_key_hex":"'"${KONG_COOKIE_BLOCK_ALERTMANAGER}"'"
+        }
+      }' | jq '.name, .service.id'
+
+################################################################################
+
 echo "services/kong/configure.sh"

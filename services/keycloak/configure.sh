@@ -143,6 +143,24 @@ curl -fs \
 
 ################################################################################
 
+curl -fs \
+  -H "Authorization: Bearer ${KC_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+  "clientId": "'"${CLIENT_ID_ALERTMANAGER}"'",
+  "enabled": true,
+  "clientAuthenticatorType": "client-secret",
+  "secret": "'"${CLIENT_SECRET_ALERTMANAGER}"'",
+  "redirectUris": ["https://alertmanager.'"${DOMAIN}"'/callback"],
+  "webOrigins":   ["https://alertmanager.'"${DOMAIN}"'"],
+  "standardFlowEnabled": true,
+  "publicClient": false,
+  "protocol": "openid-connect"
+  }' \
+  "${KC_URL}/admin/realms/${NAME}/clients"
+
+################################################################################
+
 curl -fs -X POST \
   -H "Authorization: Bearer $KC_TOKEN" \
   -H "Content-Type: application/json" \

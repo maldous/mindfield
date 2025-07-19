@@ -29,9 +29,6 @@ volumes:
   grafana_provisioning:
     name: mindfield_grafana_provisioning
 
-  kong_db_data:
-    name: mindfield_kong_db_data
-
   opensearch_data:
     name: mindfield_opensearch_data
 

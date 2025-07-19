@@ -51,18 +51,21 @@ setup:
 	    KONG_COOKIE_HASH_MAILHOG="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_REDISINSIGHT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_MINIO="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_ALERTMANAGER="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_MAILHOG="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_REDISINSIGHT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_MINIO="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_ALERTMANAGER="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_MAILHOG="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_REDISINSIGHT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_MINIO="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_ALERTMANAGER="$$(openssl rand -hex 32)"
 
 	    echo "PASSWORD=$$PASSWORD" >> .env
 	    echo "" >> .env
@@ -134,6 +137,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_MAILHOG=$$KONG_COOKIE_HASH_MAILHOG" >> .env
 	    echo "KONG_COOKIE_HASH_REDISINSIGHT=$$KONG_COOKIE_HASH_REDISINSIGHT" >> .env
 	    echo "KONG_COOKIE_HASH_MINIO=$$KONG_COOKIE_HASH_MINIO" >> .env
+	    echo "KONG_COOKIE_HASH_ALERTMANAGER=$$KONG_COOKIE_HASH_ALERTMANAGER" >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
@@ -141,6 +145,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_MAILHOG=$$KONG_COOKIE_BLOCK_MAILHOG" >> .env
 	    echo "KONG_COOKIE_BLOCK_REDISINSIGHT=$$KONG_COOKIE_BLOCK_REDISINSIGHT" >> .env
 	    echo "KONG_COOKIE_BLOCK_MINIO=$$KONG_COOKIE_BLOCK_MINIO" >> .env
+	    echo "KONG_COOKIE_BLOCK_ALERTMANAGER=$$KONG_COOKIE_BLOCK_ALERTMANAGER" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_ID_ROOT=root" >> .env
@@ -148,6 +153,7 @@ setup:
 	    echo "CLIENT_ID_MAILHOG=mailhog" >> .env
 	    echo "CLIENT_ID_REDISINSIGHT=redisinsight" >> .env
 	    echo "CLIENT_ID_MINIO=minio" >> .env
+	    echo "CLIENT_ID_ALERTMANAGER=alertmanager" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
@@ -155,6 +161,7 @@ setup:
 	    echo "CLIENT_SECRET_MAILHOG=$$CLIENT_SECRET_MAILHOG" >> .env
 	    echo "CLIENT_SECRET_REDISINSIGHT=$$CLIENT_SECRET_REDISINSIGHT" >> .env
 	    echo "CLIENT_SECRET_MINIO=$$CLIENT_SECRET_MINIO" >> .env
+	    echo "CLIENT_SECRET_ALERTMANAGER=$$CLIENT_SECRET_ALERTMANAGER" >> .env
 
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 	  fi

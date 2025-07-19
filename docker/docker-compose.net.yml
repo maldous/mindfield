@@ -45,9 +45,10 @@ services:
     ports:
       - '0.0.0.0:5540:5540'
 
-#   alertmanager:
-#     ports:
-#       - "0.0.0.0:9093:9093"
+  alertmanager:
+    ports:
+      - "0.0.0.0:9093:9093"
+
 #
 #   api:
 #     ports:
