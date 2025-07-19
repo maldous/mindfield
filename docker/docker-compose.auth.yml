@@ -86,6 +86,14 @@ services:
       - frontend
       - backend
     restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - kong health
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
 
   kong-bootstrap:
     image: mindfield/kong:local
