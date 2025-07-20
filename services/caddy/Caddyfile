@@ -7,7 +7,7 @@
   }
 }
 
-jaeger.{$DOMAIN}, grafana.{$DOMAIN}, blackbox.{$DOMAIN}, alertmanager.{$DOMAIN}, minio.{$DOMAIN}, redisinsight.{$DOMAIN}, mailhog.{$DOMAIN}, pgadmin.{$DOMAIN}, keycloak.{$DOMAIN}, {$DOMAIN} {
+kuma.{$DOMAIN}, jaeger.{$DOMAIN}, grafana.{$DOMAIN}, blackbox.{$DOMAIN}, alertmanager.{$DOMAIN}, minio.{$DOMAIN}, redisinsight.{$DOMAIN}, mailhog.{$DOMAIN}, pgadmin.{$DOMAIN}, keycloak.{$DOMAIN}, {$DOMAIN} {
   tls {$LETSENCRYPT_EMAIL}
 
   @hsts host {$DOMAIN}

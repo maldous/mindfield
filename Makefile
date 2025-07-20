@@ -33,6 +33,7 @@ setup:
 	    KONG_COOKIE_HASH_BLACKBOX="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_GRAFANA="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_JAEGER="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_KUMA="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
@@ -43,6 +44,7 @@ setup:
 	    KONG_COOKIE_BLOCK_BLACKBOX="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_GRAFANA="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_JAEGER="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_KUMA="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
@@ -53,6 +55,7 @@ setup:
 	    CLIENT_SECRET_BLACKBOX="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_GRAFANA="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_JAEGER="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_KUMA="$$(openssl rand -hex 32)"
 
 	    #PASSWORD="$$(openssl rand -hex 16)"
 	    #POSTGRES_PASSWORD="$$(openssl rand -hex 16)"
@@ -63,7 +66,7 @@ setup:
 	    #KC_DB_PASSWORD="$$(openssl rand -hex 16)"
 	    #KC_SECRET="$$(openssl rand -hex 32)"
 	    #KONG_PG_PASSWORD="$$(openssl rand -hex 16)"
-	    KUMA_PASSWORD="$$(openssl rand -hex 16)"
+	    #KUMA_PASSWORD="$$(openssl rand -hex 16)"
 
 	    PASSWORD="password"
 	    POSTGRES_PASSWORD="password"
@@ -74,7 +77,7 @@ setup:
 	    KC_DB_PASSWORD="password"
 	    KC_SECRET="password"
 	    KONG_PG_PASSWORD="password"
-	    #KUMA_PASSWORD="password"
+	    KUMA_PASSWORD="password"
 
 	    echo "NAME=$$NAME" >> .env
 	    echo "DOMAIN=aldous.info" >> .env
@@ -177,6 +180,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_BLACKBOX=$$KONG_COOKIE_HASH_BLACKBOX" >> .env
 	    echo "KONG_COOKIE_HASH_GRAFANA=$$KONG_COOKIE_HASH_GRAFANA" >> .env
 	    echo "KONG_COOKIE_HASH_JAEGER=$$KONG_COOKIE_HASH_JAEGER" >> .env
+	    echo "KONG_COOKIE_HASH_KUMA=$$KONG_COOKIE_HASH_KUMA" >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
@@ -188,6 +192,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_BLACKBOX=$$KONG_COOKIE_BLOCK_BLACKBOX" >> .env
 	    echo "KONG_COOKIE_BLOCK_GRAFANA=$$KONG_COOKIE_BLOCK_GRAFANA" >> .env
 	    echo "KONG_COOKIE_BLOCK_JAEGER=$$KONG_COOKIE_BLOCK_JAEGER" >> .env
+	    echo "KONG_COOKIE_BLOCK_KUMA=$$KONG_COOKIE_BLOCK_KUMA" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_ID_ROOT=root" >> .env
@@ -199,6 +204,7 @@ setup:
 	    echo "CLIENT_ID_BLACKBOX=blackbox" >> .env
 	    echo "CLIENT_ID_GRAFANA=grafana" >> .env
 	    echo "CLIENT_ID_JAEGER=jaeger" >> .env
+	    echo "CLIENT_ID_KUMA=kuma" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
@@ -210,6 +216,7 @@ setup:
 	    echo "CLIENT_SECRET_BLACKBOX=$$CLIENT_SECRET_BLACKBOX" >> .env
 	    echo "CLIENT_SECRET_GRAFANA=$$CLIENT_SECRET_GRAFANA" >> .env
 	    echo "CLIENT_SECRET_JAEGER=$$CLIENT_SECRET_JAEGER" >> .env
+	    echo "CLIENT_SECRET_KUMA=$$CLIENT_SECRET_KUMA" >> .env
 
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 	  fi

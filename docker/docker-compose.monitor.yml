@@ -161,38 +161,6 @@ services:
     cpus: 0.5
     mem_limit: "268435456"
 
-  autokuma:
-    image: ghcr.io/bigboot/autokuma:latest
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      AUTOKUMA__KUMA__URL: "http://kuma:3001"
-      AUTOKUMA__KUMA__USERNAME: "${KUMA_USER}"
-      AUTOKUMA__KUMA__PASSWORD: "${KUMA_PASSWORD}"
-      AUTOKUMA__DOCKER__HOSTS: "unix:///var/run/docker.sock"
-      AUTOKUMA__TAG_NAME: "AutoKuma"
-      AUTOKUMA__TAG_COLOR: "#42C0FB"
-      AUTOKUMA__SNIPPETS__WEB: |-
-        {{container_name}}_http.http.name: {{container_name}} HTTP
-        {{container_name}}_http.http.url: https://{{@0}}:{{@1}}
-    volumes:
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-        bind:
-          create_host_path: false
-      - type: bind
-        source: ./data/autokuma
-        target: /data
-        bind:
-          create_host_path: true
-    networks:
-      backend: null
-      frontend: null
-    cpus: 0.5
-    mem_limit: "268435456"
-
 #   otel-collector:
 #     image: otel/opentelemetry-collector-contrib:latest
 #     depends_on:

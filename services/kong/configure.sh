@@ -106,5 +106,6 @@ create_stack alertmanager alertmanager 9093 "alertmanager.${DOMAIN}" "${CLIENT_I
 create_stack blackbox blackbox 9115 "blackbox.${DOMAIN}" "${CLIENT_ID_BLACKBOX}" "${CLIENT_SECRET_BLACKBOX}" blackbox "${KONG_COOKIE_HASH_BLACKBOX}" "${KONG_COOKIE_BLOCK_BLACKBOX}"
 create_stack grafana grafana 3000 "grafana.${DOMAIN}" "${CLIENT_ID_GRAFANA}" "${CLIENT_SECRET_GRAFANA}" grafana "${KONG_COOKIE_HASH_GRAFANA}" "${KONG_COOKIE_BLOCK_GRAFANA}"
 create_stack jaeger jaeger 16686 "jaeger.${DOMAIN}" "${CLIENT_ID_JAEGER}" "${CLIENT_SECRET_JAEGER}" jaeger "${KONG_COOKIE_HASH_JAEGER}" "${KONG_COOKIE_BLOCK_JAEGER}"
+create_stack kuma kuma 3001 "kuma.${DOMAIN}" "${CLIENT_ID_KUMA}" "${CLIENT_SECRET_KUMA}" kuma "${KONG_COOKIE_HASH_KUMA}" "${KONG_COOKIE_BLOCK_KUMA}"
 
 echo "services/kong/configure.sh"
