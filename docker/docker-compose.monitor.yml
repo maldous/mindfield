@@ -27,7 +27,7 @@ services:
       - --storage.path=/alertmanager
     cpus: 0.25
     mem_limit: "134217728"
- 
+
   blackbox:
     image: prom/blackbox-exporter:latest
     volumes:
@@ -43,7 +43,7 @@ services:
       monitoring: null
     cpus: 0.25
     mem_limit: "134217728"
- 
+
   grafana:
     image: grafana/grafana:latest
     depends_on:
@@ -61,7 +61,7 @@ services:
       monitoring: null
     cpus: 0.5
     mem_limit: "268435456"
- 
+
   jaeger:
     image: jaegertracing/all-in-one:latest
     env_file:
@@ -72,7 +72,7 @@ services:
       monitoring: null
     cpus: 0.5
     mem_limit: "268435456"
- 
+
   loki:
     image: grafana/loki:latest
     volumes:
@@ -113,10 +113,11 @@ services:
     cpus: 0.25
     mem_limit: "134217728"
     pid: host
- 
+
   prometheus:
     image: prom/prometheus:latest
     volumes:
+
       - type: bind
         source: ./services/prometheus/prometheus.yml
         target: /etc/prometheus/prometheus.yml
@@ -128,7 +129,6 @@ services:
         target: /prometheus
         bind:
           create_host_path: true
-
     env_file:
       - .env
     networks:
@@ -144,17 +144,49 @@ services:
       - --web.enable-lifecycle
     cpus: 0.5
     mem_limit: "536870912"
- 
+
   kuma:
     image: louislam/uptime-kuma:latest
+    env_file:
+      - .env
     volumes:
       - type: bind
         source: ./data/kuma
         target: /app/data
         bind:
           create_host_path: true
+    networks:
+      backend: null
+      frontend: null
+    cpus: 0.5
+    mem_limit: "268435456"
+
+  autokuma:
+    image: ghcr.io/bigboot/autokuma:latest
+    restart: unless-stopped
     env_file:
       - .env
+    environment:
+      AUTOKUMA__KUMA__URL: "http://kuma:3001"
+      AUTOKUMA__KUMA__USERNAME: "${KUMA_USER}"
+      AUTOKUMA__KUMA__PASSWORD: "${KUMA_PASSWORD}"
+      AUTOKUMA__DOCKER__HOSTS: "unix:///var/run/docker.sock"
+      AUTOKUMA__TAG_NAME: "AutoKuma"
+      AUTOKUMA__TAG_COLOR: "#42C0FB"
+      AUTOKUMA__SNIPPETS__WEB: |-
+        {{container_name}}_http.http.name: {{container_name}} HTTP
+        {{container_name}}_http.http.url: https://{{@0}}:{{@1}}
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./data/autokuma
+        target: /data
+        bind:
+          create_host_path: true
     networks:
       backend: null
       frontend: null
@@ -189,7 +221,7 @@ services:
 #       - --config=/etc/otel-collector-config.yaml
 #     cpus: 0.5
 #     mem_limit: "268435456"
- 
+
 #   promtail:
 #     image: grafana/promtail:latest
 #     volumes:
@@ -219,4 +251,4 @@ services:
 #       - -config.file=/etc/promtail/config.yml
 #     cpus: 0.25
 #     mem_limit: "134217728"
- 
+
