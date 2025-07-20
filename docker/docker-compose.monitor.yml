@@ -89,6 +89,7 @@ services:
       monitoring: null
     command:
       - -config.file=/etc/loki/local-config.yaml
+      - -config.expand-env=true
     cpus: 0.5
     mem_limit: "536870912"
 

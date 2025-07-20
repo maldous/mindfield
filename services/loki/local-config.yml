@@ -9,7 +9,7 @@ common:
   storage:
     filesystem:
       chunks_directory: /tmp/loki/chunks
-      rules_directory: /tmp/loki/rules
+      rules_directory:  /tmp/loki/rules
   replication_factor: 1
   ring:
     instance_addr: 127.0.0.1
@@ -25,16 +25,13 @@ query_range:
 
 schema_config:
   configs:
-    - from: 2020-10-24
-      store: boltdb-shipper
-      object_store: filesystem
-      schema: v11
+    - from: 2025-01-01
+      store: tsdb
+      object_store: aws
+      schema: v13
       index:
         prefix: index_
         period: 24h
-
-ruler:
-  alertmanager_url: http://localhost:9093
 
 limits_config:
   retention_period: 168h
@@ -47,13 +44,14 @@ table_manager:
   retention_period: 168h
 
 storage_config:
-  boltdb_shipper:
+  tsdb_shipper:
     active_index_directory: /tmp/loki/index
     cache_location: /tmp/loki/index_cache
-    shared_store: s3
+    cache_ttl: 24h
 
-  s3:
-    endpoint: minio:9000
+  aws:
+    s3: s3://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@minio:9000
     bucketnames: loki-chunks
+    region: ap-southeast-4
+    s3forcepathstyle: true
     insecure: true
-
