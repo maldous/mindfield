@@ -48,7 +48,13 @@ create_stack() {
   svc_id=$(echo "${svc_json}" | jq -r '.id')
   curl -fs -X PUT "${KONG_URL}/routes/${svc}-route" \
   -H 'Content-Type: application/json' \
-  -d "{\"name\":\"${svc}-route\",\"hosts\":[\"${fqdn}\"],\"service\":{\"id\":\"${svc_id}\"}}"
+  -d "{
+    \"name\":\"${svc}-route\",
+    \"hosts\":[\"${fqdn}\"],
+    \"methods\":[\"GET\",\"POST\",\"PUT\",\"DELETE\"],
+    \"preserve_host\":true,
+    \"service\":{\"id\":\"${svc_id}\"}
+  }"
   local plugin_cfg
   plugin_cfg="{\"issuer\":\"https://keycloak.${DOMAIN}/realms/mindfield\",\
   \"client_id\":\"${client_id}\",\"client_secret\":\"${client_secret}\",\
@@ -73,8 +79,15 @@ root_id=$(echo "${root_svc_json}" | jq -r '.id')
 
 curl -fs -X PUT "${KONG_URL}/routes/root-route" \
   -H 'Content-Type: application/json' \
-  -d "{\"name\":\"root-route\",\"hosts\":[\"${DOMAIN}\"],\"paths\":[\"/\"],\
-  \"strip_path\":false,\"service\":{\"id\":\"${root_id}\"}}"
+  -d "{
+  \"name\":\"root-route\",
+  \"hosts\":[\"${DOMAIN}\"],
+  \"paths\":[\"/\"],
+  \"strip_path\":false,
+  \"methods\":[\"GET\",\"POST\",\"PUT\",\"DELETE\"],
+  \"preserve_host\":true,
+  \"service\":{\"id\":\"${root_id}\"}
+}"
 
 root_cfg="{\"issuer\":\"https://keycloak.${DOMAIN}/realms/mindfield\",\
   \"client_id\":\"${CLIENT_ID_ROOT}\",\"client_secret\":\"${CLIENT_SECRET_ROOT}\",\
