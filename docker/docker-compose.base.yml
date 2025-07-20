@@ -23,9 +23,6 @@ volumes:
   opensearch_data:
     name: mindfield_opensearch_data
 
-  prometheus_data:
-    name: mindfield_prometheus_data
-
   sonarqube_db_data:
     name: mindfield_sonarqube_db_data
 

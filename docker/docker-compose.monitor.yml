@@ -114,6 +114,35 @@ services:
     mem_limit: "134217728"
     pid: host
  
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - type: bind
+        source: ./services/prometheus/prometheus.yml
+        target: /etc/prometheus/prometheus.yml
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ./data/prometheus
+        target: /prometheus
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+      monitoring: null
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.console.templates=/etc/prometheus/consoles
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+    cpus: 0.5
+    mem_limit: "536870912"
+ 
 #   otel-collector:
 #     image: otel/opentelemetry-collector-contrib:latest
 #     depends_on:
@@ -142,35 +171,7 @@ services:
 #       - --config=/etc/otel-collector-config.yaml
 #     cpus: 0.5
 #     mem_limit: "268435456"
-# 
-#   prometheus:
-#     image: prom/prometheus:latest
-#     volumes:
-#       - type: bind
-#         source: ./services/prometheus/prometheus.yml
-#         target: /etc/prometheus/prometheus.yml
-#         bind:
-#           create_host_path: true
-#       - type: volume
-#         source: prometheus_data
-#         target: /prometheus
-#         volume: {}
-#     env_file:
-#       - .env
-#     networks:
-#       backend: null
-#       frontend: null
-#       monitoring: null
-#     command:
-#       - --config.file=/etc/prometheus/prometheus.yml
-#       - --storage.tsdb.path=/prometheus
-#       - --web.console.libraries=/etc/prometheus/console_libraries
-#       - --web.console.templates=/etc/prometheus/consoles
-#       - --storage.tsdb.retention.time=7d
-#       - --web.enable-lifecycle
-#     cpus: 0.5
-#     mem_limit: "536870912"
-# 
+ 
 #   promtail:
 #     image: grafana/promtail:latest
 #     volumes:

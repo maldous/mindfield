@@ -5,7 +5,7 @@ services:
   keycloak:
     ports:
       - "0.0.0.0:8080:8080/tcp"
-      - "0.0.0.0:9090:9000/tcp" # 9090
+      - "0.0.0.0:9002:9000/tcp" # 9002
 
   kong:
     ports:
@@ -81,6 +81,10 @@ services:
     ports:
       - "0.0.0.0:9100:9100/tcp"
 
+  prometheus:
+    ports:
+      - "0.0.0.0:9090:9090/tcp"
+
 #
 #   api:
 #     ports:
@@ -135,10 +139,6 @@ services:
 #   presidio-image-redactor:
 #     ports:
 #       - "0.0.0.0:3000:3000"
-#
-#   prometheus:
-#     ports:
-#       - "0.0.0.0:9090:9090"
 
 #
 #   redoc:
