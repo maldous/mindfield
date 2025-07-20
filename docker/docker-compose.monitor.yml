@@ -161,6 +161,36 @@ services:
     cpus: 0.5
     mem_limit: "268435456"
 
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - type: bind
+        source: ./services/promtail/promtail-config.yml
+        target: /etc/promtail/config.yml
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /var/log
+        target: /var/log
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /var/lib/docker/containers
+        target: /var/lib/docker/containers
+        read_only: true
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      monitoring: null
+    command:
+      - -config.file=/etc/promtail/config.yml
+    cpus: 0.25
+    mem_limit: "134217728"
+
 #   otel-collector:
 #     image: otel/opentelemetry-collector-contrib:latest
 #     depends_on:
@@ -189,34 +219,4 @@ services:
 #       - --config=/etc/otel-collector-config.yaml
 #     cpus: 0.5
 #     mem_limit: "268435456"
-
-#   promtail:
-#     image: grafana/promtail:latest
-#     volumes:
-#       - type: bind
-#         source: ./services/promtail/promtail-config.yml
-#         target: /etc/promtail/config.yml
-#         bind:
-#           create_host_path: true
-#       - type: bind
-#         source: /var/log
-#         target: /var/log
-#         read_only: true
-#         bind:
-#           create_host_path: true
-#       - type: bind
-#         source: /var/lib/docker/containers
-#         target: /var/lib/docker/containers
-#         read_only: true
-#         bind:
-#           create_host_path: true
-#     env_file:
-#       - .env
-#     networks:
-#       backend: null
-#       monitoring: null
-#     command:
-#       - -config.file=/etc/promtail/config.yml
-#     cpus: 0.25
-#     mem_limit: "134217728"
 

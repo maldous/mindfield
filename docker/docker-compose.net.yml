@@ -89,6 +89,10 @@ services:
     ports:
       - "0.0.0.0:3002:3001/tcp" # 3002
 
+  promtail:
+    ports:
+      - "0.0.0.0:9080:9080/tcp"
+
 #
 #
 #   api:

@@ -34,6 +34,7 @@ setup:
 	    KONG_COOKIE_HASH_GRAFANA="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_JAEGER="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_KUMA="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_PROMTAIL="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
@@ -45,6 +46,7 @@ setup:
 	    KONG_COOKIE_BLOCK_GRAFANA="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_JAEGER="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_KUMA="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_PROMTAIL="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
@@ -56,6 +58,7 @@ setup:
 	    CLIENT_SECRET_GRAFANA="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_JAEGER="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_KUMA="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_PROMTAIL="$$(openssl rand -hex 32)"
 
 	    #PASSWORD="$$(openssl rand -hex 16)"
 	    #POSTGRES_PASSWORD="$$(openssl rand -hex 16)"
@@ -104,7 +107,7 @@ setup:
 	    echo 'MINIO_ROOT_USER=admin' >> .env
 	    echo 'AWS_ACCESS_KEY_ID=$${MINIO_ROOT_USER}' >> .env
 	    echo 'AWS_SECRET_ACCESS_KEY=$${MINIO_ROOT_PASSWORD}' >> .env
-	    echo 'AWS_REGION=ap-southeast-4' >> .env
+	    echo 'AWS_REGION=us-east-1' >> .env
 	    echo "" >> .env
 	    echo "RI_ACCEPT_TERMS_AND_CONDITIONS=true" >> .env
 	    echo "RI_REDIS_HOST=redis" >> .env
@@ -178,6 +181,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_GRAFANA=$$KONG_COOKIE_HASH_GRAFANA" >> .env
 	    echo "KONG_COOKIE_HASH_JAEGER=$$KONG_COOKIE_HASH_JAEGER" >> .env
 	    echo "KONG_COOKIE_HASH_KUMA=$$KONG_COOKIE_HASH_KUMA" >> .env
+	    echo "KONG_COOKIE_HASH_PROMTAIL=$$KONG_COOKIE_HASH_PROMTAIL" >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
@@ -190,18 +194,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_GRAFANA=$$KONG_COOKIE_BLOCK_GRAFANA" >> .env
 	    echo "KONG_COOKIE_BLOCK_JAEGER=$$KONG_COOKIE_BLOCK_JAEGER" >> .env
 	    echo "KONG_COOKIE_BLOCK_KUMA=$$KONG_COOKIE_BLOCK_KUMA" >> .env
-
-	    echo "" >> .env
-	    echo "CLIENT_ID_ROOT=root" >> .env
-	    echo "CLIENT_ID_PGADMIN=pgadmin" >> .env
-	    echo "CLIENT_ID_MAILHOG=mailhog" >> .env
-	    echo "CLIENT_ID_REDISINSIGHT=redisinsight" >> .env
-	    echo "CLIENT_ID_MINIO=minio" >> .env
-	    echo "CLIENT_ID_ALERTMANAGER=alertmanager" >> .env
-	    echo "CLIENT_ID_BLACKBOX=blackbox" >> .env
-	    echo "CLIENT_ID_GRAFANA=grafana" >> .env
-	    echo "CLIENT_ID_JAEGER=jaeger" >> .env
-	    echo "CLIENT_ID_KUMA=kuma" >> .env
+	    echo "KONG_COOKIE_BLOCK_PROMTAIL=$$KONG_COOKIE_BLOCK_PROMTAIL" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
@@ -214,6 +207,20 @@ setup:
 	    echo "CLIENT_SECRET_GRAFANA=$$CLIENT_SECRET_GRAFANA" >> .env
 	    echo "CLIENT_SECRET_JAEGER=$$CLIENT_SECRET_JAEGER" >> .env
 	    echo "CLIENT_SECRET_KUMA=$$CLIENT_SECRET_KUMA" >> .env
+	    echo "CLIENT_SECRET_PROMTAIL=$$CLIENT_SECRET_PROMTAIL" >> .env
+
+	    echo "" >> .env
+	    echo "CLIENT_ID_ROOT=root" >> .env
+	    echo "CLIENT_ID_PGADMIN=pgadmin" >> .env
+	    echo "CLIENT_ID_MAILHOG=mailhog" >> .env
+	    echo "CLIENT_ID_REDISINSIGHT=redisinsight" >> .env
+	    echo "CLIENT_ID_MINIO=minio" >> .env
+	    echo "CLIENT_ID_ALERTMANAGER=alertmanager" >> .env
+	    echo "CLIENT_ID_BLACKBOX=blackbox" >> .env
+	    echo "CLIENT_ID_GRAFANA=grafana" >> .env
+	    echo "CLIENT_ID_JAEGER=jaeger" >> .env
+	    echo "CLIENT_ID_KUMA=kuma" >> .env
+	    echo "CLIENT_ID_PROMTAIL=promtail" >> .env
 
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 	  fi

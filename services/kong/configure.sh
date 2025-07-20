@@ -107,5 +107,6 @@ create_stack blackbox blackbox 9115 "blackbox.${DOMAIN}" "${CLIENT_ID_BLACKBOX}"
 create_stack grafana grafana 3000 "grafana.${DOMAIN}" "${CLIENT_ID_GRAFANA}" "${CLIENT_SECRET_GRAFANA}" grafana "${KONG_COOKIE_HASH_GRAFANA}" "${KONG_COOKIE_BLOCK_GRAFANA}"
 create_stack jaeger jaeger 16686 "jaeger.${DOMAIN}" "${CLIENT_ID_JAEGER}" "${CLIENT_SECRET_JAEGER}" jaeger "${KONG_COOKIE_HASH_JAEGER}" "${KONG_COOKIE_BLOCK_JAEGER}"
 create_stack kuma kuma 3001 "kuma.${DOMAIN}" "${CLIENT_ID_KUMA}" "${CLIENT_SECRET_KUMA}" kuma "${KONG_COOKIE_HASH_KUMA}" "${KONG_COOKIE_BLOCK_KUMA}"
+create_stack promtail promtail 9080 "promtail.${DOMAIN}" "${CLIENT_ID_PROMTAIL}" "${CLIENT_SECRET_PROMTAIL}" promtail "${KONG_COOKIE_HASH_PROMTAIL}" "${KONG_COOKIE_BLOCK_PROMTAIL}"
 
 echo "services/kong/configure.sh"
