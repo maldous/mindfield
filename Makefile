@@ -66,7 +66,6 @@ setup:
 	    #KC_DB_PASSWORD="$$(openssl rand -hex 16)"
 	    #KC_SECRET="$$(openssl rand -hex 32)"
 	    #KONG_PG_PASSWORD="$$(openssl rand -hex 16)"
-	    #KUMA_PASSWORD="$$(openssl rand -hex 16)"
 
 	    PASSWORD="password"
 	    POSTGRES_PASSWORD="password"
@@ -77,7 +76,6 @@ setup:
 	    KC_DB_PASSWORD="password"
 	    KC_SECRET="password"
 	    KONG_PG_PASSWORD="password"
-	    KUMA_PASSWORD="password"
 
 	    echo "NAME=$$NAME" >> .env
 	    echo "DOMAIN=aldous.info" >> .env
@@ -90,7 +88,6 @@ setup:
 	    echo "KC_BOOTSTRAP_ADMIN_PASSWORD=$$KC_BOOTSTRAP_ADMIN_PASSWORD" >> .env
 	    echo "KC_DB_PASSWORD=$$KC_DB_PASSWORD" >> .env
 	    echo "KONG_PG_PASSWORD=$${KONG_PG_PASSWORD}" >> .env
-	    echo "KUMA_PASSWORD=$${KUMA_PASSWORD}" >> .env
 	    echo "" >> .env
 	    echo 'REGISTRY_CACHE=localhost:5001/$${NAME}-cache' >> .env
 	    echo "NODE_VERSION=24" >> .env
