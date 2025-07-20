@@ -105,5 +105,6 @@ create_stack minio minio 9001 "minio.${DOMAIN}" "${CLIENT_ID_MINIO}" "${CLIENT_S
 create_stack alertmanager alertmanager 9093 "alertmanager.${DOMAIN}" "${CLIENT_ID_ALERTMANAGER}" "${CLIENT_SECRET_ALERTMANAGER}" alertmanager "${KONG_COOKIE_HASH_ALERTMANAGER}" "${KONG_COOKIE_BLOCK_ALERTMANAGER}"
 create_stack blackbox blackbox 9115 "blackbox.${DOMAIN}" "${CLIENT_ID_BLACKBOX}" "${CLIENT_SECRET_BLACKBOX}" blackbox "${KONG_COOKIE_HASH_BLACKBOX}" "${KONG_COOKIE_BLOCK_BLACKBOX}"
 create_stack grafana grafana 3000 "grafana.${DOMAIN}" "${CLIENT_ID_GRAFANA}" "${CLIENT_SECRET_GRAFANA}" grafana "${KONG_COOKIE_HASH_GRAFANA}" "${KONG_COOKIE_BLOCK_GRAFANA}"
+create_stack jaeger jaeger 16686 "jaeger.${DOMAIN}" "${CLIENT_ID_JAEGER}" "${CLIENT_SECRET_JAEGER}" jaeger "${KONG_COOKIE_HASH_JAEGER}" "${KONG_COOKIE_BLOCK_JAEGER}"
 
 echo "services/kong/configure.sh"

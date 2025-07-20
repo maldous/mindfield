@@ -75,6 +75,7 @@ ensure_client "${CLIENT_ID_MINIO}" "${CLIENT_SECRET_MINIO}" "https://minio.${DOM
 ensure_client "${CLIENT_ID_ALERTMANAGER}" "${CLIENT_SECRET_ALERTMANAGER}" "https://alertmanager.${DOMAIN}/callback" "https://alertmanager.${DOMAIN}"
 ensure_client "${CLIENT_ID_BLACKBOX}" "${CLIENT_SECRET_BLACKBOX}" "https://blackbox.${DOMAIN}/callback" "https://blackbox.${DOMAIN}"
 ensure_client "${CLIENT_ID_GRAFANA}" "${CLIENT_SECRET_GRAFANA}" "https://grafana.${DOMAIN}/callback" "https://grafana.${DOMAIN}"
+ensure_client "${CLIENT_ID_JAEGER}" "${CLIENT_SECRET_JAEGER}" "https://jaeger.${DOMAIN}/callback" "https://jaeger.${DOMAIN}"
 
 role_json=$( curl -sS -H "${AUTH_HEADER}" -H "${JSON_HEADER}" "${KC_URL}/admin/realms/${NAME}/roles/user" || true)
 role_uid=$(printf '%s' "$role_json" | jq -r '.id // empty')

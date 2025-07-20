@@ -62,35 +62,36 @@ services:
     cpus: 0.5
     mem_limit: "268435456"
  
-#   jaeger:
-#     image: jaegertracing/all-in-one:latest
-#     env_file:
-#       - .env
-#     networks:
-#       backend: null
-#       frontend: null
-#       monitoring: null
-#     cpus: 0.5
-#     mem_limit: "268435456"
-# 
-#   loki:
-#     image: grafana/loki:latest
-#     volumes:
-#       - type: bind
-#         source: ./services/loki/loki-config.yml
-#         target: /etc/loki/local-config.yaml
-#         bind:
-#           create_host_path: true
-#     env_file:
-#       - .env
-#     networks:
-#       backend: null
-#       frontend: null
-#       monitoring: null
-#     command:
-#       - -config.file=/etc/loki/local-config.yaml
-#     cpus: 0.5
-#     mem_limit: "536870912"
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+      monitoring: null
+    cpus: 0.5
+    mem_limit: "268435456"
+ 
+  loki:
+    image: grafana/loki:latest
+    volumes:
+      - type: bind
+        source: ./services/loki/loki-config.yml
+        target: /etc/loki/local-config.yaml
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+      monitoring: null
+    command:
+      - -config.file=/etc/loki/local-config.yaml
+    cpus: 0.5
+    mem_limit: "536870912"
+
 # 
 #   node-exporter:
 #     image: prom/node-exporter:latest
