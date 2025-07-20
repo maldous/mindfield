@@ -122,11 +122,13 @@ services:
         target: /etc/prometheus/prometheus.yml
         bind:
           create_host_path: true
+
       - type: bind
         source: ./data/prometheus
         target: /prometheus
         bind:
           create_host_path: true
+
     env_file:
       - .env
     networks:
@@ -143,6 +145,22 @@ services:
     cpus: 0.5
     mem_limit: "536870912"
  
+  kuma:
+    image: louislam/uptime-kuma:latest
+    volumes:
+      - type: bind
+        source: ./data/kuma
+        target: /app/data
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+    cpus: 0.5
+    mem_limit: "268435456"
+
 #   otel-collector:
 #     image: otel/opentelemetry-collector-contrib:latest
 #     depends_on:
@@ -201,18 +219,4 @@ services:
 #       - -config.file=/etc/promtail/config.yml
 #     cpus: 0.25
 #     mem_limit: "134217728"
-# 
-#   uptime-kuma:
-#     image: louislam/uptime-kuma:latest
-#     volumes:
-#       - type: volume
-#         source: uptime_kuma_data
-#         target: /app/data
-#         volume: {}
-#     env_file:
-#       - .env
-#     networks:
-#       backend: null
-#       frontend: null
-#     cpus: 0.5
-#     mem_limit: "268435456"
+ 
