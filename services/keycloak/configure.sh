@@ -73,6 +73,7 @@ ensure_client "${CLIENT_ID_MAILHOG}" "${CLIENT_SECRET_MAILHOG}" "https://mailhog
 ensure_client "${CLIENT_ID_REDISINSIGHT}" "${CLIENT_SECRET_REDISINSIGHT}" "https://redisinsight.${DOMAIN}/callback" "https://redisinsight.${DOMAIN}"
 ensure_client "${CLIENT_ID_MINIO}" "${CLIENT_SECRET_MINIO}" "https://minio.${DOMAIN}/callback" "https://minio.${DOMAIN}"
 ensure_client "${CLIENT_ID_ALERTMANAGER}" "${CLIENT_SECRET_ALERTMANAGER}" "https://alertmanager.${DOMAIN}/callback" "https://alertmanager.${DOMAIN}"
+ensure_client "${CLIENT_ID_BLACKBOX}" "${CLIENT_SECRET_BLACKBOX}" "https://blackbox.${DOMAIN}/callback" "https://blackbox.${DOMAIN}"
 ensure_client "${CLIENT_ID_GRAFANA}" "${CLIENT_SECRET_GRAFANA}" "https://grafana.${DOMAIN}/callback" "https://grafana.${DOMAIN}"
 
 role_json=$( curl -sS -H "${AUTH_HEADER}" -H "${JSON_HEADER}" "${KC_URL}/admin/realms/${NAME}/roles/user" || true)

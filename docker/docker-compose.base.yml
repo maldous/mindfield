@@ -20,15 +20,6 @@ networks:
 
 volumes:
 
-  grafana_dashboards:
-    name: mindfield_grafana_dashboards
-
-  grafana_data:
-    name: mindfield_grafana_data
-
-  grafana_provisioning:
-    name: mindfield_grafana_provisioning
-
   opensearch_data:
     name: mindfield_opensearch_data
 

@@ -30,6 +30,7 @@ setup:
 	    KONG_COOKIE_HASH_REDISINSIGHT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_MINIO="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_ALERTMANAGER="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_BLACKBOX="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_GRAFANA="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
@@ -38,6 +39,7 @@ setup:
 	    KONG_COOKIE_BLOCK_REDISINSIGHT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_MINIO="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_ALERTMANAGER="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_BLACKBOX="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_GRAFANA="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
@@ -46,6 +48,7 @@ setup:
 	    CLIENT_SECRET_REDISINSIGHT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_MINIO="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_ALERTMANAGER="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_BLACKBOX="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_GRAFANA="$$(openssl rand -hex 32)"
 
 	    #PASSWORD="$$(openssl rand -hex 16)"
@@ -161,6 +164,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_REDISINSIGHT=$$KONG_COOKIE_HASH_REDISINSIGHT" >> .env
 	    echo "KONG_COOKIE_HASH_MINIO=$$KONG_COOKIE_HASH_MINIO" >> .env
 	    echo "KONG_COOKIE_HASH_ALERTMANAGER=$$KONG_COOKIE_HASH_ALERTMANAGER" >> .env
+	    echo "KONG_COOKIE_HASH_BLACKBOX=$$KONG_COOKIE_HASH_BLACKBOX" >> .env
 	    echo "KONG_COOKIE_HASH_GRAFANA=$$KONG_COOKIE_HASH_GRAFANA" >> .env
 
 	    echo "" >> .env
@@ -170,6 +174,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_REDISINSIGHT=$$KONG_COOKIE_BLOCK_REDISINSIGHT" >> .env
 	    echo "KONG_COOKIE_BLOCK_MINIO=$$KONG_COOKIE_BLOCK_MINIO" >> .env
 	    echo "KONG_COOKIE_BLOCK_ALERTMANAGER=$$KONG_COOKIE_BLOCK_ALERTMANAGER" >> .env
+	    echo "KONG_COOKIE_BLOCK_BLACKBOX=$$KONG_COOKIE_BLOCK_BLACKBOX" >> .env
 	    echo "KONG_COOKIE_BLOCK_GRAFANA=$$KONG_COOKIE_BLOCK_GRAFANA" >> .env
 
 	    echo "" >> .env
@@ -179,6 +184,7 @@ setup:
 	    echo "CLIENT_ID_REDISINSIGHT=redisinsight" >> .env
 	    echo "CLIENT_ID_MINIO=minio" >> .env
 	    echo "CLIENT_ID_ALERTMANAGER=alertmanager" >> .env
+	    echo "CLIENT_ID_BLACKBOX=blackbox" >> .env
 	    echo "CLIENT_ID_GRAFANA=grafana" >> .env
 
 	    echo "" >> .env
@@ -188,6 +194,7 @@ setup:
 	    echo "CLIENT_SECRET_REDISINSIGHT=$$CLIENT_SECRET_REDISINSIGHT" >> .env
 	    echo "CLIENT_SECRET_MINIO=$$CLIENT_SECRET_MINIO" >> .env
 	    echo "CLIENT_SECRET_ALERTMANAGER=$$CLIENT_SECRET_ALERTMANAGER" >> .env
+	    echo "CLIENT_SECRET_BLACKBOX=$$CLIENT_SECRET_BLACKBOX" >> .env
 	    echo "CLIENT_SECRET_GRAFANA=$$CLIENT_SECRET_GRAFANA" >> .env
 
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"

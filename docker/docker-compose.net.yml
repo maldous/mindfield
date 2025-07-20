@@ -49,7 +49,7 @@ services:
     ports:
       - "0.0.0.0:9093:9093"
 
-  blackbox-exporter:
+  blackbox:
     ports:
       - "0.0.0.0:9115:9115"
 

@@ -28,7 +28,7 @@ services:
     cpus: 0.25
     mem_limit: "134217728"
  
-  blackbox-exporter:
+  blackbox:
     image: prom/blackbox-exporter:latest
     volumes:
       - type: bind
@@ -53,19 +53,6 @@ services:
       pgbouncer:
         condition: service_healthy
         required: true
-    volumes:
-      - type: volume
-        source: grafana_data
-        target: /var/lib/grafana
-        volume: {}
-      - type: volume
-        source: grafana_provisioning
-        target: /etc/grafana/provisioning
-        volume: {}
-      - type: volume
-        source: grafana_dashboards
-        target: /var/lib/grafana/dashboards
-        volume: {}
     env_file:
       - .env
     networks:
