@@ -90,5 +90,6 @@ create_stack mailhog mailhog 8025 "mailhog.${DOMAIN}" "${CLIENT_ID_MAILHOG}" "${
 create_stack redisinsight redisinsight 5540 "redisinsight.${DOMAIN}" "${CLIENT_ID_REDISINSIGHT}" "${CLIENT_SECRET_REDISINSIGHT}" redisinsight "${KONG_COOKIE_HASH_REDISINSIGHT}" "${KONG_COOKIE_BLOCK_REDISINSIGHT}"
 create_stack minio minio 9001 "minio.${DOMAIN}" "${CLIENT_ID_MINIO}" "${CLIENT_SECRET_MINIO}" minio "${KONG_COOKIE_HASH_MINIO}" "${KONG_COOKIE_BLOCK_MINIO}"
 create_stack alertmanager alertmanager 9093 "alertmanager.${DOMAIN}" "${CLIENT_ID_ALERTMANAGER}" "${CLIENT_SECRET_ALERTMANAGER}" alertmanager "${KONG_COOKIE_HASH_ALERTMANAGER}" "${KONG_COOKIE_BLOCK_ALERTMANAGER}"
+create_stack grafana grafana 3000 "grafana.${DOMAIN}" "${CLIENT_ID_GRAFANA}" "${CLIENT_SECRET_GRAFANA}" grafana "${KONG_COOKIE_HASH_GRAFANA}" "${KONG_COOKIE_BLOCK_GRAFANA}"
 
 echo "services/kong/configure.sh"

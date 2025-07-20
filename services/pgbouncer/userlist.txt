@@ -3,3 +3,4 @@
 "keycloak" "md53665e4728566ea97857a44b3558b1426"
 "kong" "md5ae5d91635f84ece547dd8da764d8970a"
 "pgadmin" "md57c348c57cfc269253a5bcaa02d85c91b"
+"grafana" "md57eff2f942bcc89da291f7eb8ae92f662"

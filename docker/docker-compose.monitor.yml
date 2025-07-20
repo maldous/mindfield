@@ -44,33 +44,37 @@ services:
     cpus: 0.25
     mem_limit: "134217728"
  
-#   grafana:
-#     image: grafana/grafana:latest
-#     depends_on:
-#       mailhog:
-#         condition: service_started
-#         required: true
-#     volumes:
-#       - type: volume
-#         source: grafana_data
-#         target: /var/lib/grafana
-#         volume: {}
-#       - type: volume
-#         source: grafana_provisioning
-#         target: /etc/grafana/provisioning
-#         volume: {}
-#       - type: volume
-#         source: grafana_dashboards
-#         target: /var/lib/grafana/dashboards
-#         volume: {}
-#     env_file:
-#       - .env
-#     networks:
-#       frontend: null
-#       monitoring: null
-#     cpus: 0.5
-#     mem_limit: "268435456"
-# 
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      mailhog:
+        condition: service_started
+        required: true
+      pgbouncer:
+        condition: service_healthy
+        required: true
+    volumes:
+      - type: volume
+        source: grafana_data
+        target: /var/lib/grafana
+        volume: {}
+      - type: volume
+        source: grafana_provisioning
+        target: /etc/grafana/provisioning
+        volume: {}
+      - type: volume
+        source: grafana_dashboards
+        target: /var/lib/grafana/dashboards
+        volume: {}
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+      monitoring: null
+    cpus: 0.5
+    mem_limit: "268435456"
+ 
 #   jaeger:
 #     image: jaegertracing/all-in-one:latest
 #     env_file:

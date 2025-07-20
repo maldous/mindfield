@@ -10,3 +10,7 @@ GRANT CONNECT ON DATABASE kong TO kong;
 CREATE ROLE pgadmin WITH LOGIN PASSWORD 'password';
 CREATE DATABASE pgadmin OWNER pgadmin;
 GRANT CONNECT ON DATABASE pgadmin TO pgadmin;
+
+CREATE ROLE grafana WITH LOGIN PASSWORD 'password';
+CREATE DATABASE grafana OWNER grafana;
+GRANT CONNECT ON DATABASE grafana TO grafana;

@@ -24,34 +24,13 @@ setup:
 	  else
 	    NAME="$$(basename "$$PWD")"
 
-	    #PASSWORD="$$(openssl rand -hex 16)"
-	    #POSTGRES_PASSWORD="$$(openssl rand -hex 16)"
-	    #MINIO_ROOT_PASSWORD="$$(openssl rand -hex 16)"
-	    #PGADMIN_DEFAULT_PASSWORD="$$(openssl rand -hex 16)"
-	    #KC_BOOTSTRAP_ADMIN_PASSWORD="$$(openssl rand -hex 16)"
-	    #KC_DB_PASSWORD="$$(openssl rand -hex 16)"
-	    #KC_SECRET="$$(openssl rand -hex 32)"
-	    #KONG_PG_PASSWORD="$$(openssl rand -hex 16)"
-	    #echo "NAME=$$NAME" >> .env
-	    #echo "DOMAIN=localhost" >> .env
-
-	    PASSWORD="password"
-	    POSTGRES_PASSWORD="password"
-	    MINIO_ROOT_PASSWORD="password"
-	    PGADMIN_DEFAULT_PASSWORD="password"
-	    KC_BOOTSTRAP_ADMIN_PASSWORD="password"
-	    KC_DB_PASSWORD="password"
-	    KC_SECRET="password"
-	    KONG_PG_PASSWORD="password"
-	    echo "NAME=$$NAME" >> .env
-	    echo "DOMAIN=aldous.info" >> .env
-
 	    KONG_COOKIE_HASH_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_PGADMIN="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_MAILHOG="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_REDISINSIGHT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_MINIO="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_ALERTMANAGER="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_GRAFANA="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
@@ -59,6 +38,7 @@ setup:
 	    KONG_COOKIE_BLOCK_REDISINSIGHT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_MINIO="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_ALERTMANAGER="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_GRAFANA="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
@@ -66,12 +46,36 @@ setup:
 	    CLIENT_SECRET_REDISINSIGHT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_MINIO="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_ALERTMANAGER="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_GRAFANA="$$(openssl rand -hex 32)"
 
+	    #PASSWORD="$$(openssl rand -hex 16)"
+	    #POSTGRES_PASSWORD="$$(openssl rand -hex 16)"
+	    #MINIO_ROOT_PASSWORD="$$(openssl rand -hex 16)"
+	    #PGADMIN_DEFAULT_PASSWORD="$$(openssl rand -hex 16)"
+	    #GRAFANA_DEFAULT_PASSWORD="$$(openssl rand -hex 16)"
+	    #KC_BOOTSTRAP_ADMIN_PASSWORD="$$(openssl rand -hex 16)"
+	    #KC_DB_PASSWORD="$$(openssl rand -hex 16)"
+	    #KC_SECRET="$$(openssl rand -hex 32)"
+	    #KONG_PG_PASSWORD="$$(openssl rand -hex 16)"
+
+	    PASSWORD="password"
+	    POSTGRES_PASSWORD="password"
+	    MINIO_ROOT_PASSWORD="password"
+	    PGADMIN_DEFAULT_PASSWORD="password"
+	    GRAFANA_DEFAULT_PASSWORD="password"
+	    KC_BOOTSTRAP_ADMIN_PASSWORD="password"
+	    KC_DB_PASSWORD="password"
+	    KC_SECRET="password"
+	    KONG_PG_PASSWORD="password"
+
+	    echo "NAME=$$NAME" >> .env
+	    echo "DOMAIN=aldous.info" >> .env
 	    echo "PASSWORD=$$PASSWORD" >> .env
 	    echo "" >> .env
 	    echo "POSTGRES_PASSWORD=$$POSTGRES_PASSWORD" >> .env
 	    echo "MINIO_ROOT_PASSWORD=$$MINIO_ROOT_PASSWORD" >> .env
 	    echo "PGADMIN_DEFAULT_PASSWORD=$$PGADMIN_DEFAULT_PASSWORD" >> .env
+	    echo "GRAFANA_DEFAULT_PASSWORD=$$GRAFANA_DEFAULT_PASSWORD" >> .env
 	    echo "KC_BOOTSTRAP_ADMIN_PASSWORD=$$KC_BOOTSTRAP_ADMIN_PASSWORD" >> .env
 	    echo "KC_DB_PASSWORD=$$KC_DB_PASSWORD" >> .env
 	    echo "KONG_PG_PASSWORD=$${KONG_PG_PASSWORD}" >> .env
@@ -90,6 +94,30 @@ setup:
 	    echo "" >> .env
 	    echo 'MINIO_ROOT_USER=admin' >> .env
 	    echo "" >> .env
+	    echo "RI_ACCEPT_TERMS_AND_CONDITIONS=true" >> .env
+	    echo "RI_REDIS_HOST=redis" >> .env
+	    echo "RI_REDIS_PORT=6379" >> .env
+	    echo "RI_REDIS_ALIAS=redis" >> .env
+	    echo "" >> .env
+	    echo "GF_DATABASE_TYPE=postgres" >> .env
+	    echo "GF_DATABASE_HOST=postgres:5432" >> .env
+	    echo "GF_DATABASE_NAME=grafana" >> .env
+	    echo "GF_DATABASE_USER=grafana" >> .env
+	    echo 'GF_DATABASE_PASSWORD=$${POSTGRES_PASSWORD}' >> .env
+	    echo "GF_DATABASE_SSL_MODE=disable" >> .env
+	    echo "GF_SMTP_ENABLED=true" >> .env
+	    echo "GF_SMTP_HOST=mailhog:1025" >> .env
+	    echo 'GF_SMTP_FROM_ADDRESS=grafana@$${DOMAIN}' >> .env
+	    echo "GF_CACHE_TYPE=redis" >> .env
+	    echo "GF_CACHE_REDIS_ADDR=redis:6379" >> .env
+	    echo "GF_CACHE_REDIS_DB_INDEX=0" >> .env
+	    echo "GF_RENDERING_S3_REGION=us-east-1" >> .env
+	    echo "GF_RENDERING_S3_ENDPOINT=minio:9001" >> .env
+	    echo "GF_RENDERING_S3_BUCKET=grafana-render" >> .env
+	    echo 'GF_RENDERING_S3_ACCESS_KEY_ID=$${MINIO_ROOT_USER}' >> .env
+	    echo 'GF_RENDERING_S3_SECRET_ACCESS_KEY=$${MINIO_ROOT_PASSWORD}' >> .env
+	    echo "GF_RENDERING_S3_INSECURE_SKIP_VERIFY=true" >> .env
+	    echo "" >> .env
 	    echo 'PGADMIN_DEFAULT_EMAIL=root@$${DOMAIN}' >> .env
 	    echo "PGADMIN_CONFIG_SERVER_MODE=True" >> .env
 	    echo "PGADMIN_CONFIG_CONFIG_DATABASE_URI=\"'postgresql+psycopg://pgadmin:$${PGADMIN_DEFAULT_PASSWORD}@pgbouncer:5433/pgadmin'\"" >> .env
@@ -107,11 +135,6 @@ setup:
 	    echo 'KC_HOSTNAME=keycloak.$${DOMAIN}' >> .env
 	    echo "KC_HOSTNAME_STRICT=true" >> .env
 	    echo "KC_SECRET=$${KC_SECRET}" >> .env
-	    echo "" >> .env
-	    echo "RI_ACCEPT_TERMS_AND_CONDITIONS=true" >> .env
-	    echo "RI_REDIS_HOST=redis" >> .env
-	    echo "RI_REDIS_PORT=6379" >> .env
-	    echo "RI_REDIS_ALIAS=redis" >> .env
 	    echo "" >> .env
 	    echo "KONG_ADMIN_ACCESS_LOG=/dev/stdout" >> .env
 	    echo "KONG_ADMIN_ERROR_LOG=/dev/stderr" >> .env
@@ -138,6 +161,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_REDISINSIGHT=$$KONG_COOKIE_HASH_REDISINSIGHT" >> .env
 	    echo "KONG_COOKIE_HASH_MINIO=$$KONG_COOKIE_HASH_MINIO" >> .env
 	    echo "KONG_COOKIE_HASH_ALERTMANAGER=$$KONG_COOKIE_HASH_ALERTMANAGER" >> .env
+	    echo "KONG_COOKIE_HASH_GRAFANA=$$KONG_COOKIE_HASH_GRAFANA" >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
@@ -146,6 +170,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_REDISINSIGHT=$$KONG_COOKIE_BLOCK_REDISINSIGHT" >> .env
 	    echo "KONG_COOKIE_BLOCK_MINIO=$$KONG_COOKIE_BLOCK_MINIO" >> .env
 	    echo "KONG_COOKIE_BLOCK_ALERTMANAGER=$$KONG_COOKIE_BLOCK_ALERTMANAGER" >> .env
+	    echo "KONG_COOKIE_BLOCK_GRAFANA=$$KONG_COOKIE_BLOCK_GRAFANA" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_ID_ROOT=root" >> .env
@@ -154,6 +179,7 @@ setup:
 	    echo "CLIENT_ID_REDISINSIGHT=redisinsight" >> .env
 	    echo "CLIENT_ID_MINIO=minio" >> .env
 	    echo "CLIENT_ID_ALERTMANAGER=alertmanager" >> .env
+	    echo "CLIENT_ID_GRAFANA=grafana" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
@@ -162,6 +188,7 @@ setup:
 	    echo "CLIENT_SECRET_REDISINSIGHT=$$CLIENT_SECRET_REDISINSIGHT" >> .env
 	    echo "CLIENT_SECRET_MINIO=$$CLIENT_SECRET_MINIO" >> .env
 	    echo "CLIENT_SECRET_ALERTMANAGER=$$CLIENT_SECRET_ALERTMANAGER" >> .env
+	    echo "CLIENT_SECRET_GRAFANA=$$CLIENT_SECRET_GRAFANA" >> .env
 
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 	  fi
@@ -172,6 +199,7 @@ setup:
 	export PGBOUNCER_KC_PASSWORD=md5$$(printf '%s' "$$KC_DB_PASSWORD"keycloak | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_KONG_PASSWORD=md5$$(printf '%s' "$$KONG_PG_PASSWORD"kong | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_PGADMIN_PASSWORD=md5$$(printf '%s' "$$PGADMIN_DEFAULT_PASSWORD"pgadmin | md5sum | cut -d' ' -f1)
+	export PGBOUNCER_GRAFANA_PASSWORD=md5$$(printf '%s' "$$GRAFANA_DEFAULT_PASSWORD"grafana | md5sum | cut -d' ' -f1)
 	echo "[databases]" > services/pgbouncer/databases.ini
 	echo "" > services/pgbouncer/userlist.txt
 	echo "$$NAME = host=postgres port=5432 dbname=$$NAME user=$$NAME password=$$POSTGRES_PASSWORD" >> services/pgbouncer/databases.ini
@@ -182,6 +210,8 @@ setup:
 	echo "\"kong\" \"$$PGBOUNCER_KONG_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "pgadmin = host=postgres port=5432 dbname=pgadmin user=pgadmin password=$$PGADMIN_DEFAULT_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "\"pgadmin\" \"$$PGBOUNCER_PGADMIN_PASSWORD\"" >> services/pgbouncer/userlist.txt
+	echo "grafana = host=postgres port=5432 dbname=grafana user=grafana password=$$GRAFANA_DEFAULT_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "\"grafana\" \"$$PGBOUNCER_GRAFANA_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "" > services/postgres/init/01.sql
 	echo "CREATE ROLE keycloak WITH LOGIN PASSWORD '$$KC_DB_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE keycloak OWNER keycloak;" >> services/postgres/init/01.sql
@@ -194,6 +224,10 @@ setup:
 	echo "CREATE ROLE pgadmin WITH LOGIN PASSWORD '$$PGADMIN_DEFAULT_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE pgadmin OWNER pgadmin;" >> services/postgres/init/01.sql
 	echo "GRANT CONNECT ON DATABASE pgadmin TO pgadmin;" >> services/postgres/init/01.sql
+	echo "" >> services/postgres/init/01.sql
+	echo "CREATE ROLE grafana WITH LOGIN PASSWORD '$$GRAFANA_DEFAULT_PASSWORD';" >> services/postgres/init/01.sql
+	echo "CREATE DATABASE grafana OWNER grafana;" >> services/postgres/init/01.sql
+	echo "GRANT CONNECT ON DATABASE grafana TO grafana;" >> services/postgres/init/01.sql
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v node >/dev/null; then volta install node@"$$NODE_VERSION"; fi
@@ -214,11 +248,6 @@ setup:
 	if ! docker container inspect registry-write >/dev/null 2>&1; then
 	  docker run -d --name registry-write --restart=always -p 5001:5000 -v registry_write_data:/var/lib/registry registry:2
 	fi
-	mkdir -p data && chown 0:0 data && chmod 755 data
-	mkdir -p data/alertmanager && chown 65534:65534 data/alertmanager && chmod 700 data/alertmanager
-	mkdir -p data/minio && chown 0:0 data/minio && chmod 700 data/minio
-	mkdir -p data/postgres && chown 70:0 data/postgres && chmod 700 data/postgres
-	mkdir -p data/redis && chown 999:1000 data/redis && chmod 700 data/redis
 
 env:
 	@openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
