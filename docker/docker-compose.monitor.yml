@@ -77,7 +77,7 @@ services:
     image: grafana/loki:latest
     volumes:
       - type: bind
-        source: ./services/loki/loki-config.yml
+        source: ./services/loki/local-config.yml
         target: /etc/loki/local-config.yaml
         bind:
           create_host_path: true
