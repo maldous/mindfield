@@ -93,28 +93,27 @@ services:
     cpus: 0.5
     mem_limit: "536870912"
 
-# 
-#   node-exporter:
-#     image: prom/node-exporter:latest
-#     volumes:
-#       - type: bind
-#         source: /
-#         target: /host
-#         read_only: true
-#         bind:
-#           propagation: rslave
-#           create_host_path: true
-#     env_file:
-#       - .env
-#     networks:
-#       backend: null
-#       monitoring: null
-#     command:
-#       - --path.rootfs=/host
-#     cpus: 0.25
-#     mem_limit: "134217728"
-#     pid: host
-# 
+  exporter:
+    image: prom/node-exporter:latest
+    volumes:
+      - type: bind
+        source: /
+        target: /host
+        read_only: true
+        bind:
+          propagation: rslave
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      monitoring: null
+    command:
+      - --path.rootfs=/host
+    cpus: 0.25
+    mem_limit: "134217728"
+    pid: host
+ 
 #   otel-collector:
 #     image: otel/opentelemetry-collector-contrib:latest
 #     depends_on:

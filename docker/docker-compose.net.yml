@@ -77,6 +77,11 @@ services:
       - "0.0.0.0:3100:3100/tcp"
       - "0.0.0.0:9096:9096/tcp"
 
+  exporter:
+    ports:
+      - "0.0.0.0:9100:9100/tcp"
+
+#
 #   api:
 #     ports:
 #       - "0.0.0.0:3000:3000"
@@ -93,9 +98,6 @@ services:
 #     ports:
 #       - "0.0.0.0:8000:8000"
 #
-#   node-exporter:
-#     ports:
-#       - "0.0.0.0:9100:9100"
 #
 #   opensearch:
 #     ports:
