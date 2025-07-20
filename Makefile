@@ -69,6 +69,7 @@ setup:
 	    #KC_DB_PASSWORD="$$(openssl rand -hex 16)"
 	    #KC_SECRET="$$(openssl rand -hex 32)"
 	    #KONG_PG_PASSWORD="$$(openssl rand -hex 16)"
+	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 
 	    PASSWORD="password"
 	    POSTGRES_PASSWORD="password"
@@ -79,6 +80,7 @@ setup:
 	    KC_DB_PASSWORD="password"
 	    KC_SECRET="password"
 	    KONG_PG_PASSWORD="password"
+	    #OPENSEARCH_INITIAL_ADMIN_PASSWORD="password"
 
 	    echo "NAME=$$NAME" >> .env
 	    echo "DOMAIN=aldous.info" >> .env
@@ -91,6 +93,7 @@ setup:
 	    echo "KC_BOOTSTRAP_ADMIN_PASSWORD=$$KC_BOOTSTRAP_ADMIN_PASSWORD" >> .env
 	    echo "KC_DB_PASSWORD=$$KC_DB_PASSWORD" >> .env
 	    echo "KONG_PG_PASSWORD=$${KONG_PG_PASSWORD}" >> .env
+	    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD=$${OPENSEARCH_INITIAL_ADMIN_PASSWORD}" >> .env
 	    echo "" >> .env
 	    echo 'REGISTRY_CACHE=localhost:5001/$${NAME}-cache' >> .env
 	    echo "NODE_VERSION=24" >> .env
@@ -139,6 +142,9 @@ setup:
 	    echo "" >> .env
 	    echo 'LETSENCRYPT_EMAIL=root@$${DOMAIN}' >> .env
 	    echo "KUMA_USER=admin" >> .env
+	    echo "OPENSEARCH_HOSTS='[\"http://opensearch:9200\"]'" >> .env
+	    echo 'OPENSEARCH_JAVA_OPTS="-Xms512m -Xmx512m"' >> .env
+	    echo 'DISABLE_SECURITY_DASHBOARDS_PLUGIN=true' >> .env
 	    echo "" >> .env
 	    echo "KC_HTTP_ENABLED=true" >> .env
 	    echo "KC_HTTPS_PORT=0" >> .env
