@@ -38,8 +38,6 @@ services:
       opensearch:
         condition: service_started
         required: true
-    environment:
-      DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
     env_file:
       - .env
     networks:
