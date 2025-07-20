@@ -11,6 +11,11 @@ services:
         target: /etc/alertmanager/alertmanager.yml
         bind:
           create_host_path: true
+      - type: bind
+        source: ./data/alertmanager
+        target: /alertmanager
+        bind:
+          create_host_path: true
     env_file:
       - .env
     networks:
@@ -22,24 +27,23 @@ services:
       - --storage.path=/alertmanager
     cpus: 0.25
     mem_limit: "134217728"
-
-# 
-#   blackbox-exporter:
-#     image: prom/blackbox-exporter:latest
-#     volumes:
-#       - type: bind
-#         source: ./services/blackbox/blackbox.yml
-#         target: /etc/blackbox_exporter/config.yml
-#         bind:
-#           create_host_path: true
-#     env_file:
-#       - .env
-#     networks:
-#       backend: null
-#       monitoring: null
-#     cpus: 0.25
-#     mem_limit: "134217728"
-# 
+ 
+  blackbox-exporter:
+    image: prom/blackbox-exporter:latest
+    volumes:
+      - type: bind
+        source: ./services/blackbox/blackbox.yml
+        target: /etc/blackbox_exporter/config.yml
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      monitoring: null
+    cpus: 0.25
+    mem_limit: "134217728"
+ 
 #   grafana:
 #     image: grafana/grafana:latest
 #     depends_on:

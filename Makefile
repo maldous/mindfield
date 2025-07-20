@@ -214,6 +214,11 @@ setup:
 	if ! docker container inspect registry-write >/dev/null 2>&1; then
 	  docker run -d --name registry-write --restart=always -p 5001:5000 -v registry_write_data:/var/lib/registry registry:2
 	fi
+	mkdir -p data && chown 0:0 data && chmod 755 data
+	mkdir -p data/alertmanager && chown 65534:65534 data/alertmanager && chmod 700 data/alertmanager
+	mkdir -p data/minio && chown 0:0 data/minio && chmod 700 data/minio
+	mkdir -p data/postgres && chown 70:0 data/postgres && chmod 700 data/postgres
+	mkdir -p data/redis && chown 999:1000 data/redis && chmod 700 data/redis
 
 env:
 	@openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
