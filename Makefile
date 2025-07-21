@@ -36,6 +36,7 @@ setup:
 	    KONG_COOKIE_HASH_KUMA="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_PROMTAIL="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_SEARCH="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_SONARQUBE="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
@@ -49,6 +50,7 @@ setup:
 	    KONG_COOKIE_BLOCK_KUMA="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PROMTAIL="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_SEARCH="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_SONARQUBE="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
@@ -62,6 +64,7 @@ setup:
 	    CLIENT_SECRET_KUMA="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PROMTAIL="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_SEARCH="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_SONARQUBE="$$(openssl rand -hex 32)"
 
 	    #PASSWORD="$$(openssl rand -hex 16)"
 	    #POSTGRES_PASSWORD="$$(openssl rand -hex 16)"
@@ -72,6 +75,7 @@ setup:
 	    #KC_DB_PASSWORD="$$(openssl rand -hex 16)"
 	    #KC_SECRET="$$(openssl rand -hex 32)"
 	    #KONG_PG_PASSWORD="$$(openssl rand -hex 16)"
+	    #SONAR_JDBC_PASSWORD="$$(openssl rand -hex 16)"
 	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 
 	    PASSWORD="password"
@@ -83,6 +87,7 @@ setup:
 	    KC_DB_PASSWORD="password"
 	    KC_SECRET="password"
 	    KONG_PG_PASSWORD="password"
+	    SONAR_JDBC_PASSWORD="password"
 	    #OPENSEARCH_INITIAL_ADMIN_PASSWORD="password"
 
 	    echo "NAME=$$NAME" >> .env
@@ -97,6 +102,7 @@ setup:
 	    echo "KC_DB_PASSWORD=$$KC_DB_PASSWORD" >> .env
 	    echo "KONG_PG_PASSWORD=$${KONG_PG_PASSWORD}" >> .env
 	    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD=$${OPENSEARCH_INITIAL_ADMIN_PASSWORD}" >> .env
+	    echo "SONAR_JDBC_PASSWORD=$${SONAR_JDBC_PASSWORD}" >> .env
 	    echo "" >> .env
 	    echo 'REGISTRY_CACHE=localhost:5001/$${NAME}-cache' >> .env
 	    echo "NODE_VERSION=24" >> .env
@@ -154,6 +160,9 @@ setup:
 	    echo 'OPENSEARCH_JAVA_OPTS="-Xms512m -Xmx512m"' >> .env
 	    echo 'DISABLE_SECURITY_DASHBOARDS_PLUGIN=true' >> .env
 	    echo "" >> .env
+	    echo "SONAR_JDBC_URL=jdbc:postgresql://pgbouncer:5433/sonarqube" >> .env
+	    echo "SONAR_JDBC_USERNAME=sonarqube" >> .env
+	    echo "" >> .env
 	    echo "KC_HTTP_ENABLED=true" >> .env
 	    echo "KC_HTTPS_PORT=0" >> .env
 	    echo "KC_PROXY=edge" >> .env
@@ -197,6 +206,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_KUMA=$$KONG_COOKIE_HASH_KUMA" >> .env
 	    echo "KONG_COOKIE_HASH_PROMTAIL=$$KONG_COOKIE_HASH_PROMTAIL" >> .env
 	    echo "KONG_COOKIE_HASH_SEARCH=$$KONG_COOKIE_HASH_SEARCH" >> .env
+	    echo "KONG_COOKIE_HASH_SONARQUBE=$$KONG_COOKIE_HASH_SONARQUBE" >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
@@ -211,6 +221,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_KUMA=$$KONG_COOKIE_BLOCK_KUMA" >> .env
 	    echo "KONG_COOKIE_BLOCK_PROMTAIL=$$KONG_COOKIE_BLOCK_PROMTAIL" >> .env
 	    echo "KONG_COOKIE_BLOCK_SEARCH=$$KONG_COOKIE_BLOCK_SEARCH" >> .env
+	    echo "KONG_COOKIE_BLOCK_SONARQUBE=$$KONG_COOKIE_BLOCK_SONARQUBE" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
@@ -225,6 +236,7 @@ setup:
 	    echo "CLIENT_SECRET_KUMA=$$CLIENT_SECRET_KUMA" >> .env
 	    echo "CLIENT_SECRET_PROMTAIL=$$CLIENT_SECRET_PROMTAIL" >> .env
 	    echo "CLIENT_SECRET_SEARCH=$$CLIENT_SECRET_SEARCH" >> .env
+	    echo "CLIENT_SECRET_SONARQUBE=$$CLIENT_SECRET_SONARQUBE" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_ID_ROOT=root" >> .env
@@ -239,7 +251,9 @@ setup:
 	    echo "CLIENT_ID_KUMA=kuma" >> .env
 	    echo "CLIENT_ID_PROMTAIL=promtail" >> .env
 	    echo "CLIENT_ID_SEARCH=search" >> .env
+	    echo "CLIENT_ID_SONARQUBE=sonarqube" >> .env
 
+	    echo "" >> .env
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 	  fi
 	fi
@@ -250,6 +264,7 @@ setup:
 	export PGBOUNCER_KONG_PASSWORD=md5$$(printf '%s' "$$KONG_PG_PASSWORD"kong | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_PGADMIN_PASSWORD=md5$$(printf '%s' "$$PGADMIN_DEFAULT_PASSWORD"pgadmin | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_GRAFANA_PASSWORD=md5$$(printf '%s' "$$GRAFANA_DEFAULT_PASSWORD"grafana | md5sum | cut -d' ' -f1)
+	export PGBOUNCER_SONARQUBE_PASSWORD=md5$$(printf '%s' "$$SONAR_JDBC_PASSWORD"sonarqube | md5sum | cut -d' ' -f1)
 	echo "[databases]" > services/pgbouncer/databases.ini
 	echo "" > services/pgbouncer/userlist.txt
 	echo "$$NAME = host=postgres port=5432 dbname=$$NAME user=$$NAME password=$$POSTGRES_PASSWORD" >> services/pgbouncer/databases.ini
@@ -262,6 +277,8 @@ setup:
 	echo "\"pgadmin\" \"$$PGBOUNCER_PGADMIN_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "grafana = host=postgres port=5432 dbname=grafana user=grafana password=$$GRAFANA_DEFAULT_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "\"grafana\" \"$$PGBOUNCER_GRAFANA_PASSWORD\"" >> services/pgbouncer/userlist.txt
+	echo "sonarqube = host=postgres port=5432 dbname=sonarqube user=sonarqube password=$$SONAR_JDBC_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "\"sonarqube\" \"$$PGBOUNCER_SONARQUBE_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "" > services/postgres/init/01.sql
 	echo "CREATE ROLE keycloak WITH LOGIN PASSWORD '$$KC_DB_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE keycloak OWNER keycloak;" >> services/postgres/init/01.sql
@@ -278,6 +295,10 @@ setup:
 	echo "CREATE ROLE grafana WITH LOGIN PASSWORD '$$GRAFANA_DEFAULT_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE grafana OWNER grafana;" >> services/postgres/init/01.sql
 	echo "GRANT CONNECT ON DATABASE grafana TO grafana;" >> services/postgres/init/01.sql
+	echo "" >> services/postgres/init/01.sql
+	echo "CREATE ROLE sonarqube WITH LOGIN PASSWORD '$$SONAR_JDBC_PASSWORD';" >> services/postgres/init/01.sql
+	echo "CREATE DATABASE sonarqube OWNER sonarqube;" >> services/postgres/init/01.sql
+	echo "GRANT CONNECT ON DATABASE sonarqube TO sonarqube;" >> services/postgres/init/01.sql
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v node >/dev/null; then volta install node@"$$NODE_VERSION"; fi
@@ -320,3 +341,19 @@ help:
 	@echo "make install - Install docker environment"
 	@echo "make clean   - Clean docker environment"
 	@echo "make reset   - Reset entire setup"
+
+sonar:
+	if [ ! -f .env ]; then touch .env; fi; \
+        if ! grep -q "SONAR_TOKEN" .env; then \
+        token=$$(curl -s -u admin:admin -X POST 'http://localhost:9003/api/user_tokens/generate' -d name=admin | jq -r '.token'); \
+        echo "SONAR_TOKEN=$$token" >> .env; \
+        fi; \
+        rm -f sonar.json; \
+        bash -c 'source .env && sonar -Dsonar.host.url=http://localhost:9003 -Dsonar.login=$${SONAR_TOKEN} -Dsonar.projectKey=mindfield -Dsonar.exclusions=data/**'; \
+        bash -c 'source .env && for ((p=1;;p++)); do \
+        r=$$(curl -s -u $${SONAR_TOKEN}: "http://localhost:9003/api/issues/search?branch=main&ps=500&p=$$p"); \
+        if [ $$(jq -e ".issues|length" <<<"$${r}") -eq 0 ]; then break; fi; \
+        printf "%s\n" "$$r"; \
+        done | jq -s "map(.issues) | add // []" > sonar.json; \
+        echo ""; \
+        jq -r ".[] | select(.issueStatus != \"FIXED\") | \"\( (.component | split(\":\")[1])):\(.line) \(.message)\"" sonar.json'

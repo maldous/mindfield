@@ -109,5 +109,6 @@ create_stack jaeger jaeger 16686 "jaeger.${DOMAIN}" "${CLIENT_ID_JAEGER}" "${CLI
 create_stack kuma kuma 3001 "kuma.${DOMAIN}" "${CLIENT_ID_KUMA}" "${CLIENT_SECRET_KUMA}" kuma "${KONG_COOKIE_HASH_KUMA}" "${KONG_COOKIE_BLOCK_KUMA}"
 create_stack promtail promtail 9080 "promtail.${DOMAIN}" "${CLIENT_ID_PROMTAIL}" "${CLIENT_SECRET_PROMTAIL}" promtail "${KONG_COOKIE_HASH_PROMTAIL}" "${KONG_COOKIE_BLOCK_PROMTAIL}"
 create_stack search search 5601 "search.${DOMAIN}" "${CLIENT_ID_SEARCH}" "${CLIENT_SECRET_SEARCH}" search "${KONG_COOKIE_HASH_SEARCH}" "${KONG_COOKIE_BLOCK_SEARCH}"
+create_stack sonarqube sonarqube 9000 "sonarqube.${DOMAIN}" "${CLIENT_ID_SONARQUBE}" "${CLIENT_SECRET_SONARQUBE}" sonarqube "${KONG_COOKIE_HASH_SONARQUBE}" "${KONG_COOKIE_BLOCK_SONARQUBE}"
 
-echo "services/kong/configure.sh"
+echo -e "\nservices/kong/configure.sh"

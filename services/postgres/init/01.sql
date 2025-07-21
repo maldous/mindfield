@@ -14,3 +14,7 @@ GRANT CONNECT ON DATABASE pgadmin TO pgadmin;
 CREATE ROLE grafana WITH LOGIN PASSWORD 'password';
 CREATE DATABASE grafana OWNER grafana;
 GRANT CONNECT ON DATABASE grafana TO grafana;
+
+CREATE ROLE sonarqube WITH LOGIN PASSWORD 'password';
+CREATE DATABASE sonarqube OWNER sonarqube;
+GRANT CONNECT ON DATABASE sonarqube TO sonarqube;
