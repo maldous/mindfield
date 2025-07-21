@@ -113,6 +113,18 @@ services:
       - "0.0.0.0:55678:55678/tcp"
       - "0.0.0.0:55679:55679/tcp"
 
+  analyzer:
+    ports:
+      - "0.0.0.0:3003:3000" # 3003
+
+  anonymizer:
+    ports:
+      - "0.0.0.0:3004:3000" # 3004
+
+  redactor:
+    ports:
+      - "0.0.0.0:3005:3000" # 3005
+
 #
 #
 #   api:
@@ -135,17 +147,6 @@ services:
 #     ports:
 #       - "0.0.0.0:5000:5000"
 #
-#   presidio-analyzer:
-#     ports:
-#       - "0.0.0.0:3000:3000"
-#
-#   presidio-anonymizer:
-#     ports:
-#       - "0.0.0.0:3000:3000"
-#
-#   presidio-image-redactor:
-#     ports:
-#       - "0.0.0.0:3000:3000"
 
 #
 #   redoc:

@@ -120,6 +120,11 @@ setup:
 	    echo "RI_REDIS_PORT=6379" >> .env
 	    echo "RI_REDIS_ALIAS=redis" >> .env
 	    echo "" >> .env
+	    echo "PRESIDIO_ANALYZER_DEFAULT_SCORE_THRESHOLD=0.35" >> .env
+	    echo "PRESIDIO_ANALYZER_ENTITIES_CACHE_TTL=3600" >> .env
+	    echo "PRESIDIO_ANALYZER_HOST=analyzer" >> .env
+	    echo "PRESIDIO_ANALYZER_PORT=3000" >> .env
+	    echo "" >> .env
 	    echo "GF_DATABASE_TYPE=postgres" >> .env
 	    echo "GF_DATABASE_HOST=postgres:5432" >> .env
 	    echo "GF_DATABASE_NAME=grafana" >> .env
