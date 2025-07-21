@@ -1,4 +1,3 @@
-
 CREATE ROLE keycloak WITH LOGIN PASSWORD 'password';
 CREATE DATABASE keycloak OWNER keycloak;
 GRANT CONNECT ON DATABASE keycloak TO keycloak;

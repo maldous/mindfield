@@ -20,18 +20,6 @@ networks:
 
 volumes:
 
-  sonarqube_db_data:
-    name: mindfield_sonarqube_db_data
-
-  sonarqube_es7:
-    name: mindfield_sonarqube_es7
-
-  sonarqube_extensions:
-    name: mindfield_sonarqube_extensions
-
-  sonarqube_logs:
-    name: mindfield_sonarqube_logs
-
   storybook_next:
     name: mindfield_storybook_next
 

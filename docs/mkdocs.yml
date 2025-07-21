@@ -1,8 +1,7 @@
-site_name: MindField Documentation
-site_description: Personality profiling app with comprehensive infrastructure
-site_author: MindField Team
-site_url: https://mindfield.local
-
+site_name: Documentation
+site_description: Description
+site_author: Author
+site_url: https://localhost
 docs_dir: content
 
 theme:

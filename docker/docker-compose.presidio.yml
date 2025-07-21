@@ -3,31 +3,6 @@ name: mindfield
 
 services:
 
-#   grapesjs:
-#     build:
-#       context: .
-#       dockerfile: docker/Dockerfile.grapesjs
-#       args:
-#         NODE_MAJOR: "24"
-#       cache_from:
-#         - type=registry,ref=localhost:5001/mindfield-cache
-#       cache_to:
-#         - type=registry,ref=localhost:5001/mindfield-cache,mode=max
-#     depends_on:
-#       minio:
-#         condition: service_healthy
-#         required: true
-#       pgbouncer:
-#         condition: service_healthy
-#         required: true
-#     env_file:
-#       - .env
-#     networks:
-#       backend: null
-#       frontend: null
-#     cpus: 0.5
-#     mem_limit: "268435456"
-
   analyzer:
     image: mcr.microsoft.com/presidio-analyzer:latest
     depends_on:

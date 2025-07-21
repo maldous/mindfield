@@ -219,4 +219,3 @@ services:
       - --config=/etc/otel-collector-config.yaml
     cpus: 0.5
     mem_limit: "268435456"
-

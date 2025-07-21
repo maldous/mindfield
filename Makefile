@@ -103,6 +103,7 @@ setup:
 	    echo "NAME=$$NAME" >> .env
 	    echo "DOMAIN=aldous.info" >> .env
 	    echo "PASSWORD=$$PASSWORD" >> .env
+
 	    echo "" >> .env
 	    echo "POSTGRES_PASSWORD=$$POSTGRES_PASSWORD" >> .env
 	    echo "MINIO_ROOT_PASSWORD=$$MINIO_ROOT_PASSWORD" >> .env
@@ -114,6 +115,7 @@ setup:
 	    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD=$${OPENSEARCH_INITIAL_ADMIN_PASSWORD}" >> .env
 	    echo "SONAR_JDBC_PASSWORD=$${SONAR_JDBC_PASSWORD}" >> .env
 	    echo "POSTGRAPHILE_DB_PASSWORD=$${POSTGRAPHILE_DB_PASSWORD}" >> .env
+
 	    echo "" >> .env
 	    echo 'REGISTRY_CACHE=localhost:5001/$${NAME}-cache' >> .env
 	    echo "NODE_VERSION=24" >> .env
@@ -122,25 +124,30 @@ setup:
 	    echo "BUILDKIT_INLINE_CACHE=1" >> .env
 	    echo "BUILDKIT_PROGRESS=plain" >> .env
 	    echo "DOCKER_BUILDKIT=1" >> .env
+
 	    echo "" >> .env
 	    echo "POSTGRES_HOST=postgres" >> .env
 	    echo 'POSTGRES_USER=$${NAME}' >> .env
 	    echo 'POSTGRES_DB=$${NAME}' >> .env
+
 	    echo "" >> .env
 	    echo 'MINIO_ROOT_USER=admin' >> .env
 	    echo 'AWS_ACCESS_KEY_ID=$${MINIO_ROOT_USER}' >> .env
 	    echo 'AWS_SECRET_ACCESS_KEY=$${MINIO_ROOT_PASSWORD}' >> .env
 	    echo 'AWS_REGION=us-east-1' >> .env
+
 	    echo "" >> .env
 	    echo "RI_ACCEPT_TERMS_AND_CONDITIONS=true" >> .env
 	    echo "RI_REDIS_HOST=redis" >> .env
 	    echo "RI_REDIS_PORT=6379" >> .env
 	    echo "RI_REDIS_ALIAS=redis" >> .env
+
 	    echo "" >> .env
 	    echo "PRESIDIO_ANALYZER_DEFAULT_SCORE_THRESHOLD=0.35" >> .env
 	    echo "PRESIDIO_ANALYZER_ENTITIES_CACHE_TTL=3600" >> .env
 	    echo "PRESIDIO_ANALYZER_HOST=analyzer" >> .env
 	    echo "PRESIDIO_ANALYZER_PORT=3000" >> .env
+
 	    echo "" >> .env
 	    echo "GF_DATABASE_TYPE=postgres" >> .env
 	    echo "GF_DATABASE_HOST=postgres:5432" >> .env
@@ -160,19 +167,23 @@ setup:
 	    echo 'GF_RENDERING_S3_ACCESS_KEY_ID=$${MINIO_ROOT_USER}' >> .env
 	    echo 'GF_RENDERING_S3_SECRET_ACCESS_KEY=$${MINIO_ROOT_PASSWORD}' >> .env
 	    echo "GF_RENDERING_S3_INSECURE_SKIP_VERIFY=true" >> .env
+
 	    echo "" >> .env
 	    echo 'PGADMIN_DEFAULT_EMAIL=root@$${DOMAIN}' >> .env
 	    echo "PGADMIN_CONFIG_SERVER_MODE=True" >> .env
 	    echo "PGADMIN_CONFIG_CONFIG_DATABASE_URI=\"'postgresql+psycopg://pgadmin:$${PGADMIN_DEFAULT_PASSWORD}@pgbouncer:5433/pgadmin'\"" >> .env
+
 	    echo "" >> .env
 	    echo 'LETSENCRYPT_EMAIL=root@$${DOMAIN}' >> .env
 	    echo "KUMA_USER=admin" >> .env
 	    echo "OPENSEARCH_HOSTS='[\"http://opensearch:9200\"]'" >> .env
 	    echo 'OPENSEARCH_JAVA_OPTS="-Xms512m -Xmx512m"' >> .env
 	    echo 'DISABLE_SECURITY_DASHBOARDS_PLUGIN=true' >> .env
+
 	    echo "" >> .env
 	    echo "SONAR_JDBC_URL=jdbc:postgresql://pgbouncer:5433/sonarqube" >> .env
 	    echo "SONAR_JDBC_USERNAME=sonarqube" >> .env
+
 	    echo "" >> .env
 	    echo "KC_HTTP_ENABLED=true" >> .env
 	    echo "KC_HTTPS_PORT=0" >> .env
@@ -185,6 +196,7 @@ setup:
 	    echo 'KC_HOSTNAME=keycloak.$${DOMAIN}' >> .env
 	    echo "KC_HOSTNAME_STRICT=true" >> .env
 	    echo "KC_SECRET=$${KC_SECRET}" >> .env
+
 	    echo "" >> .env
 	    echo "KONG_ADMIN_ACCESS_LOG=/dev/stdout" >> .env
 	    echo "KONG_ADMIN_ERROR_LOG=/dev/stderr" >> .env
@@ -279,6 +291,7 @@ setup:
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 	  fi
 	fi
+
 	set -a ;. .env ;set +a
 	export PATH="$$HOME/.volta/bin:$$PATH"
 	export PGBOUNCER_POSTGRES_PASSWORD=md5$$(printf '%s' "$$POSTGRES_PASSWORD$$NAME" | md5sum | cut -d' ' -f1)
@@ -288,6 +301,7 @@ setup:
 	export PGBOUNCER_GRAFANA_PASSWORD=md5$$(printf '%s' "$$GRAFANA_DEFAULT_PASSWORD"grafana | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_SONARQUBE_PASSWORD=md5$$(printf '%s' "$$SONAR_JDBC_PASSWORD"sonarqube | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_POSTGRAPHILE_PASSWORD=md5$$(printf '%s' "$$POSTGRAPHILE_DB_PASSWORD"postgraphile | md5sum | cut -d' ' -f1)
+
 	echo "[databases]" > services/pgbouncer/databases.ini
 	echo "" > services/pgbouncer/userlist.txt
 	echo "$$NAME = host=postgres port=5432 dbname=$$NAME user=$$NAME password=$$POSTGRES_PASSWORD" >> services/pgbouncer/databases.ini
@@ -304,6 +318,7 @@ setup:
 	echo "\"sonarqube\" \"$$PGBOUNCER_SONARQUBE_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "postgraphile = host=postgres port=5432 dbname=postgraphile user=postgraphile password=$$POSTGRAPHILE_DB_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "\"postgraphile\" \"$$PGBOUNCER_POSTGRAPHILE_PASSWORD\"" >> services/pgbouncer/userlist.txt
+
 	echo "" > services/postgres/init/01.sql
 	echo "CREATE ROLE keycloak WITH LOGIN PASSWORD '$$KC_DB_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE keycloak OWNER keycloak;" >> services/postgres/init/01.sql
@@ -327,6 +342,7 @@ setup:
 	echo "" >> services/postgres/init/01.sql
 	echo "CREATE ROLE postgraphile WITH LOGIN PASSWORD '$$POSTGRAPHILE_DB_PASSWORD';" >> services/postgres/init/01.sql
 	echo "GRANT CONNECT ON DATABASE $${NAME} TO postgraphile;" >> services/postgres/init/01.sql
+
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v node >/dev/null; then volta install node@"$$NODE_VERSION"; fi
@@ -341,6 +357,7 @@ setup:
 	  echo '{ "insecure-registries": ["localhost:5001"], "features": { "buildkit": true, "containerd-snapshotter": true }, "registry-mirrors": [ "http://localhost:5000" ] }' | jq .
 	  exit 1
 	fi
+
 	if ! docker container inspect registry-proxy >/dev/null 2>&1; then
 	  docker run -d --name registry-proxy --restart=always -p 5000:5000 -v registry_proxy_data:/var/lib/registry -v ./services/registry/config.yml:/etc/docker/registry/config.yml:ro registry:2
 	fi
