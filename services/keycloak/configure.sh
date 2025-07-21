@@ -78,6 +78,7 @@ ensure_client "${CLIENT_ID_GRAFANA}" "${CLIENT_SECRET_GRAFANA}" "https://grafana
 ensure_client "${CLIENT_ID_JAEGER}" "${CLIENT_SECRET_JAEGER}" "https://jaeger.${DOMAIN}/callback" "https://jaeger.${DOMAIN}"
 ensure_client "${CLIENT_ID_KUMA}" "${CLIENT_SECRET_KUMA}" "https://kuma.${DOMAIN}/callback" "https://kuma.${DOMAIN}"
 ensure_client "${CLIENT_ID_PROMTAIL}" "${CLIENT_SECRET_PROMTAIL}" "https://promtail.${DOMAIN}/callback" "https://promtail.${DOMAIN}"
+ensure_client "${CLIENT_ID_SEARCH}" "${CLIENT_SECRET_SEARCH}" "https://search.${DOMAIN}/callback" "https://search.${DOMAIN}"
 
 role_json=$( curl -sS -H "${AUTH_HEADER}" -H "${JSON_HEADER}" "${KC_URL}/admin/realms/${NAME}/roles/user" || true)
 role_uid=$(printf '%s' "$role_json" | jq -r '.id // empty')

@@ -35,6 +35,7 @@ setup:
 	    KONG_COOKIE_HASH_JAEGER="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_KUMA="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_PROMTAIL="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_SEARCH="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
@@ -47,6 +48,7 @@ setup:
 	    KONG_COOKIE_BLOCK_JAEGER="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_KUMA="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PROMTAIL="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_SEARCH="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
@@ -59,6 +61,7 @@ setup:
 	    CLIENT_SECRET_JAEGER="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_KUMA="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PROMTAIL="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_SEARCH="$$(openssl rand -hex 32)"
 
 	    #PASSWORD="$$(openssl rand -hex 16)"
 	    #POSTGRES_PASSWORD="$$(openssl rand -hex 16)"
@@ -188,6 +191,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_JAEGER=$$KONG_COOKIE_HASH_JAEGER" >> .env
 	    echo "KONG_COOKIE_HASH_KUMA=$$KONG_COOKIE_HASH_KUMA" >> .env
 	    echo "KONG_COOKIE_HASH_PROMTAIL=$$KONG_COOKIE_HASH_PROMTAIL" >> .env
+	    echo "KONG_COOKIE_HASH_SEARCH=$$KONG_COOKIE_HASH_SEARCH" >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
@@ -201,6 +205,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_JAEGER=$$KONG_COOKIE_BLOCK_JAEGER" >> .env
 	    echo "KONG_COOKIE_BLOCK_KUMA=$$KONG_COOKIE_BLOCK_KUMA" >> .env
 	    echo "KONG_COOKIE_BLOCK_PROMTAIL=$$KONG_COOKIE_BLOCK_PROMTAIL" >> .env
+	    echo "KONG_COOKIE_BLOCK_SEARCH=$$KONG_COOKIE_BLOCK_SEARCH" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
@@ -214,6 +219,7 @@ setup:
 	    echo "CLIENT_SECRET_JAEGER=$$CLIENT_SECRET_JAEGER" >> .env
 	    echo "CLIENT_SECRET_KUMA=$$CLIENT_SECRET_KUMA" >> .env
 	    echo "CLIENT_SECRET_PROMTAIL=$$CLIENT_SECRET_PROMTAIL" >> .env
+	    echo "CLIENT_SECRET_SEARCH=$$CLIENT_SECRET_SEARCH" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_ID_ROOT=root" >> .env
@@ -227,6 +233,7 @@ setup:
 	    echo "CLIENT_ID_JAEGER=jaeger" >> .env
 	    echo "CLIENT_ID_KUMA=kuma" >> .env
 	    echo "CLIENT_ID_PROMTAIL=promtail" >> .env
+	    echo "CLIENT_ID_SEARCH=search" >> .env
 
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 	  fi

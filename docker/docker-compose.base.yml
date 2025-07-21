@@ -20,9 +20,6 @@ networks:
 
 volumes:
 
-  opensearch_data:
-    name: mindfield_opensearch_data
-
   sonarqube_db_data:
     name: mindfield_sonarqube_db_data
 

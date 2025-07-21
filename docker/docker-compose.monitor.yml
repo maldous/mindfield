@@ -191,32 +191,32 @@ services:
     cpus: 0.25
     mem_limit: "134217728"
 
-#   otel-collector:
-#     image: otel/opentelemetry-collector-contrib:latest
-#     depends_on:
-#       jaeger:
-#         condition: service_started
-#         required: true
-#       opensearch:
-#         condition: service_started
-#         required: true
-#       prometheus:
-#         condition: service_started
-#         required: true
-#     volumes:
-#       - type: bind
-#         source: ./services/otel/otel-collector-config.yaml
-#         target: /etc/otel-collector-config.yaml
-#         bind:
-#           create_host_path: true
-#     env_file:
-#       - .env
-#     networks:
-#       backend: null
-#       frontend: null
-#       monitoring: null
-#     command:
-#       - --config=/etc/otel-collector-config.yaml
-#     cpus: 0.5
-#     mem_limit: "268435456"
+  collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    depends_on:
+      jaeger:
+        condition: service_started
+        required: true
+      opensearch:
+        condition: service_started
+        required: true
+      prometheus:
+        condition: service_started
+        required: true
+    volumes:
+      - type: bind
+        source: ./services/collector/otel-collector-config.yaml
+        target: /etc/otel-collector-config.yaml
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+      monitoring: null
+    command:
+      - --config=/etc/otel-collector-config.yaml
+    cpus: 0.5
+    mem_limit: "268435456"
 

@@ -32,7 +32,7 @@ services:
         soft: 65536
         hard: 65536
 
-  opensearch-dashboards:
+  search:
     image: opensearchproject/opensearch-dashboards:latest
     depends_on:
       opensearch:
