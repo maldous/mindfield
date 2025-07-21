@@ -38,12 +38,6 @@ volumes:
   storybook_node_modules:
     name: mindfield_storybook_node_modules
 
-  trivy_cache:
-    name: mindfield_trivy_cache
-
-  uptime_kuma_data:
-    name: mindfield_uptime_kuma_data
-
   web_next:
     name: mindfield_web_next
 
