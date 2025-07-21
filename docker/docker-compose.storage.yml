@@ -2,6 +2,7 @@
 name: mindfield
 
 services:
+
   minio:
     image: minio/minio:latest
     volumes:

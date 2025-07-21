@@ -114,6 +114,7 @@ setup:
 	    echo "KONG_PG_PASSWORD=$${KONG_PG_PASSWORD}" >> .env
 	    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD=$${OPENSEARCH_INITIAL_ADMIN_PASSWORD}" >> .env
 	    echo "SONAR_JDBC_PASSWORD=$${SONAR_JDBC_PASSWORD}" >> .env
+	    echo "SONAR_ADMIN_PASSWORD=$${SONAR_ADMIN_PASSWORD}" >> .env
 	    echo "POSTGRAPHILE_DB_PASSWORD=$${POSTGRAPHILE_DB_PASSWORD}" >> .env
 
 	    echo "" >> .env
@@ -161,12 +162,6 @@ setup:
 	    echo "GF_CACHE_TYPE=redis" >> .env
 	    echo "GF_CACHE_REDIS_ADDR=redis:6379" >> .env
 	    echo "GF_CACHE_REDIS_DB_INDEX=0" >> .env
-	    echo "GF_RENDERING_S3_REGION=us-east-1" >> .env
-	    echo "GF_RENDERING_S3_ENDPOINT=minio:9001" >> .env
-	    echo "GF_RENDERING_S3_BUCKET=grafana-render" >> .env
-	    echo 'GF_RENDERING_S3_ACCESS_KEY_ID=$${MINIO_ROOT_USER}' >> .env
-	    echo 'GF_RENDERING_S3_SECRET_ACCESS_KEY=$${MINIO_ROOT_PASSWORD}' >> .env
-	    echo "GF_RENDERING_S3_INSECURE_SKIP_VERIFY=true" >> .env
 
 	    echo "" >> .env
 	    echo 'PGADMIN_DEFAULT_EMAIL=root@$${DOMAIN}' >> .env
@@ -285,9 +280,6 @@ setup:
 	    echo "CLIENT_ID_POSTGRAPHILE=postgraphile" >> .env
 
 	    echo "" >> .env
-	    echo "SONAR_ADMIN_PASSWORD=$${SONAR_ADMIN_PASSWORD}" >> .env
-
-	    echo "" >> .env
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 	  fi
 	fi
@@ -343,7 +335,6 @@ setup:
 	echo "CREATE ROLE postgraphile WITH LOGIN PASSWORD '$$POSTGRAPHILE_DB_PASSWORD';" >> services/postgres/init/01.sql
 	echo "GRANT CONNECT ON DATABASE $${NAME} TO postgraphile;" >> services/postgres/init/01.sql
 
-	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v node >/dev/null; then volta install node@"$$NODE_VERSION"; fi
 	if ! command -v pnpm >/dev/null; then volta install pnpm@latest; fi

@@ -1,8 +1,8 @@
----
-name: mindfield
-
-services:
-
+#---
+#name: mindfield
+#
+#services:
+#
 #   redoc:
 #     image: redocly/redoc:latest
 #     depends_on:
