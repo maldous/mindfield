@@ -80,6 +80,7 @@ setup:
 	    #KONG_PG_PASSWORD="$$(openssl rand -hex 16)"
 	    #SONAR_JDBC_PASSWORD="$$(openssl rand -hex 16)"
 	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
+	    SONAR_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 
 	    PASSWORD="password"
 	    POSTGRES_PASSWORD="password"
@@ -92,6 +93,7 @@ setup:
 	    KONG_PG_PASSWORD="password"
 	    SONAR_JDBC_PASSWORD="password"
 	    #OPENSEARCH_INITIAL_ADMIN_PASSWORD="password"
+	    #SONAR_ADMIN_PASSWORD="password"
 
 	    echo "NAME=$$NAME" >> .env
 	    echo "DOMAIN=aldous.info" >> .env
@@ -106,6 +108,7 @@ setup:
 	    echo "KONG_PG_PASSWORD=$${KONG_PG_PASSWORD}" >> .env
 	    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD=$${OPENSEARCH_INITIAL_ADMIN_PASSWORD}" >> .env
 	    echo "SONAR_JDBC_PASSWORD=$${SONAR_JDBC_PASSWORD}" >> .env
+	    echo "SONAR_ADMIN_PASSWORD=$${SONAR_ADMIN_PASSWORD}" >> .env
 	    echo "" >> .env
 	    echo 'REGISTRY_CACHE=localhost:5001/$${NAME}-cache' >> .env
 	    echo "NODE_VERSION=24" >> .env
@@ -352,7 +355,7 @@ help:
 sonar:
 	if [ ! -f .env ]; then touch .env; fi; \
         if ! grep -q "SONAR_TOKEN" .env; then \
-        token=$$(curl -s -u admin:admin -X POST 'http://localhost:9003/api/user_tokens/generate' -d name=admin | jq -r '.token'); \
+        token=$$(set -a; . .env; set +a ; curl -s -u admin:${SONAR_ADMIN_PASSWORD} -X POST 'http://localhost:9003/api/user_tokens/generate' -d name=admin | jq -r '.token'); \
         echo "SONAR_TOKEN=$$token" >> .env; \
         fi; \
         rm -f sonar.json; \
