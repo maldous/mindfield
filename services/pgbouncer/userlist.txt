@@ -5,3 +5,4 @@
 "pgadmin" "md57c348c57cfc269253a5bcaa02d85c91b"
 "grafana" "md57eff2f942bcc89da291f7eb8ae92f662"
 "sonarqube" "md53f9d844c929f05fe5d974d57729ff5e7"
+"postgraphile" "md5f0bfa9362b81b26ba58fa69801d8c091"

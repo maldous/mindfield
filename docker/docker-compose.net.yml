@@ -134,15 +134,16 @@ services:
     ports:
       - "0.0.0.0:8005:8005"
 
+  postgraphile:
+    ports:
+      - "0.0.0.0:5002:5002"
+
 #   api:
 #     ports:
 #       - "0.0.0.0:3000:3000"
 #   grapesjs:
 #     ports:
 #       - "0.0.0.0:3000:3000"
-#   postgraphile:
-#     ports:
-#       - "0.0.0.0:5000:5000"
 #   redoc:
 #     ports:
 #       - "0.0.0.0:3000:3000"

@@ -18,3 +18,6 @@ GRANT CONNECT ON DATABASE grafana TO grafana;
 CREATE ROLE sonarqube WITH LOGIN PASSWORD 'password';
 CREATE DATABASE sonarqube OWNER sonarqube;
 GRANT CONNECT ON DATABASE sonarqube TO sonarqube;
+
+CREATE ROLE postgraphile WITH LOGIN PASSWORD 'password';
+GRANT CONNECT ON DATABASE mindfield TO postgraphile;

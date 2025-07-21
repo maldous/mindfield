@@ -38,6 +38,7 @@ setup:
 	    KONG_COOKIE_HASH_SEARCH="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_SONARQUBE="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_DOCS="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_POSTGRAPHILE="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
@@ -53,6 +54,7 @@ setup:
 	    KONG_COOKIE_BLOCK_SEARCH="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_SONARQUBE="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_DOCS="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_POSTGRAPHILE="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
@@ -68,6 +70,7 @@ setup:
 	    CLIENT_SECRET_SEARCH="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_SONARQUBE="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_DOCS="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_POSTGRAPHILE="$$(openssl rand -hex 32)"
 
 	    #PASSWORD="$$(openssl rand -hex 16)"
 	    #POSTGRES_PASSWORD="$$(openssl rand -hex 16)"
@@ -79,6 +82,7 @@ setup:
 	    #KC_SECRET="$$(openssl rand -hex 32)"
 	    #KONG_PG_PASSWORD="$$(openssl rand -hex 16)"
 	    #SONAR_JDBC_PASSWORD="$$(openssl rand -hex 16)"
+	    #POSTGRAPHILE_DB_PASSWORD="$$(openssl rand -hex 16)"
 	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 	    SONAR_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 
@@ -92,6 +96,7 @@ setup:
 	    KC_SECRET="password"
 	    KONG_PG_PASSWORD="password"
 	    SONAR_JDBC_PASSWORD="password"
+	    POSTGRAPHILE_DB_PASSWORD="password"
 	    #OPENSEARCH_INITIAL_ADMIN_PASSWORD="password"
 	    #SONAR_ADMIN_PASSWORD="password"
 
@@ -108,7 +113,7 @@ setup:
 	    echo "KONG_PG_PASSWORD=$${KONG_PG_PASSWORD}" >> .env
 	    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD=$${OPENSEARCH_INITIAL_ADMIN_PASSWORD}" >> .env
 	    echo "SONAR_JDBC_PASSWORD=$${SONAR_JDBC_PASSWORD}" >> .env
-	    echo "SONAR_ADMIN_PASSWORD=$${SONAR_ADMIN_PASSWORD}" >> .env
+	    echo "POSTGRAPHILE_DB_PASSWORD=$${POSTGRAPHILE_DB_PASSWORD}" >> .env
 	    echo "" >> .env
 	    echo 'REGISTRY_CACHE=localhost:5001/$${NAME}-cache' >> .env
 	    echo "NODE_VERSION=24" >> .env
@@ -214,6 +219,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_SEARCH=$$KONG_COOKIE_HASH_SEARCH" >> .env
 	    echo "KONG_COOKIE_HASH_SONARQUBE=$$KONG_COOKIE_HASH_SONARQUBE" >> .env
 	    echo "KONG_COOKIE_HASH_DOCS=$$KONG_COOKIE_HASH_DOCS" >> .env
+	    echo "KONG_COOKIE_HASH_POSTGRAPHILE=$$KONG_COOKIE_HASH_POSTGRAPHILE" >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
@@ -230,6 +236,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_SEARCH=$$KONG_COOKIE_BLOCK_SEARCH" >> .env
 	    echo "KONG_COOKIE_BLOCK_SONARQUBE=$$KONG_COOKIE_BLOCK_SONARQUBE" >> .env
 	    echo "KONG_COOKIE_BLOCK_DOCS=$$KONG_COOKIE_BLOCK_DOCS" >> .env
+	    echo "KONG_COOKIE_BLOCK_POSTGRAPHILE=$$KONG_COOKIE_BLOCK_POSTGRAPHILE" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
@@ -246,6 +253,7 @@ setup:
 	    echo "CLIENT_SECRET_SEARCH=$$CLIENT_SECRET_SEARCH" >> .env
 	    echo "CLIENT_SECRET_SONARQUBE=$$CLIENT_SECRET_SONARQUBE" >> .env
 	    echo "CLIENT_SECRET_DOCS=$$CLIENT_SECRET_DOCS" >> .env
+	    echo "CLIENT_SECRET_POSTGRAPHILE=$$CLIENT_SECRET_POSTGRAPHILE" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_ID_ROOT=root" >> .env
@@ -262,6 +270,10 @@ setup:
 	    echo "CLIENT_ID_SEARCH=search" >> .env
 	    echo "CLIENT_ID_SONARQUBE=sonarqube" >> .env
 	    echo "CLIENT_ID_DOCS=docs" >> .env
+	    echo "CLIENT_ID_POSTGRAPHILE=postgraphile" >> .env
+
+	    echo "" >> .env
+	    echo "SONAR_ADMIN_PASSWORD=$${SONAR_ADMIN_PASSWORD}" >> .env
 
 	    echo "" >> .env
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
@@ -275,6 +287,7 @@ setup:
 	export PGBOUNCER_PGADMIN_PASSWORD=md5$$(printf '%s' "$$PGADMIN_DEFAULT_PASSWORD"pgadmin | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_GRAFANA_PASSWORD=md5$$(printf '%s' "$$GRAFANA_DEFAULT_PASSWORD"grafana | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_SONARQUBE_PASSWORD=md5$$(printf '%s' "$$SONAR_JDBC_PASSWORD"sonarqube | md5sum | cut -d' ' -f1)
+	export PGBOUNCER_POSTGRAPHILE_PASSWORD=md5$$(printf '%s' "$$POSTGRAPHILE_DB_PASSWORD"postgraphile | md5sum | cut -d' ' -f1)
 	echo "[databases]" > services/pgbouncer/databases.ini
 	echo "" > services/pgbouncer/userlist.txt
 	echo "$$NAME = host=postgres port=5432 dbname=$$NAME user=$$NAME password=$$POSTGRES_PASSWORD" >> services/pgbouncer/databases.ini
@@ -289,6 +302,8 @@ setup:
 	echo "\"grafana\" \"$$PGBOUNCER_GRAFANA_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "sonarqube = host=postgres port=5432 dbname=sonarqube user=sonarqube password=$$SONAR_JDBC_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "\"sonarqube\" \"$$PGBOUNCER_SONARQUBE_PASSWORD\"" >> services/pgbouncer/userlist.txt
+	echo "postgraphile = host=postgres port=5432 dbname=postgraphile user=postgraphile password=$$POSTGRAPHILE_DB_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "\"postgraphile\" \"$$PGBOUNCER_POSTGRAPHILE_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "" > services/postgres/init/01.sql
 	echo "CREATE ROLE keycloak WITH LOGIN PASSWORD '$$KC_DB_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE keycloak OWNER keycloak;" >> services/postgres/init/01.sql
@@ -309,6 +324,9 @@ setup:
 	echo "CREATE ROLE sonarqube WITH LOGIN PASSWORD '$$SONAR_JDBC_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE sonarqube OWNER sonarqube;" >> services/postgres/init/01.sql
 	echo "GRANT CONNECT ON DATABASE sonarqube TO sonarqube;" >> services/postgres/init/01.sql
+	echo "" >> services/postgres/init/01.sql
+	echo "CREATE ROLE postgraphile WITH LOGIN PASSWORD '$$POSTGRAPHILE_DB_PASSWORD';" >> services/postgres/init/01.sql
+	echo "GRANT CONNECT ON DATABASE $${NAME} TO postgraphile;" >> services/postgres/init/01.sql
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v node >/dev/null; then volta install node@"$$NODE_VERSION"; fi
