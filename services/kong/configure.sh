@@ -110,5 +110,6 @@ create_stack kuma kuma 3001 "kuma.${DOMAIN}" "${CLIENT_ID_KUMA}" "${CLIENT_SECRE
 create_stack promtail promtail 9080 "promtail.${DOMAIN}" "${CLIENT_ID_PROMTAIL}" "${CLIENT_SECRET_PROMTAIL}" promtail "${KONG_COOKIE_HASH_PROMTAIL}" "${KONG_COOKIE_BLOCK_PROMTAIL}"
 create_stack search search 5601 "search.${DOMAIN}" "${CLIENT_ID_SEARCH}" "${CLIENT_SECRET_SEARCH}" search "${KONG_COOKIE_HASH_SEARCH}" "${KONG_COOKIE_BLOCK_SEARCH}"
 create_stack sonarqube sonarqube 9000 "sonarqube.${DOMAIN}" "${CLIENT_ID_SONARQUBE}" "${CLIENT_SECRET_SONARQUBE}" sonarqube "${KONG_COOKIE_HASH_SONARQUBE}" "${KONG_COOKIE_BLOCK_SONARQUBE}"
+create_stack docs docs 8005 "docs.${DOMAIN}" "${CLIENT_ID_DOCS}" "${CLIENT_SECRET_DOCS}" docs "${KONG_COOKIE_HASH_DOCS}" "${KONG_COOKIE_BLOCK_DOCS}"
 
 echo -e "\nservices/kong/configure.sh"

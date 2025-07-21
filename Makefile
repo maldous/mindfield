@@ -37,6 +37,7 @@ setup:
 	    KONG_COOKIE_HASH_PROMTAIL="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_SEARCH="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_SONARQUBE="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_DOCS="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
@@ -51,6 +52,7 @@ setup:
 	    KONG_COOKIE_BLOCK_PROMTAIL="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_SEARCH="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_SONARQUBE="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_DOCS="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
@@ -65,6 +67,7 @@ setup:
 	    CLIENT_SECRET_PROMTAIL="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_SEARCH="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_SONARQUBE="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_DOCS="$$(openssl rand -hex 32)"
 
 	    #PASSWORD="$$(openssl rand -hex 16)"
 	    #POSTGRES_PASSWORD="$$(openssl rand -hex 16)"
@@ -207,6 +210,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_PROMTAIL=$$KONG_COOKIE_HASH_PROMTAIL" >> .env
 	    echo "KONG_COOKIE_HASH_SEARCH=$$KONG_COOKIE_HASH_SEARCH" >> .env
 	    echo "KONG_COOKIE_HASH_SONARQUBE=$$KONG_COOKIE_HASH_SONARQUBE" >> .env
+	    echo "KONG_COOKIE_HASH_DOCS=$$KONG_COOKIE_HASH_DOCS" >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
@@ -222,6 +226,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_PROMTAIL=$$KONG_COOKIE_BLOCK_PROMTAIL" >> .env
 	    echo "KONG_COOKIE_BLOCK_SEARCH=$$KONG_COOKIE_BLOCK_SEARCH" >> .env
 	    echo "KONG_COOKIE_BLOCK_SONARQUBE=$$KONG_COOKIE_BLOCK_SONARQUBE" >> .env
+	    echo "KONG_COOKIE_BLOCK_DOCS=$$KONG_COOKIE_BLOCK_DOCS" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
@@ -237,6 +242,7 @@ setup:
 	    echo "CLIENT_SECRET_PROMTAIL=$$CLIENT_SECRET_PROMTAIL" >> .env
 	    echo "CLIENT_SECRET_SEARCH=$$CLIENT_SECRET_SEARCH" >> .env
 	    echo "CLIENT_SECRET_SONARQUBE=$$CLIENT_SECRET_SONARQUBE" >> .env
+	    echo "CLIENT_SECRET_DOCS=$$CLIENT_SECRET_DOCS" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_ID_ROOT=root" >> .env
@@ -252,6 +258,7 @@ setup:
 	    echo "CLIENT_ID_PROMTAIL=promtail" >> .env
 	    echo "CLIENT_ID_SEARCH=search" >> .env
 	    echo "CLIENT_ID_SONARQUBE=sonarqube" >> .env
+	    echo "CLIENT_ID_DOCS=docs" >> .env
 
 	    echo "" >> .env
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
