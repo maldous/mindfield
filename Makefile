@@ -364,7 +364,7 @@ env:
 	@openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 
 reset: clean
-	@rm -f .env
+	@rm -f .env services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
 	@docker rm -f registry-proxy registry-write || exit 1
 	@docker volume rm -f registry_proxy_data registry_write_data || exit 1
 
