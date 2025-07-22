@@ -16,3 +16,4 @@
 - **[redisinsight](https://redisinsight.aldous.info/)** – Redis data visualization and insights  
 - **[search](https://search.aldous.info/)** – Internal or site-wide search service  
 - **[sonarqube](https://sonarqube.aldous.info/)** – Code quality and security analysis  
+- **[gitlab](https://gitlab.aldous.info/)** – Gitlab community edition
