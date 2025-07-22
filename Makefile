@@ -11,21 +11,23 @@ endif
 
 setup:
 	@mkdir -vp data/sonarqube/{es7,extensions,logs} data/opensearch/nodes
-
 	if [ ! -f .env ]; then
 	  if [ -f .enc ]; then
-	    echo -n "PASSWORD: "; stty -echo; read PASSWORD; stty echo; echo
-	    TMP_ENV="$$(mktemp)"
-	    if openssl enc -d -aes-256-cbc -pbkdf2 -in .enc -out "$$TMP_ENV" -k "$$PASSWORD"; then
-	  	  mv "$$TMP_ENV" .env
-	    else
-	  	  echo "WRONG PASSWORD!"
-	  	  rm -f "$$TMP_ENV"
-	  	  exit 1
+	    echo -n "Restore .env from .enc? [y/N]: "; read ANSWER
+	    if echo "$$ANSWER" | grep -qi '^y'; then
+	      echo -n "Decryption password: "; stty -echo; read PASSWORD; stty echo; echo
+	      TMP_ENV="$$(mktemp)"
+	      if openssl enc -d -aes-256-cbc -pbkdf2 -in .enc -out "$$TMP_ENV" -k "$$PASSWORD"; then
+	        mv "$$TMP_ENV" .env && echo ".env restored!"
+	      else
+	        echo "WRONG PASSWORD!" && rm -f "$$TMP_ENV" && exit 1
+	      fi
 	    fi
-	  else
+	  fi
+	  if [ ! -f .env ]; then
 	    NAME="$$(basename "$$PWD")"
-
+	    #PASSWORD="$$(openssl rand -hex 16)"
+	    PASSWORD="password"
 	    KONG_COOKIE_HASH_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_PGADMIN="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_MAILHOG="$$(openssl rand -hex 32)"
@@ -41,7 +43,7 @@ setup:
 	    KONG_COOKIE_HASH_SONARQUBE="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_DOCS="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_POSTGRAPHILE="$$(openssl rand -hex 32)"
-
+	    KONG_COOKIE_HASH_GITLAB="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_MAILHOG="$$(openssl rand -hex 32)"
@@ -57,7 +59,7 @@ setup:
 	    KONG_COOKIE_BLOCK_SONARQUBE="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_DOCS="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_POSTGRAPHILE="$$(openssl rand -hex 32)"
-
+	    KONG_COOKIE_BLOCK_GITLAB="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_MAILHOG="$$(openssl rand -hex 32)"
@@ -73,8 +75,7 @@ setup:
 	    CLIENT_SECRET_SONARQUBE="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_DOCS="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_POSTGRAPHILE="$$(openssl rand -hex 32)"
-
-	    #PASSWORD="$$(openssl rand -hex 16)"
+	    CLIENT_SECRET_GITLAB="$$(openssl rand -hex 32)"
 	    POSTGRES_PASSWORD="$$(openssl rand -hex 16)"
 	    MINIO_ROOT_PASSWORD="$$(openssl rand -hex 16)"
 	    PGADMIN_DEFAULT_PASSWORD="$$(openssl rand -hex 16)"
@@ -87,8 +88,6 @@ setup:
 	    POSTGRAPHILE_DB_PASSWORD="$$(openssl rand -hex 16)"
 	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 	    SONAR_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
-
-	    PASSWORD="password"
 	    #POSTGRES_PASSWORD="password"
 	    #MINIO_ROOT_PASSWORD="password"
 	    #PGADMIN_DEFAULT_PASSWORD="password"
@@ -101,11 +100,9 @@ setup:
 	    #POSTGRAPHILE_DB_PASSWORD="password"
 	    #OPENSEARCH_INITIAL_ADMIN_PASSWORD="password"
 	    #SONAR_ADMIN_PASSWORD="password"
-
 	    echo "NAME=$$NAME" >> .env
 	    echo "DOMAIN=aldous.info" >> .env
 	    echo "PASSWORD=$$PASSWORD" >> .env
-
 	    echo "" >> .env
 	    echo "POSTGRES_PASSWORD=$$POSTGRES_PASSWORD" >> .env
 	    echo "MINIO_ROOT_PASSWORD=$$MINIO_ROOT_PASSWORD" >> .env
@@ -118,7 +115,6 @@ setup:
 	    echo "SONAR_JDBC_PASSWORD=$${SONAR_JDBC_PASSWORD}" >> .env
 	    echo "SONAR_ADMIN_PASSWORD=$${SONAR_ADMIN_PASSWORD}" >> .env
 	    echo "POSTGRAPHILE_DB_PASSWORD=$${POSTGRAPHILE_DB_PASSWORD}" >> .env
-
 	    echo "" >> .env
 	    echo 'REGISTRY_CACHE=localhost:5001/$${NAME}-cache' >> .env
 	    echo "NODE_VERSION=24" >> .env
@@ -127,30 +123,25 @@ setup:
 	    echo "BUILDKIT_INLINE_CACHE=1" >> .env
 	    echo "BUILDKIT_PROGRESS=plain" >> .env
 	    echo "DOCKER_BUILDKIT=1" >> .env
-
 	    echo "" >> .env
 	    echo "POSTGRES_HOST=postgres" >> .env
 	    echo 'POSTGRES_USER=$${NAME}' >> .env
 	    echo 'POSTGRES_DB=$${NAME}' >> .env
-
 	    echo "" >> .env
 	    echo 'MINIO_ROOT_USER=admin' >> .env
 	    echo 'AWS_ACCESS_KEY_ID=$${MINIO_ROOT_USER}' >> .env
 	    echo 'AWS_SECRET_ACCESS_KEY=$${MINIO_ROOT_PASSWORD}' >> .env
 	    echo 'AWS_REGION=us-east-1' >> .env
-
 	    echo "" >> .env
 	    echo "RI_ACCEPT_TERMS_AND_CONDITIONS=true" >> .env
 	    echo "RI_REDIS_HOST=redis" >> .env
 	    echo "RI_REDIS_PORT=6379" >> .env
 	    echo "RI_REDIS_ALIAS=redis" >> .env
-
 	    echo "" >> .env
 	    echo "PRESIDIO_ANALYZER_DEFAULT_SCORE_THRESHOLD=0.35" >> .env
 	    echo "PRESIDIO_ANALYZER_ENTITIES_CACHE_TTL=3600" >> .env
 	    echo "PRESIDIO_ANALYZER_HOST=analyzer" >> .env
 	    echo "PRESIDIO_ANALYZER_PORT=3000" >> .env
-
 	    echo "" >> .env
 	    echo "GF_DATABASE_TYPE=postgres" >> .env
 	    echo "GF_DATABASE_HOST=postgres:5432" >> .env
@@ -164,23 +155,19 @@ setup:
 	    echo "GF_CACHE_TYPE=redis" >> .env
 	    echo "GF_CACHE_REDIS_ADDR=redis:6379" >> .env
 	    echo "GF_CACHE_REDIS_DB_INDEX=0" >> .env
-
 	    echo "" >> .env
 	    echo 'PGADMIN_DEFAULT_EMAIL=root@$${DOMAIN}' >> .env
 	    echo "PGADMIN_CONFIG_SERVER_MODE=True" >> .env
 	    echo "PGADMIN_CONFIG_CONFIG_DATABASE_URI=\"'postgresql+psycopg://pgadmin:$${PGADMIN_DEFAULT_PASSWORD}@pgbouncer:5433/pgadmin'\"" >> .env
-
 	    echo "" >> .env
 	    echo 'LETSENCRYPT_EMAIL=root@$${DOMAIN}' >> .env
 	    echo "KUMA_USER=admin" >> .env
 	    echo "OPENSEARCH_HOSTS='[\"http://opensearch:9200\"]'" >> .env
 	    echo 'OPENSEARCH_JAVA_OPTS="-Xms512m -Xmx512m"' >> .env
 	    echo 'DISABLE_SECURITY_DASHBOARDS_PLUGIN=true' >> .env
-
 	    echo "" >> .env
 	    echo "SONAR_JDBC_URL=jdbc:postgresql://pgbouncer:5433/sonarqube" >> .env
 	    echo "SONAR_JDBC_USERNAME=sonarqube" >> .env
-
 	    echo "" >> .env
 	    echo "KC_HTTP_ENABLED=true" >> .env
 	    echo "KC_HTTPS_PORT=0" >> .env
@@ -193,7 +180,6 @@ setup:
 	    echo 'KC_HOSTNAME=keycloak.$${DOMAIN}' >> .env
 	    echo "KC_HOSTNAME_STRICT=true" >> .env
 	    echo "KC_SECRET=$${KC_SECRET}" >> .env
-
 	    echo "" >> .env
 	    echo "KONG_ADMIN_ACCESS_LOG=/dev/stdout" >> .env
 	    echo "KONG_ADMIN_ERROR_LOG=/dev/stderr" >> .env
@@ -212,7 +198,6 @@ setup:
 	    echo "KONG_NGINX_WORKER_PROCESSES=2" >> .env
 	    echo 'KONG_DB_CACHE_WARMUP_ENTITIES=""' >> .env
 	    echo "KONG_LICENSING_ENABLED=false" >> .env
-
 	    echo "" >> .env
 	    echo "KONG_COOKIE_HASH_ROOT=$$KONG_COOKIE_HASH_ROOT" >> .env
 	    echo "KONG_COOKIE_HASH_PGADMIN=$$KONG_COOKIE_HASH_PGADMIN" >> .env
@@ -229,7 +214,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_SONARQUBE=$$KONG_COOKIE_HASH_SONARQUBE" >> .env
 	    echo "KONG_COOKIE_HASH_DOCS=$$KONG_COOKIE_HASH_DOCS" >> .env
 	    echo "KONG_COOKIE_HASH_POSTGRAPHILE=$$KONG_COOKIE_HASH_POSTGRAPHILE" >> .env
-
+	    echo "KONG_COOKIE_HASH_GITLAB=$$KONG_COOKIE_HASH_GITLAB" >> .env
 	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
 	    echo "KONG_COOKIE_BLOCK_PGADMIN=$$KONG_COOKIE_BLOCK_PGADMIN" >> .env
@@ -246,7 +231,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_SONARQUBE=$$KONG_COOKIE_BLOCK_SONARQUBE" >> .env
 	    echo "KONG_COOKIE_BLOCK_DOCS=$$KONG_COOKIE_BLOCK_DOCS" >> .env
 	    echo "KONG_COOKIE_BLOCK_POSTGRAPHILE=$$KONG_COOKIE_BLOCK_POSTGRAPHILE" >> .env
-
+	    echo "KONG_COOKIE_BLOCK_GITLAB=$$KONG_COOKIE_BLOCK_GITLAB" >> .env
 	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
 	    echo "CLIENT_SECRET_PGADMIN=$$CLIENT_SECRET_PGADMIN" >> .env
@@ -263,7 +248,7 @@ setup:
 	    echo "CLIENT_SECRET_SONARQUBE=$$CLIENT_SECRET_SONARQUBE" >> .env
 	    echo "CLIENT_SECRET_DOCS=$$CLIENT_SECRET_DOCS" >> .env
 	    echo "CLIENT_SECRET_POSTGRAPHILE=$$CLIENT_SECRET_POSTGRAPHILE" >> .env
-
+	    echo "CLIENT_SECRET_GITLAB=$$CLIENT_SECRET_GITLAB" >> .env
 	    echo "" >> .env
 	    echo "CLIENT_ID_ROOT=root" >> .env
 	    echo "CLIENT_ID_PGADMIN=pgadmin" >> .env
@@ -280,12 +265,11 @@ setup:
 	    echo "CLIENT_ID_SONARQUBE=sonarqube" >> .env
 	    echo "CLIENT_ID_DOCS=docs" >> .env
 	    echo "CLIENT_ID_POSTGRAPHILE=postgraphile" >> .env
-
+	    echo "CLIENT_ID_GITLAB=gitlab" >> .env
 	    echo "" >> .env
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 	  fi
 	fi
-
 	set -a ;. .env ;set +a
 	export PATH="$$HOME/.volta/bin:$$PATH"
 	export PGBOUNCER_POSTGRES_PASSWORD=md5$$(printf '%s' "$$POSTGRES_PASSWORD$$NAME" | md5sum | cut -d' ' -f1)
@@ -295,7 +279,6 @@ setup:
 	export PGBOUNCER_GRAFANA_PASSWORD=md5$$(printf '%s' "$$GRAFANA_DEFAULT_PASSWORD"grafana | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_SONARQUBE_PASSWORD=md5$$(printf '%s' "$$SONAR_JDBC_PASSWORD"sonarqube | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_POSTGRAPHILE_PASSWORD=md5$$(printf '%s' "$$POSTGRAPHILE_DB_PASSWORD"postgraphile | md5sum | cut -d' ' -f1)
-
 	echo "" > services/pgbouncer/userlist.txt
 	echo "\"$$NAME\" \"$$PGBOUNCER_POSTGRES_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "\"keycloak\" \"$$PGBOUNCER_KC_PASSWORD\"" >> services/pgbouncer/userlist.txt
@@ -304,7 +287,6 @@ setup:
 	echo "\"grafana\" \"$$PGBOUNCER_GRAFANA_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "\"sonarqube\" \"$$PGBOUNCER_SONARQUBE_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "\"postgraphile\" \"$$PGBOUNCER_POSTGRAPHILE_PASSWORD\"" >> services/pgbouncer/userlist.txt
-
 	echo "[databases]" > services/pgbouncer/databases.ini
 	echo "$$NAME = host=postgres port=5432 dbname=$$NAME user=$$NAME password=$$POSTGRES_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "keycloak = host=postgres port=5432 dbname=keycloak user=keycloak password=$$KC_DB_PASSWORD" >> services/pgbouncer/databases.ini
@@ -313,7 +295,6 @@ setup:
 	echo "grafana = host=postgres port=5432 dbname=grafana user=grafana password=$$GRAFANA_DEFAULT_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "sonarqube = host=postgres port=5432 dbname=sonarqube user=sonarqube password=$$SONAR_JDBC_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "postgraphile = host=postgres port=5432 dbname=postgraphile user=postgraphile password=$$POSTGRAPHILE_DB_PASSWORD" >> services/pgbouncer/databases.ini
-
 	echo "" > services/postgres/init/01.sql
 	echo "CREATE ROLE keycloak WITH LOGIN PASSWORD '$$KC_DB_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE keycloak OWNER keycloak;" >> services/postgres/init/01.sql
@@ -337,7 +318,6 @@ setup:
 	echo "" >> services/postgres/init/01.sql
 	echo "CREATE ROLE postgraphile WITH LOGIN PASSWORD '$$POSTGRAPHILE_DB_PASSWORD';" >> services/postgres/init/01.sql
 	echo "GRANT CONNECT ON DATABASE $${NAME} TO postgraphile;" >> services/postgres/init/01.sql
-
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v node >/dev/null; then volta install node@"$$NODE_VERSION"; fi
 	if ! command -v pnpm >/dev/null; then volta install pnpm@latest; fi
@@ -351,7 +331,6 @@ setup:
 	  echo '{ "insecure-registries": ["localhost:5001"], "features": { "buildkit": true, "containerd-snapshotter": true }, "registry-mirrors": [ "http://localhost:5000" ] }' | jq .
 	  exit 1
 	fi
-
 	if ! docker container inspect registry-proxy >/dev/null 2>&1; then
 	  docker run -d --name registry-proxy --restart=always -p 5000:5000 -v registry_proxy_data:/var/lib/registry -v ./services/registry/config.yml:/etc/docker/registry/config.yml:ro registry:2
 	fi
@@ -359,21 +338,17 @@ setup:
 	  docker run -d --name registry-write --restart=always -p 5001:5000 -v registry_write_data:/var/lib/registry registry:2
 	fi
 
-
-env:
-	@openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
-
 reset: clean
 	@docker rm -f registry-proxy registry-write || exit 1
 	@docker volume rm -f registry_proxy_data registry_write_data || exit 1
+	@sudo rm -fr .env data sonar.json services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
 
 install: setup
 	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) build --pull --parallel || exit 1
 	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) up -d --remove-orphans || exit 1
 
-clean: env
-	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down -v --remove-orphans
-	@rm -f services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
+clean:
+	docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down -v --remove-orphans
 
 help:
 	@echo "make setup   - Initial project setup"
@@ -384,16 +359,16 @@ help:
 
 sonar:
 	if [ ! -f .env ]; then touch .env; fi; \
-        if ! grep -q "SONAR_TOKEN" .env; then \
-        token=$$(set -a; . .env; set +a ; curl -s -u admin:${SONAR_ADMIN_PASSWORD} -X POST 'http://localhost:9003/api/user_tokens/generate' -d name=admin | jq -r '.token'); \
-        echo "SONAR_TOKEN=$$token" >> .env; \
-        fi; \
-        rm -f sonar.json; \
-        bash -c 'source .env && sonar -Dsonar.host.url=http://localhost:9003 -Dsonar.login=$${SONAR_TOKEN} -Dsonar.projectKey=${NAME} -Dsonar.exclusions=data/**'; \
-        bash -c 'source .env && for ((p=1;;p++)); do \
-        r=$$(curl -s -u $${SONAR_TOKEN}: "http://localhost:9003/api/issues/search?branch=main&ps=500&p=$$p"); \
-        if [ $$(jq -e ".issues|length" <<<"$${r}") -eq 0 ]; then break; fi; \
-        printf "%s\n" "$$r"; \
-        done | jq -s "map(.issues) | add // []" > sonar.json; \
-        echo ""; \
-        jq -r ".[] | select(.issueStatus != \"FIXED\") | \"\( (.component | split(\":\")[1])):\(.line) \(.message)\"" sonar.json'
+	if ! grep -q "SONAR_TOKEN" .env; then \
+	token=$$(set -a; . .env; set +a ; curl -s -u admin:${SONAR_ADMIN_PASSWORD} -X POST 'http://localhost:9003/api/user_tokens/generate' -d name=admin | jq -r '.token'); \
+	echo "SONAR_TOKEN=$$token" >> .env; \
+	fi; \
+	rm -f sonar.json; \
+	bash -c 'source .env && sonar -Dsonar.host.url=http://localhost:9003 -Dsonar.login=$${SONAR_TOKEN} -Dsonar.projectKey=${NAME} -Dsonar.exclusions=data/**'; \
+	bash -c 'source .env && for ((p=1;;p++)); do \
+	r=$$(curl -s -u $${SONAR_TOKEN}: "http://localhost:9003/api/issues/search?branch=main&ps=500&p=$$p"); \
+	if [ $$(jq -e ".issues|length" <<<"$${r}") -eq 0 ]; then break; fi; \
+	printf "%s\n" "$$r"; \
+	done | jq -s "map(.issues) | add // []" > sonar.json; \
+	echo ""; \
+	jq -r ".[] | select(.issueStatus != \"FIXED\") | \"\( (.component | split(\":\")[1])):\(.line) \(.message)\"" sonar.json'

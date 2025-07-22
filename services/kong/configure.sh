@@ -112,5 +112,6 @@ create_stack search search 5601 "search.${DOMAIN}" "${CLIENT_ID_SEARCH}" "${CLIE
 create_stack sonarqube sonarqube 9000 "sonarqube.${DOMAIN}" "${CLIENT_ID_SONARQUBE}" "${CLIENT_SECRET_SONARQUBE}" sonarqube "${KONG_COOKIE_HASH_SONARQUBE}" "${KONG_COOKIE_BLOCK_SONARQUBE}"
 create_stack docs docs 8005 "docs.${DOMAIN}" "${CLIENT_ID_DOCS}" "${CLIENT_SECRET_DOCS}" docs "${KONG_COOKIE_HASH_DOCS}" "${KONG_COOKIE_BLOCK_DOCS}"
 create_stack postgraphile postgraphile 5002 "postgraphile.${DOMAIN}" "${CLIENT_ID_POSTGRAPHILE}" "${CLIENT_SECRET_POSTGRAPHILE}" postgraphile "${KONG_COOKIE_HASH_POSTGRAPHILE}" "${KONG_COOKIE_BLOCK_POSTGRAPHILE}"
+create_stack gitlab gitlab 5002 "gitlab.${DOMAIN}" "${CLIENT_ID_GITLAB}" "${CLIENT_SECRET_GITLAB}" gitlab "${KONG_COOKIE_HASH_GITLAB}" "${KONG_COOKIE_BLOCK_GITLAB}"
 
 echo -e "\nservices/kong/configure.sh"

@@ -35,6 +35,10 @@ services:
   exporter:
     ports:
       - '0.0.0.0:9100:9100/tcp'
+  gitlab:
+    ports:
+      - '0.0.0.0:8082:80/tcp' # 8082
+      - '0.0.0.0:2222:22/tcp'
   grafana:
     ports:
       - '0.0.0.0:3001:3000/tcp' # 3001

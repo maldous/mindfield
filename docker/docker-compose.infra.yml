@@ -216,6 +216,29 @@ services:
     mem_limit: "128MiB"
     pid: host
 
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    volumes:
+      - ./data/gitlab/config:/etc/gitlab
+      - ./data/gitlab/logs:/var/log/gitlab
+      - ./data/gitlab/data:/var/opt/gitlab
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -f http://localhost/-/readiness || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 1.0
+    mem_limit: "2GiB"
+
   grafana:
     image: grafana/grafana:latest
     depends_on:
