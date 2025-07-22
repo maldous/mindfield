@@ -335,18 +335,18 @@ install: setup
 clean:
 	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down --remove-orphans
 
-reset:
+purge:
 	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down -v --remove-orphans
 	@docker rm -f registry-proxy registry-write
 	@docker volume rm -f registry_proxy_data registry_write_data
 	@rm -fr .env sonar.json services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
 
 help:
-	@echo "make setup   "
-	@echo "make install "
-	@echo "make clean   "
-	@echo "make reset   "
-	@echo "make sonar   "
+	@echo "make setup"
+	@echo "make install"
+	@echo "make clean"
+	@echo "make purge"
+	@echo "make sonar"
 
 sonar:
 	if [ ! -f .env ]; then touch .env; fi; \

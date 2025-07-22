@@ -236,8 +236,9 @@ services:
       timeout: 10s
       retries: 12
       start_period: 60s
-    cpus: 1.0
-    mem_limit: "4GiB"
+    cpus: 4.0
+    mem_limit: "8GiB"
+    shm_size: 256m
 
   grafana:
     image: grafana/grafana:latest
