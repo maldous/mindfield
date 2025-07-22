@@ -26,7 +26,7 @@ if curl -fs -H "${AUTH_HEADER}" "${KC_URL}/admin/realms/${NAME}" -o /dev/null; t
             \"realm\":\"${NAME}\",
             \"enabled\":true,
             \"smtpServer\":{\"host\":\"mailhog\",\"port\":\"1025\",\"from\":\"noreply@aldous.info\"},
-            \"displayName\":\"Mindfield\"
+            \"displayName\":\"${NAME}\"
           }"
 else
   curl -fs -X POST "${KC_URL}/admin/realms" \
@@ -41,7 +41,7 @@ else
             \"bruteForceProtected\":true,
             \"passwordPolicy\":\"length(8) and notUsername() and digits(1) and lowerCase(1) and upperCase(1)\",
             \"smtpServer\":{\"host\":\"mailhog\",\"port\":\"1025\",\"from\":\"noreply@aldous.info\",\"auth\":false},
-            \"displayName\":\"Mindfield\"
+            \"displayName\":\"${NAME}\"
           }"
 fi
 

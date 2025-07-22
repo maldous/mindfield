@@ -1,99 +1,67 @@
 ---
-name: mindfield
+name: infra
 
 services:
-  caddy:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.caddy
-      cache_from:
-        - type=registry,ref=localhost:5001/mindfield-cache
-      cache_to:
-        - type=registry,ref=localhost:5001/mindfield-cache,mode=max
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    volumes:
+      - ./services/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - ./data/alertmanager:/alertmanager
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.25
+    mem_limit: "128MiB"
+
+  analyzer:
+    image: mcr.microsoft.com/presidio-analyzer:latest
     depends_on:
-      postgres:
+      redis:
         condition: service_healthy
         required: true
     volumes:
-      - type: bind
-        source: /var/log/caddy/
-        target: /var/log/caddy/
-        bind:
-          create_host_path: true
-      - type: bind
-        source: ./services/caddy/Caddyfile
-        target: /etc/caddy/Caddyfile
-        bind:
-          create_host_path: true
-    env_file:
-      - .env
-    ports:
-      - mode: ingress
-        target: 80
-        published: "80"
-        host_ip: 0.0.0.0
-        protocol: tcp
-      - mode: ingress
-        target: 443
-        published: "443"
-        host_ip: 0.0.0.0
-        protocol: tcp
-      - mode: ingress
-        target: 443
-        published: "443"
-        host_ip: 0.0.0.0
-        protocol: udp
-      - mode: ingress
-        target: 2019
-        published: "2019"
-        host_ip: 0.0.0.0
-        protocol: tcp
-    networks:
-      backend: null
-      frontend: null
-      monitoring: null
-    restart: always
-    healthcheck:
-      test:
-        - CMD
-        - "true"
-      interval: 5s
-      timeout: 10s
-      retries: 12
-      start_period: 60s
-    cpus: 0.25
-    mem_limit: "134217728"
-
-  mailhog:
-    image: mailhog/mailhog:latest
+      - ./services/analyzer/healthcheck.sh:/healthcheck.sh
     env_file:
       - .env
     networks:
-      backend: null
-      frontend: null
+      - backend
     restart: always
     healthcheck:
       test:
-        - CMD
-        - "true"
+        - CMD-SHELL
+        - /healthcheck.sh
       timeout: 10s
       interval: 5s
       retries: 12
-      start_period: 60s
-    cpus: 0.25
-    mem_limit: "134217728"
+    cpus: 1
+    mem_limit: "1GiB"
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
+  anonymizer:
+    image: mcr.microsoft.com/presidio-anonymizer:latest
     depends_on:
-      postgres:
+      analyzer:
         condition: service_healthy
         required: true
     env_file:
       - .env
     networks:
-      backend: null
-      frontend: null
+      - backend
     restart: always
     healthcheck:
       test:
@@ -104,4 +72,836 @@ services:
       retries: 12
       start_period: 60s
     cpus: 0.5
-    mem_limit: "268435456"
+    mem_limit: "512MiB"
+
+  blackbox:
+    image: prom/blackbox-exporter:latest
+    volumes:
+      - ./services/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml
+    env_file:
+      - .env
+    networks:
+      - backend
+      - monitoring
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.25
+    mem_limit: "128MiB"
+
+  caddy:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.caddy
+      cache_from:
+        - type=registry,ref=localhost:5001/cache
+      cache_to:
+        - type=registry,ref=localhost:5001/cache,mode=max
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    volumes:
+      - /var/log/caddy/:/var/log/caddy/
+      - ./services/caddy/Caddyfile:/etc/caddy/Caddyfile
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.25
+    mem_limit: "128MiB"
+
+  collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    depends_on:
+      jaeger:
+        condition: service_started
+        required: true
+      opensearch:
+        condition: service_started
+        required: true
+      prometheus:
+        condition: service_started
+        required: true
+    volumes:
+      - ./services/collector/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    command:
+      - --config=/etc/otel-collector-config.yaml
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "256MiB"
+
+  docs:
+    image: squidfunk/mkdocs-material:latest
+    volumes:
+      - ./docs:/docs
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    command:
+      - serve
+      - --dev-addr=0.0.0.0:8005
+    working_dir: /docs
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.25
+    mem_limit: "128MiB"
+
+  exporter:
+    image: prom/node-exporter:latest
+    volumes:
+      - type: bind
+        source: /
+        target: /host
+        read_only: true
+        bind:
+          propagation: rslave
+    env_file:
+      - .env
+    networks:
+      - backend
+      - monitoring
+    command:
+      - --path.rootfs=/host
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.25
+    mem_limit: "128MiB"
+    pid: host
+
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      mailhog:
+        condition: service_started
+        required: true
+      pgbouncer:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "256MiB"
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+
+    cpus: 0.5
+    mem_limit: "256MiB"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    depends_on:
+      mailhog:
+        condition: service_healthy
+        required: true
+      pgbouncer:
+        condition: service_healthy
+        required: true
+    volumes:
+      - ./services/keycloak/themes:/opt/keycloak/themes
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    command:
+      - start
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "512MiB"
+
+  keycloak-configure:
+    image: badouralix/curl-jq:latest
+    depends_on:
+      keycloak:
+        condition: service_healthy
+        required: true
+    volumes:
+      - ./services/keycloak/configure.sh:/configure.sh
+    env_file:
+      - .env
+    networks:
+      - backend
+    command:
+      - /configure.sh
+    restart: no
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.25
+    mem_limit: "128MiB"
+
+  kong:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.kong
+      cache_from:
+        - type=registry,ref=localhost:5001/cache
+      cache_to:
+        - type=registry,ref=localhost:5001/cache,mode=max
+    depends_on:
+      kong-bootstrap:
+        condition: service_completed_successfully
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - frontend
+      - backend
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - kong health
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "512MiB"
+
+  kong-bootstrap:
+    image: mindfield/kong:local
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - backend
+    command: >
+      kong migrations bootstrap
+    restart: no
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.25
+    mem_limit: "128MiB"
+
+  kong-configure:
+    image: badouralix/curl-jq:latest
+    depends_on:
+      kong:
+        condition: service_healthy
+        required: true
+    volumes:
+      - ./services/kong/configure.sh:/configure.sh
+    env_file:
+      - .env
+    networks:
+      - backend
+    command:
+      - /configure.sh
+    restart: no
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.25
+    mem_limit: "128MiB"
+
+  kuma:
+    image: louislam/uptime-kuma:latest
+    volumes:
+      - ./data/kuma:/app/data
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "256MiB"
+
+  loki:
+    image: grafana/loki:latest
+    volumes:
+      - ./services/loki/local-config.yml:/etc/loki/local-config.yaml
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    command:
+      - -config.file=/etc/loki/local-config.yaml
+      - -config.expand-env=true
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "512MiB"
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    cpus: 0.25
+    mem_limit: "128MiB"
+
+  minio:
+    image: minio/minio:latest
+    volumes:
+      - ./data/minio:/data
+    env_file:
+      - .env
+    networks:
+      - backend
+    command: >
+      server /data --console-address :9001
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -f http://localhost:9000/minio/health/live
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "256MiB"
+
+  opensearch:
+    image: opensearchproject/opensearch:latest
+    volumes:
+      - ./data/opensearch:/usr/share/opensearch/data
+    environment:
+      bootstrap.memory_lock: "true"
+      cluster.name: opensearch-cluster
+      discovery.type: single-node
+      node.name: opensearch
+      plugins.security.disabled: true
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 1
+    mem_limit: "1GiB"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "256MiB"
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    volumes:
+      - ./services/pgbouncer:/etc/pgbouncer
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -h "${POSTGRES_HOST}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -p "5432"
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    user: root
+    cpus: 0.25
+    mem_limit: "64MiB"
+
+  postgraphile:
+    image: graphile/postgraphile:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    command:
+      - --connection
+      - postgres://postgraphile:${POSTGRAPHILE_DB_PASSWORD}@pgbouncer:5433/${NAME}
+      - --schema
+      - public
+      - --watch
+      - --enhance-graphiql
+      - --dynamic-json
+      - --no-setof-functions-contain-nulls
+      - --no-ignore-rbac
+      - --show-error-stack=json
+      - --extended-errors
+      - hint,detail,errcode
+      - --export-schema-graphql
+      - /tmp/schema.graphql
+      - --graphiql
+      - /graphiql
+      - --port
+      - "5002"
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "256MiB"
+
+  postgres:
+    image: postgres:17-alpine
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./services/postgres/init:/docker-entrypoint-initdb.d
+    env_file:
+      - .env
+    networks:
+      - backend
+    command: >
+      postgres -c shared_buffers=256MB -c effective_cache_size=1GB -c maintenance_work_mem=64MB -c checkpoint_completion_target=0.9 -c wal_buffers=16MB -c default_statistics_target=100 -c random_page_cost=1.1 -c effective_io_concurrency=200 -c password_encryption=md5
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -h "${POSTGRES_HOST}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -p "5432"
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    cpus: 1
+    mem_limit: "512MiB"
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./services/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./data/prometheus:/prometheus
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.console.templates=/etc/prometheus/consoles
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "512MiB"
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./services/promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers
+    env_file:
+      - .env
+    networks:
+      - backend
+      - monitoring
+    command:
+      - -config.file=/etc/promtail/config.yml
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.25
+    mem_limit: "128MiB"
+
+  redactor:
+    image: mcr.microsoft.com/presidio-image-redactor:latest
+    depends_on:
+      analyzer:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 1
+    mem_limit: "1GiB"
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - ./data/redis:/data
+    env_file:
+      - .env
+    networks:
+      - backend
+    command: >
+      redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru --save 900 1 --save 300 10 --save 60 10000
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli ping
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "256MiB"
+
+  redisinsight:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.redisinsight
+      cache_from:
+        - type=registry,ref=localhost:5001/cache
+      cache_to:
+        - type=registry,ref=localhost:5001/cache,mode=max
+    depends_on:
+      redis:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "512MiB"
+
+  search:
+    image: opensearchproject/opensearch-dashboards:latest
+    depends_on:
+      opensearch:
+        condition: service_started
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "512MiB"
+
+  sonarqube:
+    image: sonarqube:community
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+        required: true
+    volumes:
+      - ./data/sonarqube/es7:/opt/sonarqube/data/es7
+      - ./data/sonarqube/logs:/opt/sonarqube/logs
+      - ./data/sonarqube/extensions:/opt/sonarqube/extensions
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 1
+    mem_limit: "2GiB"
+
+#   redoc:
+#     image: redocly/redoc:latest
+#     depends_on:
+#       api:
+#         condition: service_started
+#         required: true
+#     env_file:
+#       - .env
+#     networks:
+#       - backend
+#       - frontend
+#     cpus: 0.25
+#     mem_limit: "128MiB"
+#
+#   swagger-ui:
+#     image: swaggerapi/swagger-ui:latest
+#     depends_on:
+#       api:
+#         condition: service_started
+#         required: true
+#     env_file:
+#       - .env
+#     networks:
+#       - backend
+#       - frontend
+#     cpus: 0.25
+#     mem_limit: "128MiB"
+#
+#   storybook:
+#     build:
+#       context: .
+#       dockerfile: docker/Dockerfile.storybook
+#       args:
+#         NODE_MAJOR: ${NODE_MAJOR}
+#       cache_from:
+#         - type=registry,ref=localhost:5001/cache
+#       cache_to:
+#         - type=registry,ref=localhost:5001/cache,mode=max
+#     volumes:
+#       - type: bind
+#         source: ./core/ui
+#         target: /app/core/ui
+#         bind:
+#           create_host_path: true
+#       - type: bind
+#         source: ./apps/web
+#         target: /app/apps/web
+#         bind:
+#           create_host_path: true
+#       - type: bind
+#         source: .
+#         target: /app
+#         bind:
+#           create_host_path: true
+#       - type: volume
+#         source: storybook_next
+#         target: /app/.next
+#         volume: {}
+#       - type: volume
+#         source: storybook_node_modules
+#         target: /app/apps/web/node_modules
+#         volume: {}
+#     env_file:
+#       - .env
+#     networks:
+#       - frontend
+#     cpus: 0.5
+#     mem_limit: "512MiB"
+#
+#   grapesjs:
+#     build:
+#       context: .
+#       dockerfile: docker/Dockerfile.grapesjs
+#       args:
+#         NODE_MAJOR: "24"
+#       cache_from:
+#         - type=registry,ref=localhost:5001/cache
+#       cache_to:
+#         - type=registry,ref=localhost:5001/cache,mode=max
+#     depends_on:
+#       minio:
+#         condition: service_healthy
+#         required: true
+#       pgbouncer:
+#         condition: service_healthy
+#         required: true
+#     env_file:
+#       - .env
+#     networks:
+#       - backend
+#       - frontend
+#     cpus: 0.5
+#     mem_limit: "256MiB"

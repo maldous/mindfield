@@ -1,0 +1,143 @@
+---
+name: mindfield
+
+services:
+
+  minio:
+    image: minio/minio:latest
+    volumes:
+      - type: bind
+        source: ./data/minio
+        target: /data
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+    command: >
+      server /data --console-address :9001
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -f http://localhost:9000/minio/health/live
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "268435456"
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    volumes:
+      - type: bind
+        source: ./services/pgbouncer
+        target: /etc/pgbouncer
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -h "${POSTGRES_HOST}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -p "5432"
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    user: root
+    cpus: 0.25
+    mem_limit: "67108864"
+
+  postgres:
+    image: postgres:17-alpine
+    volumes:
+      - type: bind
+        source: ./data/postgres
+        target: /var/lib/postgresql/data
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ./services/postgres/init
+        target: /docker-entrypoint-initdb.d
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+    command: >
+      postgres -c shared_buffers=256MB -c effective_cache_size=1GB -c maintenance_work_mem=64MB -c checkpoint_completion_target=0.9 -c wal_buffers=16MB -c default_statistics_target=100 -c random_page_cost=1.1 -c effective_io_concurrency=200 -c password_encryption=md5
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -h "${POSTGRES_HOST}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -p "5432"
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    cpus: 1
+    mem_limit: "536870912"
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - type: bind
+        source: ./data/redis
+        target: /data
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+    command: >
+      redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru --save 900 1 --save 300 10 --save 60 10000
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli ping
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "268435456"
+
+  redisinsight:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.redisinsight
+      cache_from:
+        - type=registry,ref=localhost:5001/cache
+      cache_to:
+        - type=registry,ref=localhost:5001/cache,mode=max
+    depends_on:
+      redis:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "536870912"

@@ -56,7 +56,7 @@ create_stack() {
     \"service\":{\"id\":\"${svc_id}\"}
   }"
   local plugin_cfg
-  plugin_cfg="{\"issuer\":\"https://keycloak.${DOMAIN}/realms/mindfield\",\
+  plugin_cfg="{\"issuer\":\"https://keycloak.${DOMAIN}/realms/${NAME}\",\
   \"client_id\":\"${client_id}\",\"client_secret\":\"${client_secret}\",\
   \"redirect_uri\":\"https://${fqdn}/callback\",\"consumer_name\":\"oidcuser\",\
   \"scopes\":[\"openid\",\"email\",\"profile\"],\
@@ -89,7 +89,7 @@ curl -fs -X PUT "${KONG_URL}/routes/root-route" \
   \"service\":{\"id\":\"${root_id}\"}
 }"
 
-root_cfg="{\"issuer\":\"https://keycloak.${DOMAIN}/realms/mindfield\",\
+root_cfg="{\"issuer\":\"https://keycloak.${DOMAIN}/realms/${NAME}\",\
   \"client_id\":\"${CLIENT_ID_ROOT}\",\"client_secret\":\"${CLIENT_SECRET_ROOT}\",\
   \"redirect_uri\":\"https://${DOMAIN}/callback\",\"consumer_name\":\"oidcuser\",\
   \"scopes\":[\"openid\",\"email\",\"profile\"],\

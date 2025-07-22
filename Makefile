@@ -10,7 +10,9 @@ ifneq (,$(wildcard .env))
 endif
 
 setup:
-	@if [ ! -f .env ]; then
+	@mkdir -vp data/sonarqube/{es7,extensions,logs} data/opensearch/nodes
+
+	if [ ! -f .env ]; then
 	  if [ -f .enc ]; then
 	    echo -n "PASSWORD: "; stty -echo; read PASSWORD; stty echo; echo
 	    TMP_ENV="$$(mktemp)"
@@ -73,30 +75,30 @@ setup:
 	    CLIENT_SECRET_POSTGRAPHILE="$$(openssl rand -hex 32)"
 
 	    #PASSWORD="$$(openssl rand -hex 16)"
-	    #POSTGRES_PASSWORD="$$(openssl rand -hex 16)"
-	    #MINIO_ROOT_PASSWORD="$$(openssl rand -hex 16)"
-	    #PGADMIN_DEFAULT_PASSWORD="$$(openssl rand -hex 16)"
-	    #GRAFANA_DEFAULT_PASSWORD="$$(openssl rand -hex 16)"
-	    #KC_BOOTSTRAP_ADMIN_PASSWORD="$$(openssl rand -hex 16)"
-	    #KC_DB_PASSWORD="$$(openssl rand -hex 16)"
-	    #KC_SECRET="$$(openssl rand -hex 32)"
-	    #KONG_PG_PASSWORD="$$(openssl rand -hex 16)"
-	    #SONAR_JDBC_PASSWORD="$$(openssl rand -hex 16)"
-	    #POSTGRAPHILE_DB_PASSWORD="$$(openssl rand -hex 16)"
+	    POSTGRES_PASSWORD="$$(openssl rand -hex 16)"
+	    MINIO_ROOT_PASSWORD="$$(openssl rand -hex 16)"
+	    PGADMIN_DEFAULT_PASSWORD="$$(openssl rand -hex 16)"
+	    GRAFANA_DEFAULT_PASSWORD="$$(openssl rand -hex 16)"
+	    KC_BOOTSTRAP_ADMIN_PASSWORD="$$(openssl rand -hex 16)"
+	    KC_DB_PASSWORD="$$(openssl rand -hex 16)"
+	    KC_SECRET="$$(openssl rand -hex 32)"
+	    KONG_PG_PASSWORD="$$(openssl rand -hex 16)"
+	    SONAR_JDBC_PASSWORD="$$(openssl rand -hex 16)"
+	    POSTGRAPHILE_DB_PASSWORD="$$(openssl rand -hex 16)"
 	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 	    SONAR_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 
 	    PASSWORD="password"
-	    POSTGRES_PASSWORD="password"
-	    MINIO_ROOT_PASSWORD="password"
-	    PGADMIN_DEFAULT_PASSWORD="password"
-	    GRAFANA_DEFAULT_PASSWORD="password"
-	    KC_BOOTSTRAP_ADMIN_PASSWORD="password"
-	    KC_DB_PASSWORD="password"
-	    KC_SECRET="password"
-	    KONG_PG_PASSWORD="password"
-	    SONAR_JDBC_PASSWORD="password"
-	    POSTGRAPHILE_DB_PASSWORD="password"
+	    #POSTGRES_PASSWORD="password"
+	    #MINIO_ROOT_PASSWORD="password"
+	    #PGADMIN_DEFAULT_PASSWORD="password"
+	    #GRAFANA_DEFAULT_PASSWORD="password"
+	    #KC_BOOTSTRAP_ADMIN_PASSWORD="password"
+	    #KC_DB_PASSWORD="password"
+	    #KC_SECRET="password"
+	    #KONG_PG_PASSWORD="password"
+	    #SONAR_JDBC_PASSWORD="password"
+	    #POSTGRAPHILE_DB_PASSWORD="password"
 	    #OPENSEARCH_INITIAL_ADMIN_PASSWORD="password"
 	    #SONAR_ADMIN_PASSWORD="password"
 
@@ -154,7 +156,7 @@ setup:
 	    echo "GF_DATABASE_HOST=postgres:5432" >> .env
 	    echo "GF_DATABASE_NAME=grafana" >> .env
 	    echo "GF_DATABASE_USER=grafana" >> .env
-	    echo 'GF_DATABASE_PASSWORD=$${POSTGRES_PASSWORD}' >> .env
+	    echo 'GF_DATABASE_PASSWORD=$${GRAFANA_DEFAULT_PASSWORD}' >> .env
 	    echo "GF_DATABASE_SSL_MODE=disable" >> .env
 	    echo "GF_SMTP_ENABLED=true" >> .env
 	    echo "GF_SMTP_HOST=mailhog:1025" >> .env
@@ -294,22 +296,23 @@ setup:
 	export PGBOUNCER_SONARQUBE_PASSWORD=md5$$(printf '%s' "$$SONAR_JDBC_PASSWORD"sonarqube | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_POSTGRAPHILE_PASSWORD=md5$$(printf '%s' "$$POSTGRAPHILE_DB_PASSWORD"postgraphile | md5sum | cut -d' ' -f1)
 
-	echo "[databases]" > services/pgbouncer/databases.ini
 	echo "" > services/pgbouncer/userlist.txt
-	echo "$$NAME = host=postgres port=5432 dbname=$$NAME user=$$NAME password=$$POSTGRES_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "\"$$NAME\" \"$$PGBOUNCER_POSTGRES_PASSWORD\"" >> services/pgbouncer/userlist.txt
-	echo "keycloak = host=postgres port=5432 dbname=keycloak user=keycloak password=$$KC_DB_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "\"keycloak\" \"$$PGBOUNCER_KC_PASSWORD\"" >> services/pgbouncer/userlist.txt
-	echo "kong = host=postgres port=5432 dbname=kong user=kong password=$$KONG_PG_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "\"kong\" \"$$PGBOUNCER_KONG_PASSWORD\"" >> services/pgbouncer/userlist.txt
-	echo "pgadmin = host=postgres port=5432 dbname=pgadmin user=pgadmin password=$$PGADMIN_DEFAULT_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "\"pgadmin\" \"$$PGBOUNCER_PGADMIN_PASSWORD\"" >> services/pgbouncer/userlist.txt
-	echo "grafana = host=postgres port=5432 dbname=grafana user=grafana password=$$GRAFANA_DEFAULT_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "\"grafana\" \"$$PGBOUNCER_GRAFANA_PASSWORD\"" >> services/pgbouncer/userlist.txt
-	echo "sonarqube = host=postgres port=5432 dbname=sonarqube user=sonarqube password=$$SONAR_JDBC_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "\"sonarqube\" \"$$PGBOUNCER_SONARQUBE_PASSWORD\"" >> services/pgbouncer/userlist.txt
-	echo "postgraphile = host=postgres port=5432 dbname=postgraphile user=postgraphile password=$$POSTGRAPHILE_DB_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "\"postgraphile\" \"$$PGBOUNCER_POSTGRAPHILE_PASSWORD\"" >> services/pgbouncer/userlist.txt
+
+	echo "[databases]" > services/pgbouncer/databases.ini
+	echo "$$NAME = host=postgres port=5432 dbname=$$NAME user=$$NAME password=$$POSTGRES_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "keycloak = host=postgres port=5432 dbname=keycloak user=keycloak password=$$KC_DB_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "kong = host=postgres port=5432 dbname=kong user=kong password=$$KONG_PG_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "pgadmin = host=postgres port=5432 dbname=pgadmin user=pgadmin password=$$PGADMIN_DEFAULT_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "grafana = host=postgres port=5432 dbname=grafana user=grafana password=$$GRAFANA_DEFAULT_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "sonarqube = host=postgres port=5432 dbname=sonarqube user=sonarqube password=$$SONAR_JDBC_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "postgraphile = host=postgres port=5432 dbname=postgraphile user=postgraphile password=$$POSTGRAPHILE_DB_PASSWORD" >> services/pgbouncer/databases.ini
 
 	echo "" > services/postgres/init/01.sql
 	echo "CREATE ROLE keycloak WITH LOGIN PASSWORD '$$KC_DB_PASSWORD';" >> services/postgres/init/01.sql
@@ -356,6 +359,7 @@ setup:
 	  docker run -d --name registry-write --restart=always -p 5001:5000 -v registry_write_data:/var/lib/registry registry:2
 	fi
 
+
 env:
 	@openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
 
@@ -370,6 +374,7 @@ install: setup
 
 clean: env
 	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down -v --remove-orphans
+	rm -f services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
 
 help:
 	@echo "make setup   - Initial project setup"
@@ -385,7 +390,7 @@ sonar:
         echo "SONAR_TOKEN=$$token" >> .env; \
         fi; \
         rm -f sonar.json; \
-        bash -c 'source .env && sonar -Dsonar.host.url=http://localhost:9003 -Dsonar.login=$${SONAR_TOKEN} -Dsonar.projectKey=mindfield -Dsonar.exclusions=data/**'; \
+        bash -c 'source .env && sonar -Dsonar.host.url=http://localhost:9003 -Dsonar.login=$${SONAR_TOKEN} -Dsonar.projectKey=${NAME} -Dsonar.exclusions=data/**'; \
         bash -c 'source .env && for ((p=1;;p++)); do \
         r=$$(curl -s -u $${SONAR_TOKEN}: "http://localhost:9003/api/issues/search?branch=main&ps=500&p=$$p"); \
         if [ $$(jq -e ".issues|length" <<<"$${r}") -eq 0 ]; then break; fi; \

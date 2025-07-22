@@ -11,7 +11,7 @@
 - **[mailhog](https://mailhog.aldous.info/)** – Email testing and SMTP capture tool  
 - **[minio](https://minio.aldous.info/)** – S3-compatible object storage  
 - **[pgadmin](https://pgadmin.aldous.info/)** – PostgreSQL database administration  
-- **[postgraphile](https://postgraphile.aldous.info/)** – GraphQL API for PostgreSQL  
+- **[postgraphile](https://postgraphile.aldous.info/graphiql)** – GraphQL API for PostgreSQL  
 - **[promtail](https://promtail.aldous.info/)** – Log collector for Loki  
 - **[redisinsight](https://redisinsight.aldous.info/)** – Redis data visualization and insights  
 - **[search](https://search.aldous.info/)** – Internal or site-wide search service  
