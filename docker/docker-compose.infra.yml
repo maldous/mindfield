@@ -7,7 +7,7 @@ services:
     image: prom/alertmanager:latest
     volumes:
       - ./services/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
-      - ./data/alertmanager:/alertmanager
+      - alertmanager_data:/alertmanager
     env_file:
       - .env
     networks:
@@ -219,9 +219,9 @@ services:
   gitlab:
     image: gitlab/gitlab-ce:latest
     volumes:
-      - ./data/gitlab/config:/etc/gitlab
-      - ./data/gitlab/logs:/var/log/gitlab
-      - ./data/gitlab/data:/var/opt/gitlab
+      - gitlab_config:/etc/gitlab
+      - gitlab_logs:/var/log/gitlab
+      - gitlab_data:/var/opt/gitlab
     env_file:
       - .env
     networks:
@@ -237,7 +237,7 @@ services:
       retries: 12
       start_period: 60s
     cpus: 1.0
-    mem_limit: "2GiB"
+    mem_limit: "4GiB"
 
   grafana:
     image: grafana/grafana:latest
@@ -429,7 +429,7 @@ services:
   kuma:
     image: louislam/uptime-kuma:latest
     volumes:
-      - ./data/kuma:/app/data
+      - kuma_data:/app/data
     env_file:
       - .env
     networks:
@@ -451,6 +451,7 @@ services:
     image: grafana/loki:latest
     volumes:
       - ./services/loki/local-config.yml:/etc/loki/local-config.yaml
+      - loki_data:/tmp/loki
     env_file:
       - .env
     networks:
@@ -494,7 +495,7 @@ services:
   minio:
     image: minio/minio:latest
     volumes:
-      - ./data/minio:/data
+      - minio_data:/data
     env_file:
       - .env
     networks:
@@ -516,7 +517,7 @@ services:
   opensearch:
     image: opensearchproject/opensearch:latest
     volumes:
-      - ./data/opensearch:/usr/share/opensearch/data
+      - opensearch_data:/usr/share/opensearch/data
     environment:
       bootstrap.memory_lock: "true"
       cluster.name: opensearch-cluster
@@ -640,7 +641,7 @@ services:
   postgres:
     image: postgres:17-alpine
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
       - ./services/postgres/init:/docker-entrypoint-initdb.d
     env_file:
       - .env
@@ -663,8 +664,8 @@ services:
   prometheus:
     image: prom/prometheus:latest
     volumes:
+      - prometheus_data:/prometheus
       - ./services/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./data/prometheus:/prometheus
     env_file:
       - .env
     networks:
@@ -740,7 +741,7 @@ services:
   redis:
     image: redis:7-alpine
     volumes:
-      - ./data/redis:/data
+      - redis_data:/data
     env_file:
       - .env
     networks:
@@ -817,9 +818,9 @@ services:
         condition: service_healthy
         required: true
     volumes:
-      - ./data/sonarqube/es7:/opt/sonarqube/data/es7
-      - ./data/sonarqube/logs:/opt/sonarqube/logs
-      - ./data/sonarqube/extensions:/opt/sonarqube/extensions
+      - sonarqube_es7:/opt/sonarqube/data/es7
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
     env_file:
       - .env
     networks:

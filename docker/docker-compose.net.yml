@@ -1,6 +1,35 @@
 ---
 name: infra
 
+volumes:
+
+  alertmanager_data:
+  gitlab_config:
+  gitlab_data:
+  gitlab_logs:
+  kuma_data:
+  loki_data:
+  minio_data:
+  opensearch_data:
+  postgres_data:
+  prometheus_data:
+  redis_data:
+  sonarqube_es7:
+  sonarqube_extensions:
+  sonarqube_logs:
+
+networks:
+
+  backend:
+    name: infra_backend
+    driver: bridge
+  frontend:
+    name: infra_frontend
+    driver: bridge
+  monitoring:
+    name: infra_monitoring
+    driver: bridge
+
 services:
 
   alertmanager:
@@ -122,18 +151,6 @@ services:
     ports:
       - '0.0.0.0:9003:9000' # 9003
       - '0.0.0.0:9004:9001' # 9004
-
-networks:
-
-  backend:
-    name: infra_backend
-    driver: bridge
-  frontend:
-    name: infra_frontend
-    driver: bridge
-  monitoring:
-    name: infra_monitoring
-    driver: bridge
 
 #  default:
 #    name: infra_default

@@ -7,7 +7,23 @@
   }
 }
 
-gitlab.{$DOMAIN},postgraphile.{$DOMAIN}, docs.{$DOMAIN}, sonarqube.{$DOMAIN}, search.{$DOMAIN}, promtail.{$DOMAIN}, kuma.{$DOMAIN}, jaeger.{$DOMAIN}, grafana.{$DOMAIN}, blackbox.{$DOMAIN}, alertmanager.{$DOMAIN}, minio.{$DOMAIN}, redisinsight.{$DOMAIN}, mailhog.{$DOMAIN}, pgadmin.{$DOMAIN}, keycloak.{$DOMAIN}, {$DOMAIN} {
+alertmanager.{$DOMAIN},
+blackbox.{$DOMAIN},
+docs.{$DOMAIN},
+gitlab.{$DOMAIN},
+grafana.{$DOMAIN},
+jaeger.{$DOMAIN},
+keycloak.{$DOMAIN},
+kuma.{$DOMAIN},
+mailhog.{$DOMAIN},
+minio.{$DOMAIN},
+pgadmin.{$DOMAIN},
+postgraphile.{$DOMAIN},
+promtail.{$DOMAIN},
+redisinsight.{$DOMAIN},
+search.{$DOMAIN},
+sonarqube.{$DOMAIN},
+{$DOMAIN} {
   tls {$LETSENCRYPT_EMAIL}
   @hsts host {$DOMAIN}
   header @hsts Strict-Transport-Security "max-age=31536000"

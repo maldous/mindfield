@@ -10,8 +10,7 @@ ifneq (,$(wildcard .env))
 endif
 
 setup:
-	@mkdir -vp data/sonarqube/{es7,extensions,logs} data/opensearch/nodes
-	if [ ! -f .env ]; then
+	@if [ ! -f .env ]; then
 	  if [ -f .enc ]; then
 	    echo -n "Restore .env from .enc? [y/N]: "; read ANSWER
 	    if echo "$$ANSWER" | grep -qi '^y'; then
@@ -26,6 +25,7 @@ setup:
 	  fi
 	  if [ ! -f .env ]; then
 	    NAME="$$(basename "$$PWD")"
+	    DATE="$$(date +%s)"
 	    #PASSWORD="$$(openssl rand -hex 16)"
 	    PASSWORD="password"
 	    KONG_COOKIE_HASH_ROOT="$$(openssl rand -hex 32)"
@@ -88,18 +88,8 @@ setup:
 	    POSTGRAPHILE_DB_PASSWORD="$$(openssl rand -hex 16)"
 	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 	    SONAR_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
-	    #POSTGRES_PASSWORD="password"
-	    #MINIO_ROOT_PASSWORD="password"
-	    #PGADMIN_DEFAULT_PASSWORD="password"
-	    #GRAFANA_DEFAULT_PASSWORD="password"
-	    #KC_BOOTSTRAP_ADMIN_PASSWORD="password"
-	    #KC_DB_PASSWORD="password"
-	    #KC_SECRET="password"
-	    #KONG_PG_PASSWORD="password"
-	    #SONAR_JDBC_PASSWORD="password"
-	    #POSTGRAPHILE_DB_PASSWORD="password"
-	    #OPENSEARCH_INITIAL_ADMIN_PASSWORD="password"
-	    #SONAR_ADMIN_PASSWORD="password"
+	    echo "# $$DATE" >> .env
+	    echo "" >> .env
 	    echo "NAME=$$NAME" >> .env
 	    echo "DOMAIN=aldous.info" >> .env
 	    echo "PASSWORD=$$PASSWORD" >> .env
@@ -338,24 +328,25 @@ setup:
 	  docker run -d --name registry-write --restart=always -p 5001:5000 -v registry_write_data:/var/lib/registry registry:2
 	fi
 
-reset: clean
-	@docker rm -f registry-proxy registry-write || exit 1
-	@docker volume rm -f registry_proxy_data registry_write_data || exit 1
-	@sudo rm -fr .env data sonar.json services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
-
 install: setup
-	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) build --pull --parallel || exit 1
-	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) up -d --remove-orphans || exit 1
+	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) build --pull --parallel
+	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) up -d --remove-orphans
 
 clean:
-	docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down -v --remove-orphans
+	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down --remove-orphans
+
+reset:
+	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down -v --remove-orphans
+	@docker rm -f registry-proxy registry-write
+	@docker volume rm -f registry_proxy_data registry_write_data
+	@rm -fr .env sonar.json services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
 
 help:
-	@echo "make setup   - Initial project setup"
-	@echo "make env     - Update environment file"
-	@echo "make install - Install docker environment"
-	@echo "make clean   - Clean docker environment"
-	@echo "make reset   - Reset entire setup"
+	@echo "make setup   "
+	@echo "make install "
+	@echo "make clean   "
+	@echo "make reset   "
+	@echo "make sonar   "
 
 sonar:
 	if [ ! -f .env ]; then touch .env; fi; \

@@ -27,7 +27,7 @@ schema_config:
   configs:
     - from: 2025-01-01
       store: tsdb
-      object_store: aws
+      object_store: filesystem
       schema: v13
       index:
         prefix: index_
@@ -44,6 +44,8 @@ table_manager:
   retention_period: 168h
 
 storage_config:
+  filesystem:
+    directory: /tmp/loki/chunks
   tsdb_shipper:
     active_index_directory: /tmp/loki/index
     cache_location: /tmp/loki/index_cache
