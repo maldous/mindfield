@@ -87,7 +87,7 @@ setup:
 	    SONAR_JDBC_PASSWORD="$$(openssl rand -hex 16)"
 	    POSTGRAPHILE_DB_PASSWORD="$$(openssl rand -hex 16)"
 	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | tr -d '\"' | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
-	    SONAR_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | tr -d '\"' | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
+	    SONAR_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | tr -d '\"' | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 	    echo "# $$DATE" >> .env
 	    echo "" >> .env
 	    echo "NAME=$$NAME" >> .env
