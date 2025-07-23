@@ -4,6 +4,7 @@ name: infra
 services:
 
   alertmanager:
+    user: root
     image: prom/alertmanager:latest
     volumes:
       - ./services/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
@@ -449,6 +450,7 @@ services:
     mem_limit: "256MiB"
 
   loki:
+    user: root
     image: grafana/loki:latest
     volumes:
       - ./services/loki/local-config.yml:/etc/loki/local-config.yaml
@@ -819,7 +821,7 @@ services:
         condition: service_healthy
         required: true
     volumes:
-      - sonarqube_es7:/opt/sonarqube/data/es7
+      - sonarqube_data:/opt/sonarqube/data
       - sonarqube_logs:/opt/sonarqube/logs
       - sonarqube_extensions:/opt/sonarqube/extensions
     env_file:

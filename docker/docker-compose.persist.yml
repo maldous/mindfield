@@ -58,10 +58,10 @@ volumes:
     driver_opts:
       mountpoint: /var/lib/docker/persist/redis_data
 
-  sonarqube_es7:
+  sonarqube_data:
     driver: local-persist
     driver_opts:
-      mountpoint: /var/lib/docker/persist/sonarqube_es7
+      mountpoint: /var/lib/docker/persist/sonarqube_data
 
   sonarqube_extensions:
     driver: local-persist

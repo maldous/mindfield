@@ -1,6 +1,7 @@
 global:
   smtp_smarthost: "mailhog:1025"
   smtp_from: "alerts@localhost"
+  smtp_require_tls: false
 
 route:
   group_by: ["alertname"]
@@ -13,6 +14,7 @@ receivers:
   - name: "web.hook"
     email_configs:
       - to: "admin@localhost"
+        require_tls: false
         html: |
           Alert: {{ .GroupLabels.alertname }}
           {{ range .Alerts }}

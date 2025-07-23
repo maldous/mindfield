@@ -10,14 +10,14 @@ ifneq (,$(wildcard .env))
 endif
 
 setup:
-	if [ ! -f .env ]; then
+	@if [ ! -f .env ]; then
 	  if [ -f .enc ]; then
 	    echo -n "Restore .env from .enc? [y/N]: "; read ANSWER
 	    if echo "$$ANSWER" | grep -qi '^y'; then
 	      echo -n "Decryption password: "; stty -echo; read PASSWORD; stty echo; echo
 	      TMP_ENV="$$(mktemp)"
 	      if openssl enc -d -aes-256-cbc -pbkdf2 -in .enc -out "$$TMP_ENV" -k "$$PASSWORD"; then
-	        mv "$$TMP_ENV" .env && echo ".env restored!"
+	        mv "$$TMP_ENV" .env
 	      else
 	        echo "WRONG PASSWORD!" && rm -f "$$TMP_ENV" && exit 1
 	      fi
@@ -86,8 +86,8 @@ setup:
 	    KONG_PG_PASSWORD="$$(openssl rand -hex 16)"
 	    SONAR_JDBC_PASSWORD="$$(openssl rand -hex 16)"
 	    POSTGRAPHILE_DB_PASSWORD="$$(openssl rand -hex 16)"
-	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | tr -d '\"' | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
-	    SONAR_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | tr -d '\"' | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
+	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | tr -d '\"#' | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
+	    SONAR_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | tr -d '\"#' | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 	    echo "# $$DATE" >> .env
 	    echo "" >> .env
 	    echo "NAME=$$NAME" >> .env
@@ -262,7 +262,6 @@ setup:
 	fi
 	set -a ;. .env ;set +a
 	export PATH="$$HOME/.volta/bin:$$PATH"
-	export PGBOUNCER_POSTGRES_PASSWORD=md5$$(printf '%s' "$$POSTGRES_PASSWORD$$NAME" | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_KC_PASSWORD=md5$$(printf '%s' "$$KC_DB_PASSWORD"keycloak | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_KONG_PASSWORD=md5$$(printf '%s' "$$KONG_PG_PASSWORD"kong | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_PGADMIN_PASSWORD=md5$$(printf '%s' "$$PGADMIN_DEFAULT_PASSWORD"pgadmin | md5sum | cut -d' ' -f1)
@@ -270,7 +269,6 @@ setup:
 	export PGBOUNCER_SONARQUBE_PASSWORD=md5$$(printf '%s' "$$SONAR_JDBC_PASSWORD"sonarqube | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_POSTGRAPHILE_PASSWORD=md5$$(printf '%s' "$$POSTGRAPHILE_DB_PASSWORD"postgraphile | md5sum | cut -d' ' -f1)
 	echo "" > services/pgbouncer/userlist.txt
-	echo "\"$$NAME\" \"$$PGBOUNCER_POSTGRES_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "\"keycloak\" \"$$PGBOUNCER_KC_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "\"kong\" \"$$PGBOUNCER_KONG_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "\"pgadmin\" \"$$PGBOUNCER_PGADMIN_PASSWORD\"" >> services/pgbouncer/userlist.txt
@@ -278,7 +276,6 @@ setup:
 	echo "\"sonarqube\" \"$$PGBOUNCER_SONARQUBE_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "\"postgraphile\" \"$$PGBOUNCER_POSTGRAPHILE_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "[databases]" > services/pgbouncer/databases.ini
-	echo "$$NAME = host=postgres port=5432 dbname=$$NAME user=$$NAME password=$$POSTGRES_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "keycloak = host=postgres port=5432 dbname=keycloak user=keycloak password=$$KC_DB_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "kong = host=postgres port=5432 dbname=kong user=kong password=$$KONG_PG_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "pgadmin = host=postgres port=5432 dbname=pgadmin user=pgadmin password=$$PGADMIN_DEFAULT_PASSWORD" >> services/pgbouncer/databases.ini
@@ -305,9 +302,6 @@ setup:
 	echo "CREATE ROLE sonarqube WITH LOGIN PASSWORD '$$SONAR_JDBC_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE sonarqube OWNER sonarqube;" >> services/postgres/init/01.sql
 	echo "GRANT CONNECT ON DATABASE sonarqube TO sonarqube;" >> services/postgres/init/01.sql
-	echo "" >> services/postgres/init/01.sql
-	echo "CREATE ROLE postgraphile WITH LOGIN PASSWORD '$$POSTGRAPHILE_DB_PASSWORD';" >> services/postgres/init/01.sql
-	echo "GRANT CONNECT ON DATABASE $${NAME} TO postgraphile;" >> services/postgres/init/01.sql
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v node >/dev/null; then volta install node@"$$NODE_VERSION"; fi
 	if ! command -v pnpm >/dev/null; then volta install pnpm@latest; fi
@@ -339,6 +333,12 @@ setup:
 	fi
 
 install: setup
+	@export PGBOUNCER_POSTGRES_PASSWORD=md5$$(printf '%s' "$$POSTGRES_PASSWORD$$NAME" | md5sum | cut -d' ' -f1)
+	@echo "$$NAME = host=postgres port=5432 dbname=$$NAME user=$$NAME password=$$POSTGRES_PASSWORD" >> services/pgbouncer/databases.ini
+	@echo "\"$$NAME\" \"$$PGBOUNCER_POSTGRES_PASSWORD\"" >> services/pgbouncer/userlist.txt
+	@echo "" >> services/postgres/init/01.sql
+	@echo "CREATE ROLE postgraphile WITH LOGIN PASSWORD '$$POSTGRAPHILE_DB_PASSWORD';" >> services/postgres/init/01.sql
+	@echo "GRANT CONNECT ON DATABASE $${NAME} TO postgraphile;" >> services/postgres/init/01.sql
 	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) build --pull --parallel
 	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) up -d --remove-orphans
 
