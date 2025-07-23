@@ -130,6 +130,7 @@ setup:
 	    POSTGRAPHILE_DB_PASSWORD="$$(openssl rand -hex 16)"
 	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | tr -d '\"#' | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 	    SONAR_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | tr -d '\"#' | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
+	    GITLAB_ROOT_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | tr -d '\"#' | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 
 	    echo "# $$DATE" >> .env
 	    echo "" >> .env
@@ -145,10 +146,11 @@ setup:
 	    echo "KC_BOOTSTRAP_ADMIN_PASSWORD=$$KC_BOOTSTRAP_ADMIN_PASSWORD" >> .env
 	    echo "KC_DB_PASSWORD=$$KC_DB_PASSWORD" >> .env
 	    echo "KONG_PG_PASSWORD=$${KONG_PG_PASSWORD}" >> .env
-	    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD=$${OPENSEARCH_INITIAL_ADMIN_PASSWORD}" >> .env
 	    echo "SONAR_JDBC_PASSWORD=$${SONAR_JDBC_PASSWORD}" >> .env
-	    echo "SONAR_ADMIN_PASSWORD=$${SONAR_ADMIN_PASSWORD}" >> .env
 	    echo "POSTGRAPHILE_DB_PASSWORD=$${POSTGRAPHILE_DB_PASSWORD}" >> .env
+	    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD=$${OPENSEARCH_INITIAL_ADMIN_PASSWORD}" >> .env
+	    echo "SONAR_ADMIN_PASSWORD=$${SONAR_ADMIN_PASSWORD}" >> .env
+	    echo "GITLAB_ROOT_PASSWORD=$${GITLAB_ROOT_PASSWORD}" >> .env
 
 	    echo "" >> .env
 	    echo 'REGISTRY_CACHE=localhost:5001/$${NAME}-cache' >> .env
@@ -209,6 +211,10 @@ setup:
 	    echo 'DISABLE_SECURITY_DASHBOARDS_PLUGIN=true' >> .env
 	    echo "SONAR_JDBC_URL=jdbc:postgresql://pgbouncer:5433/sonarqube" >> .env
 	    echo "SONAR_JDBC_USERNAME=sonarqube" >> .env
+
+	    echo "" >> .env
+	    echo 'EXTERNAL_URL=https://gitlab.@$${DOMAIN}' >> .env
+	    echo 'GITLAB_ROOT_EMAIL=root@$${DOMAIN}' >> .env
 
 	    echo "" >> .env
 	    echo "KC_HTTP_ENABLED=true" >> .env
