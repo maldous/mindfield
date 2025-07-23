@@ -22,21 +22,29 @@ check-bucket: check-gcloud
 	fi
 
 backup: check-bucket clean
+	rm -f /tmp/${NAME}-backup.tar.gz /tmp/${NAME}-services.tar.gz
 	if sudo test -d /var/lib/docker/persist; then \
 	  set -a; . .env; set +a; \
 	  sudo tar -czf /tmp/${NAME}-backup.tar.gz -C /var/lib/docker persist; \
+	  tar -czf /tmp/${NAME}-services.tar.gz services; \
 	  gsutil cp /tmp/${NAME}-backup.tar.gz gs://$$NAME/backup.tar.gz; \
+	  gsutil cp /tmp/${NAME}-services.tar.gz gs://$$NAME/services.tar.gz; \
 	  gsutil cp .enc gs://$$NAME/enc; \
 	  sudo rm -f /tmp/${NAME}-backup.tar.gz; \
+	  rm -f /tmp/${NAME}-services.tar.gz; \
 	fi
 
 restore: setup check-bucket clean
+	rm -f /tmp/${NAME}-backup.tar.gz /tmp/${NAME}-services.tar.gz
 	set -a; . .env; set +a; \
 	if gsutil ls gs://${NAME}/backup.tar.gz >/dev/null 2>&1; then \
 	  gsutil cp gs://${NAME}/enc .enc; \
 	  gsutil cp gs://${NAME}/backup.tar.gz /tmp/${NAME}-backup.tar.gz; \
+	  gsutil cp gs://${NAME}/services.tar.gz /tmp/${NAME}-services.tar.gz; \
 	  sudo tar -xzf /tmp/${NAME}-backup.tar.gz -C /var/lib/docker; \
-	  sudo rm -f /tmp/${NAME}-backup.tar.gz; \
+	  tar -xzf /tmp/${NAME}-services.tar.gz; \
+	  rm -f /tmp/${NAME}-backup.tar.gz; \
+	  rm -f /tmp/${NAME}-services.tar.gz; \
 	fi
 
 setup:
