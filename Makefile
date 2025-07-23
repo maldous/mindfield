@@ -118,19 +118,19 @@ setup:
 	    CLIENT_SECRET_POSTGRAPHILE="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_GITLAB="$$(openssl rand -hex 32)"
 
-	    POSTGRES_PASSWORD="$$(openssl rand -hex 16)"
-	    MINIO_ROOT_PASSWORD="$$(openssl rand -hex 16)"
-	    PGADMIN_DEFAULT_PASSWORD="$$(openssl rand -hex 16)"
-	    GRAFANA_DEFAULT_PASSWORD="$$(openssl rand -hex 16)"
-	    KC_BOOTSTRAP_ADMIN_PASSWORD="$$(openssl rand -hex 16)"
-	    KC_DB_PASSWORD="$$(openssl rand -hex 16)"
-	    KC_SECRET="$$(openssl rand -hex 32)"
-	    KONG_PG_PASSWORD="$$(openssl rand -hex 16)"
-	    SONAR_JDBC_PASSWORD="$$(openssl rand -hex 16)"
-	    POSTGRAPHILE_DB_PASSWORD="$$(openssl rand -hex 16)"
-	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | tr -d '\"#' | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
-	    SONAR_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | tr -d '\"#' | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
-	    GITLAB_ROOT_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | tr -d '\"#' | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
+	    POSTGRES_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    MINIO_ROOT_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    PGADMIN_DEFAULT_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    GRAFANA_DEFAULT_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    KC_BOOTSTRAP_ADMIN_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    KC_DB_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    KC_SECRET="$$(pwgen -s -c -n 16 1)"
+	    KONG_PG_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    SONAR_JDBC_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    POSTGRAPHILE_DB_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    SONAR_ADMIN_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    GITLAB_ROOT_PASSWORD="$$(pwgen -s -c -n 16 1)"
 
 	    echo "# $$DATE" >> .env
 	    echo "" >> .env
@@ -333,6 +333,7 @@ setup:
 	export PGBOUNCER_GRAFANA_PASSWORD=md5$$(printf '%s' "$$GRAFANA_DEFAULT_PASSWORD"grafana | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_SONARQUBE_PASSWORD=md5$$(printf '%s' "$$SONAR_JDBC_PASSWORD"sonarqube | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_POSTGRAPHILE_PASSWORD=md5$$(printf '%s' "$$POSTGRAPHILE_DB_PASSWORD"postgraphile | md5sum | cut -d' ' -f1)
+	export PGBOUNCER_GITLAB_PASSWORD=md5$$(printf '%s' "$$GITLAB_ROOT_PASSWORD"gitlab | md5sum | cut -d' ' -f1)
 
 	echo "" > services/pgbouncer/userlist.txt
 	echo "\"keycloak\" \"$$PGBOUNCER_KC_PASSWORD\"" >> services/pgbouncer/userlist.txt
@@ -341,6 +342,7 @@ setup:
 	echo "\"grafana\" \"$$PGBOUNCER_GRAFANA_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "\"sonarqube\" \"$$PGBOUNCER_SONARQUBE_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "\"postgraphile\" \"$$PGBOUNCER_POSTGRAPHILE_PASSWORD\"" >> services/pgbouncer/userlist.txt
+	echo "\"gitlab\" \"$$PGBOUNCER_GITLAB_PASSWORD\"" >> services/pgbouncer/userlist.txt
 
 	echo "[databases]" > services/pgbouncer/databases.ini
 	echo "keycloak = host=postgres port=5432 dbname=keycloak user=keycloak password=$$KC_DB_PASSWORD" >> services/pgbouncer/databases.ini
@@ -349,6 +351,7 @@ setup:
 	echo "grafana = host=postgres port=5432 dbname=grafana user=grafana password=$$GRAFANA_DEFAULT_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "sonarqube = host=postgres port=5432 dbname=sonarqube user=sonarqube password=$$SONAR_JDBC_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "postgraphile = host=postgres port=5432 dbname=postgraphile user=postgraphile password=$$POSTGRAPHILE_DB_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "gitlab = host=postgres port=5432 dbname=gitlab user=gitlab password=$$GITLAB_ROOT_PASSWORD" >> services/pgbouncer/databases.ini
 
 	echo "" > services/postgres/init/01.sql
 	echo "CREATE ROLE keycloak WITH LOGIN PASSWORD '$$KC_DB_PASSWORD';" >> services/postgres/init/01.sql
@@ -370,6 +373,10 @@ setup:
 	echo "CREATE ROLE sonarqube WITH LOGIN PASSWORD '$$SONAR_JDBC_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE sonarqube OWNER sonarqube;" >> services/postgres/init/01.sql
 	echo "GRANT CONNECT ON DATABASE sonarqube TO sonarqube;" >> services/postgres/init/01.sql
+	echo "" >> services/postgres/init/01.sql
+	echo "CREATE ROLE gitlab WITH LOGIN PASSWORD '$$GITLAB_ROOT_PASSWORD';" >> services/postgres/init/01.sql
+	echo "CREATE DATABASE gitlab OWNER gitlab;" >> services/postgres/init/01.sql
+	echo "GRANT CONNECT ON DATABASE gitlab TO gitlab;" >> services/postgres/init/01.sql
 
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v node >/dev/null; then volta install node@"$$NODE_VERSION"; fi
@@ -404,24 +411,27 @@ setup:
 	fi
 
 install: setup
-	@export PGBOUNCER_POSTGRES_PASSWORD=md5$$(printf '%s' "$$POSTGRES_PASSWORD$$NAME" | md5sum | cut -d' ' -f1)
-	@echo "$$NAME = host=postgres port=5432 dbname=$$NAME user=$$NAME password=$$POSTGRES_PASSWORD" >> services/pgbouncer/databases.ini
-	@echo "\"$$NAME\" \"$$PGBOUNCER_POSTGRES_PASSWORD\"" >> services/pgbouncer/userlist.txt
-	@echo "" >> services/postgres/init/01.sql
-	@echo "CREATE ROLE postgraphile WITH LOGIN PASSWORD '$$POSTGRAPHILE_DB_PASSWORD';" >> services/postgres/init/01.sql
-	@echo "GRANT CONNECT ON DATABASE $${NAME} TO postgraphile;" >> services/postgres/init/01.sql
-	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) build --pull --parallel
-	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) up -d --remove-orphans
+	@set -a; . .env; set -a
+	export PGBOUNCER_POSTGRES_PASSWORD=md5$$(printf '%s' "$$POSTGRES_PASSWORD$$NAME" | md5sum | cut -d' ' -f1)
+	echo "$$NAME = host=postgres port=5432 dbname=$$NAME user=$$NAME password=$$POSTGRES_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "\"$$NAME\" \"$$PGBOUNCER_POSTGRES_PASSWORD\"" >> services/pgbouncer/userlist.txt
+	echo "" >> services/postgres/init/01.sql
+	echo "CREATE ROLE postgraphile WITH LOGIN PASSWORD '$$POSTGRAPHILE_DB_PASSWORD';" >> services/postgres/init/01.sql
+	echo "GRANT CONNECT ON DATABASE $${NAME} TO postgraphile;" >> services/postgres/init/01.sql
+	docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) build --pull --parallel
+	docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) up -d --remove-orphans
 
 clean:
-	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down --remove-orphans
+	@set -a; . .env; set -a
+	docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down --remove-orphans
 
 purge:
-	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down -v --remove-orphans
-	@docker rm -f local-persist
-	@docker volume rm -f local-persist
-	@sudo bash -c 'for d in $$(grep mountpoint docker/docker-compose.persist.yml | cut -d: -f2 | xargs -n1 basename); do rm -fr /var/lib/docker/persist/$$d; done'
-	@rm -fr .env sonar.json .scannerwork services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
+	@set -a; . .env; set -a
+	docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down -v --remove-orphans
+	docker rm -f local-persist
+	docker volume rm -f local-persist
+	sudo bash -c 'for d in $$(grep mountpoint docker/docker-compose.persist.yml | cut -d: -f2 | xargs -n1 basename); do rm -fr /var/lib/docker/persist/$$d; done'
+	rm -fr .env sonar.json .scannerwork services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
 
 help:
 	@echo "make setup"

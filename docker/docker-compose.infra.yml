@@ -225,6 +225,19 @@ services:
       - gitlab_data:/var/opt/gitlab
     env_file:
       - .env
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        postgresql['enable'] = false;
+        gitlab_rails['db_adapter'] = 'postgresql';
+        gitlab_rails['db_host'] = 'pgbouncer';
+        gitlab_rails['db_port'] = 5433;
+        gitlab_rails['db_database'] = 'gitlab';
+        gitlab_rails['db_username'] = 'gitlab';
+        gitlab_rails['db_password'] = "${GITLAB_ROOT_PASSWORD}";
+        redis['enable'] = false;
+        gitlab_rails['redis_host'] = 'redis';
+        gitlab_rails['redis_port'] = 6379;
+        gitlab_rails['redis_database'] = 0;
     networks:
       - backend
       - frontend
