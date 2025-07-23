@@ -10,7 +10,7 @@ ifneq (,$(wildcard .env))
 endif
 
 setup:
-	@if [ ! -f .env ]; then
+	if [ ! -f .env ]; then
 	  if [ -f .enc ]; then
 	    echo -n "Restore .env from .enc? [y/N]: "; read ANSWER
 	    if echo "$$ANSWER" | grep -qi '^y'; then
@@ -86,8 +86,8 @@ setup:
 	    KONG_PG_PASSWORD="$$(openssl rand -hex 16)"
 	    SONAR_JDBC_PASSWORD="$$(openssl rand -hex 16)"
 	    POSTGRAPHILE_DB_PASSWORD="$$(openssl rand -hex 16)"
-	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
-	    SONAR_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
+	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | tr -d '\"' | head -c16 | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
+	    SONAR_ADMIN_PASSWORD="\"$$(tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' </dev/urandom | head -c16 | tr -d '\"' | awk '/[A-Z]/ && /[a-z]/ && /[0-9]/ && /[^A-Za-z0-9]/ {print; exit}' )\""
 	    echo "# $$DATE" >> .env
 	    echo "" >> .env
 	    echo "NAME=$$NAME" >> .env
@@ -327,6 +327,16 @@ setup:
 	if ! docker container inspect registry-write >/dev/null 2>&1; then
 	  docker run -d --name registry-write --restart=always -p 5001:5000 -v registry_write_data:/var/lib/registry registry:2
 	fi
+	sudo bash -c 'for d in $$(grep mountpoint docker/docker-compose.persist.yml | cut -d: -f2 | xargs -n1 basename); do mkdir -p /var/lib/docker/persist/$$d; done'
+	if ! docker container inspect local-persist >/dev/null 2>&1; then
+	  docker run -d \
+	  --name local-persist \
+	  --restart=always \
+	  -v /run/docker/plugins/:/run/docker/plugins/ \
+	  -v /var/lib/docker/plugin-data/:/var/lib/docker/plugin-data/ \
+	  -v /var/lib/docker/persist/:/var/lib/docker/persist/ \
+	  cwspear/docker-local-persist-volume-plugin
+	fi
 
 install: setup
 	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) build --pull --parallel
@@ -337,8 +347,9 @@ clean:
 
 purge:
 	@docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down -v --remove-orphans
-	@docker rm -f registry-proxy registry-write
-	@docker volume rm -f registry_proxy_data registry_write_data
+	@docker rm -f local-persist
+	@docker volume rm -f local-persist
+	@sudo bash -c 'for d in $$(grep mountpoint docker/docker-compose.persist.yml | cut -d: -f2 | xargs -n1 basename); do rm -fr /var/lib/docker/persist/$$d; done'
 	@rm -fr .env sonar.json services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
 
 help:
@@ -351,7 +362,8 @@ help:
 sonar:
 	if [ ! -f .env ]; then touch .env; fi; \
 	if ! grep -q "SONAR_TOKEN" .env; then \
-	token=$$(set -a; . .env; set +a ; curl -s -u admin:${SONAR_ADMIN_PASSWORD} -X POST 'http://localhost:9003/api/user_tokens/generate' -d name=admin | jq -r '.token'); \
+	token=$$( set -a; . .env; set +a; curl -s -u admin:${SONAR_ADMIN_PASSWORD} -X POST 'http://localhost:9003/api/user_tokens/generate' -d name=admin | jq -r '.token' ); \
+	if [ -z "$$token" ] || [ "$$token" = "null" ]; then token=$$(curl -s -u admin:admin -X POST 'http://localhost:9003/api/user_tokens/generate' -d name=admin | jq -r '.token'); fi; \
 	echo "SONAR_TOKEN=$$token" >> .env; \
 	fi; \
 	rm -f sonar.json; \

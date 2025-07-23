@@ -1,23 +1,6 @@
 ---
 name: infra
 
-volumes:
-
-  alertmanager_data:
-  gitlab_config:
-  gitlab_data:
-  gitlab_logs:
-  kuma_data:
-  loki_data:
-  minio_data:
-  opensearch_data:
-  postgres_data:
-  prometheus_data:
-  redis_data:
-  sonarqube_es7:
-  sonarqube_extensions:
-  sonarqube_logs:
-
 networks:
 
   backend:
