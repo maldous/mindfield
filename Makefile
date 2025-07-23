@@ -9,6 +9,36 @@ ifneq (,$(wildcard .env))
 	export
 endif
 
+check-gcloud:
+	command -v gcloud >/dev/null 2>&1 || exit 0
+	if ! gcloud auth list --filter=status:ACTIVE --format="value(account)" | grep -q .; then \
+	  echo "Run 'gcloud auth login' to enable backup/restore."; exit 0; \
+	fi
+
+check-bucket: check-gcloud
+	set -a; . .env; set +a; \
+	if ! gsutil ls -b gs://${NAME} >/dev/null 2>&1; then \
+	  gsutil mb -p $$(gcloud config get-value project) gs://${NAME}/; \
+	fi
+
+backup: check-bucket clean
+	if sudo test -d /var/lib/docker/persist; then \
+	  set -a; . .env; set +a; \
+	  sudo tar -czf /tmp/${NAME}-backup.tar.gz -C /var/lib/docker persist; \
+	  gsutil cp /tmp/${NAME}-backup.tar.gz gs://$$NAME/backup.tar.gz; \
+	  gsutil cp .enc gs://$$NAME/enc; \
+	  sudo rm -f /tmp/${NAME}-backup.tar.gz; \
+	fi
+
+restore: setup check-bucket clean
+	set -a; . .env; set +a; \
+	if gsutil ls gs://${NAME}/backup.tar.gz >/dev/null 2>&1; then \
+	  gsutil cp gs://${NAME}/enc .enc; \
+	  gsutil cp gs://${NAME}/backup.tar.gz /tmp/${NAME}-backup.tar.gz; \
+	  sudo tar -xzf /tmp/${NAME}-backup.tar.gz -C /var/lib/docker; \
+	  sudo rm -f /tmp/${NAME}-backup.tar.gz; \
+	fi
+
 setup:
 	@if [ ! -f .env ]; then
 	  if [ -f .enc ]; then
@@ -350,7 +380,7 @@ purge:
 	@docker rm -f local-persist
 	@docker volume rm -f local-persist
 	@sudo bash -c 'for d in $$(grep mountpoint docker/docker-compose.persist.yml | cut -d: -f2 | xargs -n1 basename); do rm -fr /var/lib/docker/persist/$$d; done'
-	@rm -fr .env sonar.json services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
+	@rm -fr .env sonar.json .scannerwork services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
 
 help:
 	@echo "make setup"
