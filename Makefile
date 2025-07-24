@@ -51,7 +51,7 @@ restore: setup check-bucket clean
 	fi
 
 setup:
-	@if [ ! -f .env ]; then
+	if [ ! -f .env ]; then
 	  if [ -f .enc ]; then
 	    echo -n "Restore .env from .enc? [y/N]: "; read ANSWER
 	    if echo "$$ANSWER" | grep -qi '^y'; then
@@ -438,6 +438,8 @@ setup:
 	if ! docker container inspect registry-write >/dev/null 2>&1; then
 	  docker run -d --name registry-write --restart=always -p 5001:5000 -v registry_write_data:/var/lib/registry registry:2
 	fi
+
+	sudo mkdir -p -m 777 $$(grep '/var/lib/docker/persist' docker/* | cut -f3 -d'-' | cut -f1 -d':')
 
 install: setup
 	@set -a; . .env; set -a

@@ -113,6 +113,6 @@ create_stack sonarqube sonarqube 9000 "sonarqube.${DOMAIN}" "${CLIENT_ID_SONARQU
 create_stack docs docs 8005 "docs.${DOMAIN}" "${CLIENT_ID_DOCS}" "${CLIENT_SECRET_DOCS}" docs "${KONG_COOKIE_HASH_DOCS}" "${KONG_COOKIE_BLOCK_DOCS}"
 create_stack postgraphile postgraphile 5002 "postgraphile.${DOMAIN}" "${CLIENT_ID_POSTGRAPHILE}" "${CLIENT_SECRET_POSTGRAPHILE}" postgraphile "${KONG_COOKIE_HASH_POSTGRAPHILE}" "${KONG_COOKIE_BLOCK_POSTGRAPHILE}"
 create_stack gitlab gitlab 80 "gitlab.${DOMAIN}" "${CLIENT_ID_GITLAB}" "${CLIENT_SECRET_GITLAB}" gitlab "${KONG_COOKIE_HASH_GITLAB}" "${KONG_COOKIE_BLOCK_GITLAB}"
-create_stack cadence cadence 7233 "cadence.${DOMAIN}" "${CLIENT_ID_CADENCE}" "${CLIENT_SECRET_CADENCE}" cadence "${KONG_COOKIE_HASH_CADENCE}" "${KONG_COOKIE_BLOCK_CADENCE}"
+create_stack cadence cadence 8088 "cadence.${DOMAIN}" "${CLIENT_ID_CADENCE}" "${CLIENT_SECRET_CADENCE}" cadence "${KONG_COOKIE_HASH_CADENCE}" "${KONG_COOKIE_BLOCK_CADENCE}"
 
 echo -e "\nservices/kong/configure.sh"
