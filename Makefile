@@ -402,17 +402,6 @@ setup:
 	  docker run -d --name registry-write --restart=always -p 5001:5000 -v registry_write_data:/var/lib/registry registry:2
 	fi
 
-#	sudo bash -c 'for d in $$(grep mountpoint docker/docker-compose.persist.yml | cut -d: -f2 | xargs -n1 basename); do mkdir -p /var/lib/docker/persist/$$d; done'
-#	if ! docker container inspect local-persist >/dev/null 2>&1; then
-#	  docker run -d \
-#	  --name local-persist \
-#	  --restart=always \
-#	  -v /run/docker/plugins/:/run/docker/plugins/ \
-#	  -v /var/lib/docker/plugin-data/:/var/lib/docker/plugin-data/ \
-#	  -v /var/lib/docker/persist/:/var/lib/docker/persist/ \
-#	  cwspear/docker-local-persist-volume-plugin
-#	fi
-
 install: setup
 	@set -a; . .env; set -a
 	export PGBOUNCER_POSTGRES_PASSWORD=md5$$(printf '%s' "$$POSTGRES_PASSWORD$$NAME" | md5sum | cut -d' ' -f1)
@@ -431,8 +420,6 @@ clean:
 purge:
 	@set -a; . .env; set -a
 	docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down -v --remove-orphans
-	docker rm -f local-persist
-	docker volume rm -f local-persist
 	sudo bash -c 'for d in $$(grep mountpoint docker/docker-compose.persist.yml | cut -d: -f2 | xargs -n1 basename); do rm -fr /var/lib/docker/persist/$$d; done'
 	rm -fr .env sonar.json .scannerwork services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
 
