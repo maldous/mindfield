@@ -4,72 +4,43 @@ name: infra
 volumes:
 
   alertmanager_data:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/alertmanager_data
+    driver: local
 
   gitlab_config:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/gitlab_config
+    driver: local
 
   gitlab_data:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/gitlab_data
+    driver: local
 
   gitlab_logs:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/gitlab_logs
+    driver: local
 
   kuma_data:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/kuma_data
+    driver: local
 
   loki_data:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/loki_data
+    driver: local
 
   minio_data:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/minio_data
+    driver: local
 
   opensearch_data:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/opensearch_data
+    driver: local
 
   postgres_data:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/postgres_data
+    driver: local
 
   prometheus_data:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/prometheus_data
+    driver: local
 
   redis_data:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/redis_data
+    driver: local
 
   sonarqube_data:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/sonarqube_data
+    driver: local
 
   sonarqube_extensions:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/sonarqube_extensions
+    driver: local
 
   sonarqube_logs:
-    driver: local-persist
-    driver_opts:
-      mountpoint: /var/lib/docker/persist/sonarqube_logs
-
+    driver: local

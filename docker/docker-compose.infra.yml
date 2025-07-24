@@ -8,7 +8,7 @@ services:
     image: prom/alertmanager:latest
     volumes:
       - ./services/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
-      - alertmanager_data:/alertmanager
+      - /var/lib/docker/persist/alertmanager_data:/alertmanager
     env_file:
       - .env
     networks:
@@ -152,14 +152,6 @@ services:
     command:
       - --config=/etc/otel-collector-config.yaml
     restart: always
-    healthcheck:
-      test:
-        - CMD
-        - "true"
-      interval: 5s
-      timeout: 10s
-      retries: 12
-      start_period: 60s
     cpus: 0.5
     mem_limit: "256MiB"
 
@@ -220,13 +212,14 @@ services:
   gitlab:
     image: gitlab/gitlab-ce:latest
     volumes:
-      - gitlab_config:/etc/gitlab
-      - gitlab_logs:/var/log/gitlab
-      - gitlab_data:/var/opt/gitlab
+      - /var/lib/docker/persist/gitlab_config:/etc/gitlab
+      - /var/lib/docker/persist/gitlab_logs:/var/log/gitlab
+      - /var/lib/docker/persist/gitlab_data:/var/opt/gitlab
     env_file:
       - .env
     environment:
       GITLAB_OMNIBUS_CONFIG: |
+        puma['worker_processes'] = 2
         postgresql['enable'] = false;
         gitlab_rails['db_adapter'] = 'postgresql';
         gitlab_rails['db_host'] = 'pgbouncer';
@@ -251,7 +244,7 @@ services:
       retries: 12
       start_period: 60s
     cpus: 4.0
-    mem_limit: "8GiB"
+    mem_limit: "12GiB"
     shm_size: 256m
 
   grafana:
@@ -442,7 +435,7 @@ services:
   kuma:
     image: louislam/uptime-kuma:latest
     volumes:
-      - kuma_data:/app/data
+      - /var/lib/docker/persist/kuma_data:/app/data
     env_file:
       - .env
     networks:
@@ -465,7 +458,7 @@ services:
     image: grafana/loki:latest
     volumes:
       - ./services/loki/local-config.yml:/etc/loki/local-config.yaml
-      - loki_data:/tmp/loki
+      - /var/lib/docker/persist/loki_data:/tmp/loki
     env_file:
       - .env
     networks:
@@ -509,7 +502,7 @@ services:
   minio:
     image: minio/minio:latest
     volumes:
-      - minio_data:/data
+      - /var/lib/docker/persist/minio_data:/data
     env_file:
       - .env
     networks:
@@ -531,7 +524,7 @@ services:
   opensearch:
     image: opensearchproject/opensearch:latest
     volumes:
-      - opensearch_data:/usr/share/opensearch/data
+      - /var/lib/docker/persist/opensearch_data:/usr/share/opensearch/data
     environment:
       bootstrap.memory_lock: "true"
       cluster.name: opensearch-cluster
@@ -655,7 +648,7 @@ services:
   postgres:
     image: postgres:17-alpine
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - /var/lib/docker/persist/postgres_data:/var/lib/postgresql/data
       - ./services/postgres/init:/docker-entrypoint-initdb.d
     env_file:
       - .env
@@ -678,7 +671,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     volumes:
-      - prometheus_data:/prometheus
+      - /var/lib/docker/persist/prometheus_data:/prometheus
       - ./services/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     env_file:
       - .env
@@ -755,7 +748,7 @@ services:
   redis:
     image: redis:7-alpine
     volumes:
-      - redis_data:/data
+      - /var/lib/docker/persist/redis_data:/data
     env_file:
       - .env
     networks:
@@ -832,9 +825,9 @@ services:
         condition: service_healthy
         required: true
     volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_logs:/opt/sonarqube/logs
-      - sonarqube_extensions:/opt/sonarqube/extensions
+      - /var/lib/docker/persist/sonarqube_data:/opt/sonarqube/data
+      - /var/lib/docker/persist/sonarqube_logs:/opt/sonarqube/logs
+      - /var/lib/docker/persist/sonarqube_extensions:/opt/sonarqube/extensions
     env_file:
       - .env
     networks:

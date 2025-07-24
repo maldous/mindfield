@@ -9,6 +9,9 @@ ifneq (,$(wildcard .env))
 	export
 endif
 
+enc:
+	@set -a; . .env; set +a; openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
+
 check-gcloud:
 	@command -v gcloud >/dev/null 2>&1 || exit 0
 	@if ! gcloud auth list --filter=status:ACTIVE --format="value(account)" | grep -q .; then \
@@ -129,7 +132,7 @@ setup:
 	    SONAR_JDBC_PASSWORD="$$(pwgen -s -c -n 16 1)"
 	    POSTGRAPHILE_DB_PASSWORD="$$(pwgen -s -c -n 16 1)"
 	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="$$(pwgen -s -c -n 16 1)"
-	    SONAR_ADMIN_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    SONAR_ADMIN_PASSWORD="$$(pwgen -s -c -n -y 16 1)"
 	    GITLAB_ROOT_PASSWORD="$$(pwgen -s -c -n 16 1)"
 
 	    echo "# $$DATE" >> .env
@@ -399,16 +402,16 @@ setup:
 	  docker run -d --name registry-write --restart=always -p 5001:5000 -v registry_write_data:/var/lib/registry registry:2
 	fi
 
-	sudo bash -c 'for d in $$(grep mountpoint docker/docker-compose.persist.yml | cut -d: -f2 | xargs -n1 basename); do mkdir -p /var/lib/docker/persist/$$d; done'
-	if ! docker container inspect local-persist >/dev/null 2>&1; then
-	  docker run -d \
-	  --name local-persist \
-	  --restart=always \
-	  -v /run/docker/plugins/:/run/docker/plugins/ \
-	  -v /var/lib/docker/plugin-data/:/var/lib/docker/plugin-data/ \
-	  -v /var/lib/docker/persist/:/var/lib/docker/persist/ \
-	  cwspear/docker-local-persist-volume-plugin
-	fi
+#	sudo bash -c 'for d in $$(grep mountpoint docker/docker-compose.persist.yml | cut -d: -f2 | xargs -n1 basename); do mkdir -p /var/lib/docker/persist/$$d; done'
+#	if ! docker container inspect local-persist >/dev/null 2>&1; then
+#	  docker run -d \
+#	  --name local-persist \
+#	  --restart=always \
+#	  -v /run/docker/plugins/:/run/docker/plugins/ \
+#	  -v /var/lib/docker/plugin-data/:/var/lib/docker/plugin-data/ \
+#	  -v /var/lib/docker/persist/:/var/lib/docker/persist/ \
+#	  cwspear/docker-local-persist-volume-plugin
+#	fi
 
 install: setup
 	@set -a; . .env; set -a
