@@ -2,9 +2,7 @@
 name: infra
 
 services:
-
   alertmanager:
-    user: root
     image: prom/alertmanager:latest
     volumes:
       - ./services/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
@@ -27,8 +25,11 @@ services:
       timeout: 10s
       retries: 12
       start_period: 60s
+    user: root
     cpus: 0.25
     mem_limit: "128MiB"
+    tmpfs:
+      - /tmp
 
   analyzer:
     image: mcr.microsoft.com/presidio-analyzer:latest
@@ -52,6 +53,8 @@ services:
       retries: 12
     cpus: 1
     mem_limit: "1GiB"
+    tmpfs:
+      - /tmp
 
   anonymizer:
     image: mcr.microsoft.com/presidio-anonymizer:latest
@@ -74,6 +77,8 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
 
   blackbox:
     image: prom/blackbox-exporter:latest
@@ -95,6 +100,8 @@ services:
       start_period: 60s
     cpus: 0.25
     mem_limit: "128MiB"
+    tmpfs:
+      - /tmp
 
   caddy:
     build:
@@ -128,6 +135,8 @@ services:
       start_period: 60s
     cpus: 0.25
     mem_limit: "128MiB"
+    tmpfs:
+      - /tmp
 
   collector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -154,6 +163,8 @@ services:
     restart: always
     cpus: 0.5
     mem_limit: "256MiB"
+    tmpfs:
+      - /tmp
 
   docs:
     image: squidfunk/mkdocs-material:latest
@@ -179,6 +190,8 @@ services:
       start_period: 60s
     cpus: 0.25
     mem_limit: "128MiB"
+    tmpfs:
+      - /tmp
 
   exporter:
     image: prom/node-exporter:latest
@@ -208,6 +221,8 @@ services:
     cpus: 0.25
     mem_limit: "128MiB"
     pid: host
+    tmpfs:
+      - /tmp
 
   gitlab:
     image: gitlab/gitlab-ce:latest
@@ -215,8 +230,6 @@ services:
       - /var/lib/docker/persist/gitlab_config:/etc/gitlab
       - /var/lib/docker/persist/gitlab_logs:/var/log/gitlab
       - /var/lib/docker/persist/gitlab_data:/var/opt/gitlab
-    env_file:
-      - .env
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         puma['worker_processes'] = 2
@@ -231,6 +244,8 @@ services:
         gitlab_rails['redis_host'] = 'redis';
         gitlab_rails['redis_port'] = 6379;
         gitlab_rails['redis_database'] = 0;
+    env_file:
+      - .env
     networks:
       - backend
       - frontend
@@ -246,6 +261,8 @@ services:
     cpus: 4.0
     mem_limit: "12GiB"
     shm_size: 256m
+    tmpfs:
+      - /tmp
 
   grafana:
     image: grafana/grafana:latest
@@ -273,6 +290,8 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "256MiB"
+    tmpfs:
+      - /tmp
 
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -294,6 +313,8 @@ services:
 
     cpus: 0.5
     mem_limit: "256MiB"
+    tmpfs:
+      - /tmp
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -322,6 +343,8 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
 
   keycloak-configure:
     image: badouralix/curl-jq:latest
@@ -348,6 +371,8 @@ services:
       start_period: 60s
     cpus: 0.25
     mem_limit: "128MiB"
+    tmpfs:
+      - /tmp
 
   kong:
     build:
@@ -382,6 +407,8 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
 
   kong-bootstrap:
     image: kong:latest
@@ -405,6 +432,8 @@ services:
       start_period: 60s
     cpus: 0.25
     mem_limit: "128MiB"
+    tmpfs:
+      - /tmp
 
   kong-configure:
     image: badouralix/curl-jq:latest
@@ -431,6 +460,8 @@ services:
       start_period: 60s
     cpus: 0.25
     mem_limit: "128MiB"
+    tmpfs:
+      - /tmp
 
   kuma:
     image: louislam/uptime-kuma:latest
@@ -452,13 +483,13 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "256MiB"
+    tmpfs:
+      - /tmp
 
   loki:
-    user: root
     image: grafana/loki:latest
     volumes:
       - ./services/loki/local-config.yml:/etc/loki/local-config.yaml
-      - /var/lib/docker/persist/loki_data:/tmp/loki
     env_file:
       - .env
     networks:
@@ -477,8 +508,11 @@ services:
       timeout: 10s
       retries: 12
       start_period: 60s
+    user: root
     cpus: 0.5
     mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
 
   mailhog:
     image: mailhog/mailhog:latest
@@ -498,6 +532,8 @@ services:
       start_period: 60s
     cpus: 0.25
     mem_limit: "128MiB"
+    tmpfs:
+      - /tmp
 
   minio:
     image: minio/minio:latest
@@ -520,6 +556,8 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "256MiB"
+    tmpfs:
+      - /tmp
 
   opensearch:
     image: opensearchproject/opensearch:latest
@@ -547,6 +585,8 @@ services:
       start_period: 60s
     cpus: 1
     mem_limit: "1GiB"
+    tmpfs:
+      - /tmp
     ulimits:
       memlock:
         soft: -1
@@ -577,6 +617,8 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "256MiB"
+    tmpfs:
+      - /tmp
 
   pgbouncer:
     image: edoburu/pgbouncer:latest
@@ -602,6 +644,8 @@ services:
     user: root
     cpus: 0.25
     mem_limit: "64MiB"
+    tmpfs:
+      - /tmp
 
   postgraphile:
     image: graphile/postgraphile:latest
@@ -644,6 +688,8 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "256MiB"
+    tmpfs:
+      - /tmp
 
   postgres:
     image: postgres:17-alpine
@@ -667,6 +713,8 @@ services:
       start_period: 60s
     cpus: 1
     mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
 
   prometheus:
     image: prom/prometheus:latest
@@ -697,6 +745,8 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
 
   promtail:
     image: grafana/promtail:latest
@@ -722,6 +772,8 @@ services:
       start_period: 60s
     cpus: 0.25
     mem_limit: "128MiB"
+    tmpfs:
+      - /tmp
 
   redactor:
     image: mcr.microsoft.com/presidio-image-redactor:latest
@@ -744,6 +796,8 @@ services:
       start_period: 60s
     cpus: 1
     mem_limit: "1GiB"
+    tmpfs:
+      - /tmp
 
   redis:
     image: redis:7-alpine
@@ -766,6 +820,8 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "256MiB"
+    tmpfs:
+      - /tmp
 
   redisinsight:
     build:
@@ -794,6 +850,8 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
 
   search:
     image: opensearchproject/opensearch-dashboards:latest
@@ -817,6 +875,8 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
 
   sonarqube:
     image: sonarqube:community
@@ -844,6 +904,8 @@ services:
       start_period: 60s
     cpus: 1
     mem_limit: "2GiB"
+    tmpfs:
+      - /tmp
 
 #   redoc:
 #     image: redocly/redoc:latest
