@@ -1,18 +1,6 @@
 ---
 name: infra
 
-networks:
-
-  backend:
-    name: infra_backend
-    driver: bridge
-  frontend:
-    name: infra_frontend
-    driver: bridge
-  monitoring:
-    name: infra_monitoring
-    driver: bridge
-
 services:
 
   alertmanager:
@@ -20,10 +8,10 @@ services:
       - '0.0.0.0:9093:9093/tcp'
   analyzer:
     ports:
-      - '0.0.0.0:3003:3000' # 3003
+      - '0.0.0.0:3003:3000/tcp' # 3003
   anonymizer:
     ports:
-      - '0.0.0.0:3004:3000' # 3004
+      - '0.0.0.0:3004:3000/tcp' # 3004
   blackbox:
     ports:
       - '0.0.0.0:9115:9115/tcp'
@@ -33,6 +21,16 @@ services:
       - '0.0.0.0:443:443/tcp'
       - '0.0.0.0:443:443/udp'
       - '0.0.0.0:2019:2019/tcp'
+  cadence:
+    ports:
+      - '0.0.0.0:8088:8088/tcp'
+  cadence-server:
+    ports:
+      - '0.0.0.0:7833:7833/tcp'
+      - '0.0.0.0:7933:7933/tcp'
+      - '0.0.0.0:7934:7934/tcp'
+      - '0.0.0.0:7935:7935/tcp'
+      - '0.0.0.0:7939:7939/tcp'
   collector:
     ports:
       - '0.0.0.0:4317:4317/tcp'
@@ -43,14 +41,14 @@ services:
       - '0.0.0.0:55679:55679/tcp'
   docs:
     ports:
-      - '0.0.0.0:8005:8005'
+      - '0.0.0.0:8005:8005/tcp'
   exporter:
     ports:
       - '0.0.0.0:9100:9100/tcp'
   gitlab:
     ports:
-      - '0.0.0.0:8082:80/tcp' # 8082
       - '0.0.0.0:2222:22/tcp'
+      - '0.0.0.0:8082:80/tcp' # 8082
   grafana:
     ports:
       - '0.0.0.0:3001:3000/tcp' # 3001
@@ -108,7 +106,7 @@ services:
       - '0.0.0.0:5433:5433/tcp'
   postgraphile:
     ports:
-      - '0.0.0.0:5002:5002'
+      - '0.0.0.0:5002:5002/tcp'
   postgres:
     ports:
       - '0.0.0.0:5432:5432/tcp'
@@ -120,7 +118,7 @@ services:
       - '0.0.0.0:9080:9080/tcp'
   redactor:
     ports:
-      - '0.0.0.0:3005:3000' # 3005
+      - '0.0.0.0:3005:3000/tcp' # 3005
   redis:
     ports:
       - '0.0.0.0:6379:6379/tcp'
@@ -132,8 +130,20 @@ services:
       - '0.0.0.0:5601:5601/tcp'
   sonarqube:
     ports:
-      - '0.0.0.0:9003:9000' # 9003
-      - '0.0.0.0:9004:9001' # 9004
+      - '0.0.0.0:9003:9000/tcp' # 9003
+      - '0.0.0.0:9004:9001/tcp' # 9004
+
+networks:
+
+  backend:
+    name: infra_backend
+    driver: bridge
+  frontend:
+    name: infra_frontend
+    driver: bridge
+  monitoring:
+    name: infra_monitoring
+    driver: bridge
 
 #  default:
 #    name: infra_default

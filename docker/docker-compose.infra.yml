@@ -138,6 +138,38 @@ services:
     tmpfs:
       - /tmp
 
+  cadence:
+    image: ubercadence/web:latest
+    env_file:
+      - .env
+    networks:
+      - backend
+    cpus: 0.25
+    mem_limit: "128MiB"
+    tmpfs:
+      - /tmp
+
+  cadence-server:
+    image: ubercadence/server:master-auto-setup
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+    volumes:
+      - ./services/cadence/config:/etc/cadence/config
+    environment:
+      POSTGRES_USER: cadence
+      POSTGRES_PWD: "${CADENCE_PASSWORD}"
+      POSTGRES_DB: cadence
+      DYNAMIC_CONFIG_FILE_PATH: /etc/cadence/config/dynamicconfig/development.yaml
+    env_file:
+      - .env
+    networks:
+      - backend
+    cpus: 1
+    mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
+
   collector:
     image: otel/opentelemetry-collector-contrib:latest
     depends_on:

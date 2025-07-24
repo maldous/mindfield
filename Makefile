@@ -86,6 +86,7 @@ setup:
 	    KONG_COOKIE_HASH_DOCS="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_POSTGRAPHILE="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_GITLAB="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_CADENCE="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
@@ -103,6 +104,7 @@ setup:
 	    KONG_COOKIE_BLOCK_DOCS="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_POSTGRAPHILE="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_GITLAB="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_CADENCE="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
@@ -120,6 +122,7 @@ setup:
 	    CLIENT_SECRET_DOCS="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_POSTGRAPHILE="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_GITLAB="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_CADENCE="$$(openssl rand -hex 32)"
 
 	    POSTGRES_PASSWORD="$$(pwgen -s -c -n 16 1)"
 	    MINIO_ROOT_PASSWORD="$$(pwgen -s -c -n 16 1)"
@@ -132,8 +135,9 @@ setup:
 	    SONAR_JDBC_PASSWORD="$$(pwgen -s -c -n 16 1)"
 	    POSTGRAPHILE_DB_PASSWORD="$$(pwgen -s -c -n 16 1)"
 	    OPENSEARCH_INITIAL_ADMIN_PASSWORD="$$(pwgen -s -c -n 16 1)"
-	    SONAR_ADMIN_PASSWORD="$$(pwgen -s -c -n -y 16 1)"
+	    SONAR_ADMIN_PASSWORD="$$(pwgen -s -c -n 16 1)!"
 	    GITLAB_ROOT_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    CADENCE_PASSWORD="$$(pwgen -s -c -n 16 1)"
 
 	    echo "# $$DATE" >> .env
 	    echo "" >> .env
@@ -154,6 +158,7 @@ setup:
 	    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD=$${OPENSEARCH_INITIAL_ADMIN_PASSWORD}" >> .env
 	    echo "SONAR_ADMIN_PASSWORD=$${SONAR_ADMIN_PASSWORD}" >> .env
 	    echo "GITLAB_ROOT_PASSWORD=$${GITLAB_ROOT_PASSWORD}" >> .env
+	    echo "CADENCE_PASSWORD=$${CADENCE_PASSWORD}" >> .env
 
 	    echo "" >> .env
 	    echo 'REGISTRY_CACHE=localhost:5001/$${NAME}-cache' >> .env
@@ -165,9 +170,23 @@ setup:
 	    echo "DOCKER_BUILDKIT=1" >> .env
 
 	    echo "" >> .env
+	    echo "DB=postgres" >> .env
+	    echo "DB_PORT=5433" >> .env
+	    echo "DB_HOST=pgbouncer" >> .env
 	    echo "POSTGRES_HOST=postgres" >> .env
 	    echo 'POSTGRES_USER=$${NAME}' >> .env
+	    echo 'POSTGRES_SEEDS=pgbouncer' >> .env
 	    echo 'POSTGRES_DB=$${NAME}' >> .env
+
+	    echo "" >> .env
+	    echo "CADENCE_ADDRESS=0.0.0.0:7933" >> .env
+	    echo "CADENCE_GRPC_PEERS=cadence-server:7833" >> .env
+	    echo "DYNAMIC_CONFIG_FILE_PATH=/etc/cadence/config/dynamicconfig/development.yaml" >> .env
+	    echo "VISIBILITY_POSTGRES_DB=cadence_visibility" >> .env
+	    echo 'VISIBILITY_POSTGRES_PWD=$${CADENCE_PASSWORD}' >> .env
+	    echo "VISIBILITY_POSTGRES_SEEDS=pgbouncer" >> .env
+	    echo "VISIBILITY_POSTGRES_USER=cadence_visibility" >> .env
+	    echo "VISIBILITY_STORE=postgres" >> .env
 
 	    echo "" >> .env
 	    echo 'MINIO_ROOT_USER=admin' >> .env
@@ -268,6 +287,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_DOCS=$$KONG_COOKIE_HASH_DOCS" >> .env
 	    echo "KONG_COOKIE_HASH_POSTGRAPHILE=$$KONG_COOKIE_HASH_POSTGRAPHILE" >> .env
 	    echo "KONG_COOKIE_HASH_GITLAB=$$KONG_COOKIE_HASH_GITLAB" >> .env
+	    echo "KONG_COOKIE_HASH_CADENCE=$$KONG_COOKIE_HASH_CADENCE" >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
@@ -286,6 +306,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_DOCS=$$KONG_COOKIE_BLOCK_DOCS" >> .env
 	    echo "KONG_COOKIE_BLOCK_POSTGRAPHILE=$$KONG_COOKIE_BLOCK_POSTGRAPHILE" >> .env
 	    echo "KONG_COOKIE_BLOCK_GITLAB=$$KONG_COOKIE_BLOCK_GITLAB" >> .env
+	    echo "KONG_COOKIE_BLOCK_CADENCE=$$KONG_COOKIE_BLOCK_CADENCE" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
@@ -304,6 +325,7 @@ setup:
 	    echo "CLIENT_SECRET_DOCS=$$CLIENT_SECRET_DOCS" >> .env
 	    echo "CLIENT_SECRET_POSTGRAPHILE=$$CLIENT_SECRET_POSTGRAPHILE" >> .env
 	    echo "CLIENT_SECRET_GITLAB=$$CLIENT_SECRET_GITLAB" >> .env
+	    echo "CLIENT_SECRET_CADENCE=$$CLIENT_SECRET_CADENCE" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_ID_ROOT=root" >> .env
@@ -322,6 +344,7 @@ setup:
 	    echo "CLIENT_ID_DOCS=docs" >> .env
 	    echo "CLIENT_ID_POSTGRAPHILE=postgraphile" >> .env
 	    echo "CLIENT_ID_GITLAB=gitlab" >> .env
+	    echo "CLIENT_ID_CADENCE=cadence" >> .env
 
 	    echo "" >> .env
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
@@ -337,6 +360,7 @@ setup:
 	export PGBOUNCER_SONARQUBE_PASSWORD=md5$$(printf '%s' "$$SONAR_JDBC_PASSWORD"sonarqube | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_POSTGRAPHILE_PASSWORD=md5$$(printf '%s' "$$POSTGRAPHILE_DB_PASSWORD"postgraphile | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_GITLAB_PASSWORD=md5$$(printf '%s' "$$GITLAB_ROOT_PASSWORD"gitlab | md5sum | cut -d' ' -f1)
+	export PGBOUNCER_CADENCE_PASSWORD=md5$$(printf '%s' "$$CADENCE_PASSWORD"cadence | md5sum | cut -d' ' -f1)
 
 	echo "" > services/pgbouncer/userlist.txt
 	echo "\"keycloak\" \"$$PGBOUNCER_KC_PASSWORD\"" >> services/pgbouncer/userlist.txt
@@ -346,8 +370,11 @@ setup:
 	echo "\"sonarqube\" \"$$PGBOUNCER_SONARQUBE_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "\"postgraphile\" \"$$PGBOUNCER_POSTGRAPHILE_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "\"gitlab\" \"$$PGBOUNCER_GITLAB_PASSWORD\"" >> services/pgbouncer/userlist.txt
+	echo "\"cadence\" \"$$PGBOUNCER_CADENCE_PASSWORD\"" >> services/pgbouncer/userlist.txt
+	echo "\"cadence_visibility\" \"$$PGBOUNCER_CADENCE_PASSWORD\"" >> services/pgbouncer/userlist.txt
 
 	echo "[databases]" > services/pgbouncer/databases.ini
+	echo "postgres = host=postgres port=5432 dbname=postgres" >> services/pgbouncer/databases.ini
 	echo "keycloak = host=postgres port=5432 dbname=keycloak user=keycloak password=$$KC_DB_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "kong = host=postgres port=5432 dbname=kong user=kong password=$$KONG_PG_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "pgadmin = host=postgres port=5432 dbname=pgadmin user=pgadmin password=$$PGADMIN_DEFAULT_PASSWORD" >> services/pgbouncer/databases.ini
@@ -355,31 +382,41 @@ setup:
 	echo "sonarqube = host=postgres port=5432 dbname=sonarqube user=sonarqube password=$$SONAR_JDBC_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "postgraphile = host=postgres port=5432 dbname=postgraphile user=postgraphile password=$$POSTGRAPHILE_DB_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "gitlab = host=postgres port=5432 dbname=gitlab user=gitlab password=$$GITLAB_ROOT_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "cadence = host=postgres port=5432 dbname=cadence user=cadence password=$$CADENCE_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "cadence_visibility = host=postgres port=5432 dbname=cadence_visibility user=cadence_visibility password=$$CADENCE_PASSWORD" >> services/pgbouncer/databases.ini
 
 	echo "" > services/postgres/init/01.sql
 	echo "CREATE ROLE keycloak WITH LOGIN PASSWORD '$$KC_DB_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE keycloak OWNER keycloak;" >> services/postgres/init/01.sql
-	echo "GRANT CONNECT ON DATABASE keycloak TO keycloak;" >> services/postgres/init/01.sql
+	echo "GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;" >> services/postgres/init/01.sql
 	echo "" >> services/postgres/init/01.sql
 	echo "CREATE ROLE kong WITH LOGIN PASSWORD '$$KONG_PG_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE kong OWNER kong;" >> services/postgres/init/01.sql
-	echo "GRANT CONNECT ON DATABASE kong TO kong;" >> services/postgres/init/01.sql
+	echo "GRANT ALL PRIVILEGES ON DATABASE kong TO kong;" >> services/postgres/init/01.sql
 	echo "" >> services/postgres/init/01.sql
 	echo "CREATE ROLE pgadmin WITH LOGIN PASSWORD '$$PGADMIN_DEFAULT_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE pgadmin OWNER pgadmin;" >> services/postgres/init/01.sql
-	echo "GRANT CONNECT ON DATABASE pgadmin TO pgadmin;" >> services/postgres/init/01.sql
+	echo "GRANT ALL PRIVILEGES ON DATABASE pgadmin TO pgadmin;" >> services/postgres/init/01.sql
 	echo "" >> services/postgres/init/01.sql
 	echo "CREATE ROLE grafana WITH LOGIN PASSWORD '$$GRAFANA_DEFAULT_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE grafana OWNER grafana;" >> services/postgres/init/01.sql
-	echo "GRANT CONNECT ON DATABASE grafana TO grafana;" >> services/postgres/init/01.sql
+	echo "GRANT ALL PRIVILEGES ON DATABASE grafana TO grafana;" >> services/postgres/init/01.sql
 	echo "" >> services/postgres/init/01.sql
 	echo "CREATE ROLE sonarqube WITH LOGIN PASSWORD '$$SONAR_JDBC_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE sonarqube OWNER sonarqube;" >> services/postgres/init/01.sql
-	echo "GRANT CONNECT ON DATABASE sonarqube TO sonarqube;" >> services/postgres/init/01.sql
+	echo "GRANT ALL PRIVILEGES ON DATABASE sonarqube TO sonarqube;" >> services/postgres/init/01.sql
 	echo "" >> services/postgres/init/01.sql
 	echo "CREATE ROLE gitlab WITH LOGIN PASSWORD '$$GITLAB_ROOT_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE gitlab OWNER gitlab;" >> services/postgres/init/01.sql
-	echo "GRANT CONNECT ON DATABASE gitlab TO gitlab;" >> services/postgres/init/01.sql
+	echo "GRANT ALL PRIVILEGES ON DATABASE gitlab TO gitlab;" >> services/postgres/init/01.sql
+	echo "" >> services/postgres/init/01.sql
+	echo "CREATE ROLE cadence WITH LOGIN PASSWORD '$$CADENCE_PASSWORD';" >> services/postgres/init/01.sql
+	echo "CREATE DATABASE cadence OWNER cadence;" >> services/postgres/init/01.sql
+	echo "GRANT ALL PRIVILEGES ON DATABASE cadence TO cadence;" >> services/postgres/init/01.sql
+	echo "" >> services/postgres/init/01.sql
+	echo "CREATE ROLE cadence_visibility WITH LOGIN PASSWORD '$$CADENCE_PASSWORD';" >> services/postgres/init/01.sql
+	echo "CREATE DATABASE cadence_visibility OWNER cadence_visibility;" >> services/postgres/init/01.sql
+	echo "GRANT ALL PRIVILEGES ON DATABASE cadence_visibility TO cadence_visibility;" >> services/postgres/init/01.sql
 
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v node >/dev/null; then volta install node@"$$NODE_VERSION"; fi
@@ -414,13 +451,14 @@ install: setup
 	docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) up -d --remove-orphans
 
 clean:
-	@set -a; . .env; set -a
+	@touch .env; set -a; . .env; set -a
 	docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down --remove-orphans
 
 purge:
-	@set -a; . .env; set -a
+	@touch .env; set -a; . .env; set -a
 	docker compose --project-directory . $(foreach f,$(wildcard docker/docker-compose.*.yml),-f $(f)) down -v --remove-orphans
-	sudo bash -c 'for d in $$(grep mountpoint docker/docker-compose.persist.yml | cut -d: -f2 | xargs -n1 basename); do rm -fr /var/lib/docker/persist/$$d; done'
+	sudo rm -fr /var/lib/docker/persist
+	sudo mkdir /var/lib/docker/persist
 	rm -fr .env sonar.json .scannerwork services/pgbouncer/databases.ini services/pgbouncer/userlist.txt services/postgres/init/01.sql
 
 help:

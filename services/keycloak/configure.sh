@@ -83,6 +83,7 @@ ensure_client "${CLIENT_ID_SONARQUBE}" "${CLIENT_SECRET_SONARQUBE}" "https://son
 ensure_client "${CLIENT_ID_DOCS}" "${CLIENT_SECRET_DOCS}" "https://docs.${DOMAIN}/callback" "https://docs.${DOMAIN}"
 ensure_client "${CLIENT_ID_POSTGRAPHILE}" "${CLIENT_SECRET_POSTGRAPHILE}" "https://postgraphile.${DOMAIN}/callback" "https://postgraphile.${DOMAIN}"
 ensure_client "${CLIENT_ID_GITLAB}" "${CLIENT_SECRET_GITLAB}" "https://gitlab.${DOMAIN}/callback" "https://gitlab.${DOMAIN}"
+ensure_client "${CLIENT_ID_CADENCE}" "${CLIENT_SECRET_CADENCE}" "https://cadence.${DOMAIN}/callback" "https://cadence.${DOMAIN}"
 
 role_json=$( curl -sS -H "${AUTH_HEADER}" -H "${JSON_HEADER}" "${KC_URL}/admin/realms/${NAME}/roles/user" || true)
 role_uid=$(printf '%s' "$role_json" | jq -r '.id // empty')
