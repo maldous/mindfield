@@ -1,0 +1,147 @@
+log:
+    stdout: true
+    level: info
+
+persistence:
+    numHistoryShards: 4
+    defaultStore: default
+    visibilityStore: visibility
+    datastores:
+        default:
+            sql:
+                pluginName: "postgres"
+                encodingType: "thriftrw"
+                decodingTypes: ["thriftrw"]
+                databaseName: cadence
+                connectAddr: "pgbouncer:5433"
+                connectProtocol: "tcp"
+                user: cadence
+                password: ldXk0Wk7O7e02qWs
+                maxConns: 20
+                maxIdleConns: 20
+                maxConnLifetime: "1h"
+        visibility:
+            sql:
+                pluginName: "postgres"
+                encodingType: "thriftrw"
+                decodingTypes: ["thriftrw"]
+                databaseName: cadence_visibility
+                connectAddr: "pgbouncer:5433"
+                connectProtocol: "tcp"
+                user: cadence
+                password: ldXk0Wk7O7e02qWs
+                maxConns: 20
+                maxIdleConns: 20
+                maxConnLifetime: "1h"
+
+ringpop:
+    name: cadence
+    broadcastAddress: 
+    bootstrapMode: hosts
+    bootstrapHosts:
+        - 172.19.0.26:7933
+        - 172.19.0.26:7934
+        - 172.19.0.26:7935
+        - 172.19.0.26:7939
+    maxJoinDuration: 30s
+
+services:
+    frontend:
+        rpc:
+            port: 7933
+            grpcPort: 7833
+            bindOnIP: 172.19.0.26
+    matching:
+        rpc:
+            port: 7935
+            grpcPort: 7835
+            bindOnIP: 172.19.0.26
+    history:
+        rpc:
+            port: 7934
+            grpcPort: 7834
+            bindOnIP: 172.19.0.26
+    worker:
+        rpc:
+            port: 7939
+            bindOnIP: 172.19.0.26
+clusterGroupMetadata:
+    clusterRedirectionPolicy:
+        policy: all-domain-apis-forwarding
+    failoverVersionIncrement: 10
+    primaryClusterName: "cluster0"
+    currentClusterName: "cluster0"
+    clusterGroup:
+        cluster0:
+            enabled: true
+            initialFailoverVersion: 0
+            rpcName: "cadence-frontend"
+            rpcAddress: cadence:7833
+            rpcTransport: "grpc"
+            authorizationProvider:
+                enable: false
+                type: "OAuthAuthorization"
+                privateKey: 
+
+archival:
+  history:
+    status: disabled
+    enableRead: false
+    provider:
+      filestore:
+        fileMode: 
+        dirMode: 
+  visibility:
+    status: disabled
+    enableRead: false
+    provider:
+      filestore:
+        fileMode: 
+        dirMode: 
+
+domainDefaults:
+  archival:
+    history:
+      status: disabled
+      URI: 
+    visibility:
+      status: disabled
+      URI: 
+
+kafka:
+    tls:
+        enabled: false
+    clusters:
+        test:
+            brokers:
+                - :9092
+    topics:
+        cadence-visibility-dev:
+            cluster: test
+        cadence-visibility-dev-dlq:
+            cluster: test
+    applications:
+        visibility:
+            topic: cadence-visibility-dev
+            dlq-topic: cadence-visibility-dev-dlq
+
+publicClient:
+    hostPort: cadence:7833
+
+dynamicconfig:
+  client: filebased
+  filebased:
+    filepath: /etc/cadence/config/dynamicconfig/development.yaml
+    pollInterval: "60s"
+
+blobstore:
+  filestore:
+    outputDirectory: 
+
+authorization:
+    oauthAuthorizer:
+        enable: false
+        maxJwtTTL: 86400
+        jwtCredentials:
+            algorithm: "RS256"
+            publicKey: 
