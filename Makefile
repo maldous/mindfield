@@ -51,7 +51,7 @@ restore: setup check-bucket clean
 	fi
 
 setup:
-	if [ ! -f .env ]; then
+	@if [ ! -f .env ]; then
 	  if [ -f .enc ]; then
 	    echo -n "Restore .env from .enc? [y/N]: "; read ANSWER
 	    if echo "$$ANSWER" | grep -qi '^y'; then
@@ -184,8 +184,8 @@ setup:
 	    echo "DYNAMIC_CONFIG_FILE_PATH=/etc/cadence/config/dynamicconfig/development.yaml" >> .env
 	    echo "VISIBILITY_POSTGRES_DB=cadence_visibility" >> .env
 	    echo 'VISIBILITY_POSTGRES_PWD=$${CADENCE_PASSWORD}' >> .env
-	    echo "VISIBILITY_POSTGRES_SEEDS=pgbouncer" >> .env
-	    echo "VISIBILITY_POSTGRES_USER=cadence_visibility" >> .env
+	    echo "VISIBILITY_POSTGRES_SEEDS=postgres" >> .env
+	    echo "VISIBILITY_POSTGRES_USER=cadence" >> .env
 	    echo "VISIBILITY_STORE=postgres" >> .env
 
 	    echo "" >> .env
@@ -383,7 +383,7 @@ setup:
 	echo "postgraphile = host=postgres port=5432 dbname=postgraphile user=postgraphile password=$$POSTGRAPHILE_DB_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "gitlab = host=postgres port=5432 dbname=gitlab user=gitlab password=$$GITLAB_ROOT_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "cadence = host=postgres port=5432 dbname=cadence user=cadence password=$$CADENCE_PASSWORD" >> services/pgbouncer/databases.ini
-	echo "cadence_visibility = host=postgres port=5432 dbname=cadence_visibility user=cadence_visibility password=$$CADENCE_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "cadence_visibility = host=postgres port=5432 dbname=cadence_visibility user=cadence password=$$CADENCE_PASSWORD" >> services/pgbouncer/databases.ini
 
 	echo "" > services/postgres/init/01.sql
 	echo "CREATE ROLE keycloak WITH LOGIN PASSWORD '$$KC_DB_PASSWORD';" >> services/postgres/init/01.sql
@@ -413,10 +413,9 @@ setup:
 	echo "CREATE ROLE cadence WITH LOGIN PASSWORD '$$CADENCE_PASSWORD';" >> services/postgres/init/01.sql
 	echo "CREATE DATABASE cadence OWNER cadence;" >> services/postgres/init/01.sql
 	echo "GRANT ALL PRIVILEGES ON DATABASE cadence TO cadence;" >> services/postgres/init/01.sql
+	echo "CREATE DATABASE cadence_visibility OWNER cadence;" >> services/postgres/init/01.sql
+	echo "GRANT ALL PRIVILEGES ON DATABASE cadence_visibility TO cadence;" >> services/postgres/init/01.sql
 	echo "" >> services/postgres/init/01.sql
-	echo "CREATE ROLE cadence_visibility WITH LOGIN PASSWORD '$$CADENCE_PASSWORD';" >> services/postgres/init/01.sql
-	echo "CREATE DATABASE cadence_visibility OWNER cadence_visibility;" >> services/postgres/init/01.sql
-	echo "GRANT ALL PRIVILEGES ON DATABASE cadence_visibility TO cadence_visibility;" >> services/postgres/init/01.sql
 
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v node >/dev/null; then volta install node@"$$NODE_VERSION"; fi

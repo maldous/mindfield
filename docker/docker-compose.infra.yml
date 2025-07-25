@@ -157,6 +157,8 @@ services:
     volumes:
       - ./services/cadence/config:/etc/cadence/config
     environment:
+      POSTGRES_SEEDS: postgres
+      DB_PORT: 5432
       POSTGRES_USER: cadence
       POSTGRES_PWD: "${CADENCE_PASSWORD}"
       POSTGRES_DB: cadence
