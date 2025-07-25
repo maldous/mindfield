@@ -88,6 +88,7 @@ setup:
 	    KONG_COOKIE_HASH_GITLAB="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_CADENCE="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_SENTRY="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_NUI="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
@@ -107,6 +108,7 @@ setup:
 	    KONG_COOKIE_BLOCK_GITLAB="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_CADENCE="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_SENTRY="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_NUI="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
@@ -126,6 +128,7 @@ setup:
 	    CLIENT_SECRET_GITLAB="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_CADENCE="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_SENTRY="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_NUI="$$(openssl rand -hex 32)"
 
 	    POSTGRES_PASSWORD="$$(pwgen -s -c -n 16 1)"
 	    MINIO_ROOT_PASSWORD="$$(pwgen -s -c -n 16 1)"
@@ -176,9 +179,12 @@ setup:
 
 	    echo "" >> .env
 	    echo "DB=postgres" >> .env
-	    echo "DB_PORT=5433" >> .env
 	    echo "DB_HOST=pgbouncer" >> .env
+	    echo "DB_PORT=5433" >> .env
+	    echo "PGBOUNCER_HOST=pgbouncer" >> .env
+	    echo "PGBOUNCER_PORT=5433" >> .env
 	    echo "POSTGRES_HOST=postgres" >> .env
+	    echo "POSTGRES_PORT=5432" >> .env
 	    echo 'POSTGRES_USER=$${NAME}' >> .env
 	    echo 'POSTGRES_SEEDS=pgbouncer' >> .env
 	    echo 'POSTGRES_DB=$${NAME}' >> .env
@@ -207,7 +213,19 @@ setup:
 	    echo "VISIBILITY_STORE=postgres" >> .env
 
 	    echo "" >> .env
+	    echo 'REDIS_HOST=redis' >> .env
+	    echo 'REDIS_PORT=6379' >> .env
+
+	    echo "" >> .env
+	    echo 'NATS_URL=nats://nats:4222' >> .env
+	    echo 'NATS_JS_STORE_DIR=/data/jetstream' >> .env
+	    echo 'NATS_JS_MAX_MEM=512MB' >> .env
+	    echo 'NATS_JS_MAX_FILE=2GB' >> .env
+
+	    echo "" >> .env
 	    echo 'MINIO_ROOT_USER=admin' >> .env
+	    echo 'MINIO_HOST=minio' >> .env
+	    echo 'MINIO_PORT=9000' >> .env
 	    echo 'AWS_ACCESS_KEY_ID=$${MINIO_ROOT_USER}' >> .env
 	    echo 'AWS_SECRET_ACCESS_KEY=$${MINIO_ROOT_PASSWORD}' >> .env
 	    echo 'AWS_REGION=us-east-1' >> .env
@@ -289,6 +307,34 @@ setup:
 	    echo "KONG_LICENSING_ENABLED=false" >> .env
 
 	    echo "" >> .env
+	    echo 'KAFKA_CFG_PROCESS_ROLES=broker,controller' >> .env
+	    echo 'KAFKA_CFG_NODE_ID=1' >> .env
+	    echo 'KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093' >> .env
+	    echo 'KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093' >> .env
+	    echo 'KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092' >> .env
+	    echo 'KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT' >> .env
+	    echo 'KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER' >> .env
+	    echo 'KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1' >> .env
+	    echo 'KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1' >> .env
+	    echo 'KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1' >> .env
+	    echo 'SCHEMA_REGISTRY_HOST_NAME=schema-registry' >> .env
+	    echo 'SCHEMA_REGISTRY_LISTENERS=http://0.0.0.0:8081' >> .env
+	    echo 'SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=PLAINTEXT://kafka:9092' >> .env
+	    echo 'CONNECT_BOOTSTRAP_SERVERS=kafka:9092' >> .env
+	    echo 'CONNECT_REST_PORT=8083' >> .env
+	    echo 'CONNECT_GROUP_ID=connect-cluster' >> .env
+	    echo 'CONNECT_PLUGIN_PATH=/usr/share/java' >> .env
+	    echo 'CONNECT_CONFIG_STORAGE_TOPIC=connect-configs' >> .env
+	    echo 'CONNECT_OFFSET_STORAGE_TOPIC=connect-offsets' >> .env
+	    echo 'CONNECT_STATUS_STORAGE_TOPIC=connect-status' >> .env
+	    echo 'CONNECT_KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter' >> .env
+	    echo 'CONNECT_VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter' >> .env
+	    echo 'CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR=1' >> .env
+	    echo 'CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR=1' >> .env
+	    echo 'CONNECT_STATUS_STORAGE_REPLICATION_FACTOR=1' >> .env
+	    echo 'CONNECT_REST_ADVERTISED_HOST_NAME=kafka-connect' >> .env
+
+	    echo "" >> .env
 	    echo "KONG_COOKIE_HASH_ROOT=$$KONG_COOKIE_HASH_ROOT" >> .env
 	    echo "KONG_COOKIE_HASH_PGADMIN=$$KONG_COOKIE_HASH_PGADMIN" >> .env
 	    echo "KONG_COOKIE_HASH_MAILHOG=$$KONG_COOKIE_HASH_MAILHOG" >> .env
@@ -307,6 +353,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_GITLAB=$$KONG_COOKIE_HASH_GITLAB" >> .env
 	    echo "KONG_COOKIE_HASH_CADENCE=$$KONG_COOKIE_HASH_CADENCE" >> .env
 	    echo "KONG_COOKIE_HASH_SENTRY=$$KONG_COOKIE_HASH_SENTRY" >> .env
+	    echo "KONG_COOKIE_HASH_NUI=$$KONG_COOKIE_HASH_NUI" >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
@@ -327,6 +374,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_GITLAB=$$KONG_COOKIE_BLOCK_GITLAB" >> .env
 	    echo "KONG_COOKIE_BLOCK_CADENCE=$$KONG_COOKIE_BLOCK_CADENCE" >> .env
 	    echo "KONG_COOKIE_BLOCK_SENTRY=$$KONG_COOKIE_BLOCK_SENTRY" >> .env
+	    echo "KONG_COOKIE_BLOCK_NUI=$$KONG_COOKIE_BLOCK_NUI" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
@@ -347,6 +395,7 @@ setup:
 	    echo "CLIENT_SECRET_GITLAB=$$CLIENT_SECRET_GITLAB" >> .env
 	    echo "CLIENT_SECRET_CADENCE=$$CLIENT_SECRET_CADENCE" >> .env
 	    echo "CLIENT_SECRET_SENTRY=$$CLIENT_SECRET_SENTRY" >> .env
+	    echo "CLIENT_SECRET_NUI=$$CLIENT_SECRET_NUI" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_ID_ROOT=root" >> .env
@@ -367,6 +416,7 @@ setup:
 	    echo "CLIENT_ID_GITLAB=gitlab" >> .env
 	    echo "CLIENT_ID_CADENCE=cadence" >> .env
 	    echo "CLIENT_ID_SENTRY=sentry" >> .env
+	    echo "CLIENT_ID_NUI=nui" >> .env
 
 	    echo "" >> .env
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"

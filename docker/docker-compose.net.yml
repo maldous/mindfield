@@ -135,6 +135,23 @@ services:
     ports:
       - '0.0.0.0:9003:9000/tcp' # 9003
       - '0.0.0.0:9004:9001/tcp' # 9004
+  nats:
+    ports:
+      - '0.0.0.0:4222:4222/tcp'
+      - '0.0.0.0:6222:6222/tcp'
+      - '0.0.0.0:8222:8222/tcp'
+  nui:
+    ports:
+      - '0.0.0.0:31311:31311/tcp'
+  kafka:
+    ports:
+      - '0.0.0.0:9092:9092/tcp'
+  schema-registry:
+    ports:
+      - '0.0.0.0:8084:8081/tcp' # 8084
+  kafka-connect:
+    ports:
+      - '0.0.0.0:8083:8083/tcp'
 
 networks:
 

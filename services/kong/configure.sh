@@ -115,5 +115,6 @@ create_stack postgraphile postgraphile 5002 "postgraphile.${DOMAIN}" "${CLIENT_I
 create_stack gitlab gitlab 80 "gitlab.${DOMAIN}" "${CLIENT_ID_GITLAB}" "${CLIENT_SECRET_GITLAB}" gitlab "${KONG_COOKIE_HASH_GITLAB}" "${KONG_COOKIE_BLOCK_GITLAB}"
 create_stack cadence cadence 8088 "cadence.${DOMAIN}" "${CLIENT_ID_CADENCE}" "${CLIENT_SECRET_CADENCE}" cadence "${KONG_COOKIE_HASH_CADENCE}" "${KONG_COOKIE_BLOCK_CADENCE}"
 create_stack sentry sentry 9000 "sentry.${DOMAIN}" "${CLIENT_ID_SENTRY}" "${CLIENT_SECRET_SENTRY}" sentry "${KONG_COOKIE_HASH_SENTRY}" "${KONG_COOKIE_BLOCK_SENTRY}"
+create_stack nui nui 31311 "nui.${DOMAIN}" "${CLIENT_ID_NUI}" "${CLIENT_SECRET_NUI}" nui "${KONG_COOKIE_HASH_NUI}" "${KONG_COOKIE_BLOCK_NUI}"
 
 echo -e "\nservices/kong/configure.sh"

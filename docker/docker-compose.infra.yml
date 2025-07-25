@@ -350,6 +350,49 @@ services:
     tmpfs:
       - /tmp
 
+  kafka:
+    image: bitnami/kafka:latest
+    volumes:
+      - /var/lib/docker/persist/kafka_data:/bitnami
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/bitnami/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    cpus: 1
+    mem_limit: "1GiB"
+    tmpfs:
+      - /tmp
+
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:latest
+    depends_on:
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8083/connectors || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
+
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     depends_on:
@@ -589,6 +632,53 @@ services:
       retries: 12
       start_period: 60s
     cpus: 0.5
+    mem_limit: "256MiB"
+    tmpfs:
+      - /tmp
+
+  nats:
+    image: nats:latest
+    volumes:
+      - /var/lib/docker/persist/nats_data:/data
+    env_file:
+      - .env
+    networks:
+      - backend
+    command:
+      - -js
+      - --store_dir=/data/jetstream
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "curl -f http://localhost:8222/healthz || exit 1"
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
+
+  nui:
+    image: ghcr.io/nats-nui/nui:latest
+    volumes:
+      - /var/lib/docker/persist/nui_db:/db
+    env_file:
+      - .env
+    ports:
+      - '31311:31311'
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:31311/healthz || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    cpus: 0.25
     mem_limit: "256MiB"
     tmpfs:
       - /tmp
@@ -880,6 +970,27 @@ services:
         - "true"
       interval: 5s
       timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:latest
+    depends_on:
+      kafka:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8081/subjects || exit 1" ]
+      interval: 5s
+      timeout: 5s
       retries: 12
       start_period: 60s
     cpus: 0.5

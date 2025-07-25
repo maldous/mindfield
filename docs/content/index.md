@@ -19,3 +19,4 @@
 - **[search](https://search.aldous.info/)** – Internal or site-wide search service  
 - **[sentry](https://sentry.aldous.info/)** – Error monitoring and reporting
 - **[sonarqube](https://sonarqube.aldous.info/)** – Code quality and security analysis  
+- **[nui](https://nui.aldous.info/)** – Durable at-lease-once streams
