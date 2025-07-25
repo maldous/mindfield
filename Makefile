@@ -141,7 +141,7 @@ setup:
 	    SONAR_ADMIN_PASSWORD="$$(pwgen -s -c -n 16 1)!"
 	    GITLAB_ROOT_PASSWORD="$$(pwgen -s -c -n 16 1)"
 	    CADENCE_PASSWORD="$$(pwgen -s -c -n 16 1)"
-	    SENTRY_SECRET_KEY="$$(pwgen -s -c -n 16 1)"
+	    SENTRY_SECRET_KEY="$$(pwgen -s -c -n 32 1)"
 
 	    echo "# $$DATE" >> .env
 	    echo "" >> .env
@@ -193,7 +193,8 @@ setup:
 	    echo 'SENTRY_REDIS_HOST=redis' >> .env
 	    echo 'SENTRY_REDIS_PORT=6379' >> .env
 	    echo 'SENTRY_CONF=/etc/sentry' >> .env
-	    echo 'SENTRY_REDIS=redis://$${SENTRY_REDIS_HOST}:$${SENTRY_REDIS_PORT}' >> .env
+	    echo 'BROKER_URL=redis://$${SENTRY_REDIS_HOST}:$${SENTRY_REDIS_PORT}/0' >> .env
+	    echo 'SENTRY_REDIS=redis://$${SENTRY_REDIS_HOST}:$${SENTRY_REDIS_PORT}/1' >> .env
 
 	    echo "" >> .env
 	    echo "CADENCE_ADDRESS=0.0.0.0:7933" >> .env

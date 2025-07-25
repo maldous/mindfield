@@ -918,8 +918,6 @@ services:
       - .env
     environment:
       DATABASE_URL: postgresql://${SENTRY_DB_USER}:${SENTRY_DB_PASSWORD}@${SENTRY_DB_HOST}:${SENTRY_DB_PORT}/${SENTRY_DB_NAME}
-    volumes:
-      - ./services/sentry:/etc/sentry
     depends_on:
       pgbouncer:
         condition: service_healthy
@@ -943,7 +941,6 @@ services:
     environment:
       DATABASE_URL: postgresql://${SENTRY_DB_USER}:${SENTRY_DB_PASSWORD}@${SENTRY_DB_HOST}:${SENTRY_DB_PORT}/${SENTRY_DB_NAME}
     volumes:
-      - ./services/sentry:/etc/sentry
       - ./services/sentry/configure.sh:/configure.sh
     command:
       - /configure.sh
@@ -955,7 +952,7 @@ services:
     networks: [backend]
     restart: "no"
     cpus: 0.5
-    mem_limit: "128MiB"
+    mem_limit: "512MiB"
     tmpfs:
       - /tmp
 
