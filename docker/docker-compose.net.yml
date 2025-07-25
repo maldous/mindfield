@@ -125,6 +125,9 @@ services:
   redisinsight:
     ports:
       - '0.0.0.0:5540:5540/tcp'
+  sentry:
+    ports:
+      - '0.0.0.0:9005:9000/tcp' # 9005
   search:
     ports:
       - '0.0.0.0:5601:5601/tcp'

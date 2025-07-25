@@ -87,6 +87,7 @@ setup:
 	    KONG_COOKIE_HASH_POSTGRAPHILE="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_GITLAB="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_CADENCE="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_SENTRY="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
@@ -105,6 +106,7 @@ setup:
 	    KONG_COOKIE_BLOCK_POSTGRAPHILE="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_GITLAB="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_CADENCE="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_SENTRY="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
@@ -123,6 +125,7 @@ setup:
 	    CLIENT_SECRET_POSTGRAPHILE="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_GITLAB="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_CADENCE="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_SENTRY="$$(openssl rand -hex 32)"
 
 	    POSTGRES_PASSWORD="$$(pwgen -s -c -n 16 1)"
 	    MINIO_ROOT_PASSWORD="$$(pwgen -s -c -n 16 1)"
@@ -138,6 +141,7 @@ setup:
 	    SONAR_ADMIN_PASSWORD="$$(pwgen -s -c -n 16 1)!"
 	    GITLAB_ROOT_PASSWORD="$$(pwgen -s -c -n 16 1)"
 	    CADENCE_PASSWORD="$$(pwgen -s -c -n 16 1)"
+	    SENTRY_SECRET_KEY="$$(pwgen -s -c -n 16 1)"
 
 	    echo "# $$DATE" >> .env
 	    echo "" >> .env
@@ -159,6 +163,7 @@ setup:
 	    echo "SONAR_ADMIN_PASSWORD=$${SONAR_ADMIN_PASSWORD}" >> .env
 	    echo "GITLAB_ROOT_PASSWORD=$${GITLAB_ROOT_PASSWORD}" >> .env
 	    echo "CADENCE_PASSWORD=$${CADENCE_PASSWORD}" >> .env
+	    echo "SENTRY_SECRET_KEY=$${SENTRY_SECRET_KEY}" >> .env
 
 	    echo "" >> .env
 	    echo 'REGISTRY_CACHE=localhost:5001/$${NAME}-cache' >> .env
@@ -177,6 +182,18 @@ setup:
 	    echo 'POSTGRES_USER=$${NAME}' >> .env
 	    echo 'POSTGRES_SEEDS=pgbouncer' >> .env
 	    echo 'POSTGRES_DB=$${NAME}' >> .env
+
+	    echo "" >> .env
+	    echo 'SENTRY_DB_ENGINE=django.db.backends.postgresql' >> .env
+	    echo 'SENTRY_DB_HOST=pgbouncer' >> .env
+	    echo 'SENTRY_DB_NAME=sentry' >> .env
+	    echo 'SENTRY_DB_USER=sentry' >> .env
+	    echo 'SENTRY_DB_PORT=5433' >> .env
+	    echo 'SENTRY_DB_PASSWORD=$${SENTRY_SECRET_KEY}' >> .env
+	    echo 'SENTRY_REDIS_HOST=redis' >> .env
+	    echo 'SENTRY_REDIS_PORT=6379' >> .env
+	    echo 'SENTRY_CONF=/etc/sentry' >> .env
+	    echo 'SENTRY_REDIS=redis://$${SENTRY_REDIS_HOST}:$${SENTRY_REDIS_PORT}' >> .env
 
 	    echo "" >> .env
 	    echo "CADENCE_ADDRESS=0.0.0.0:7933" >> .env
@@ -288,6 +305,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_POSTGRAPHILE=$$KONG_COOKIE_HASH_POSTGRAPHILE" >> .env
 	    echo "KONG_COOKIE_HASH_GITLAB=$$KONG_COOKIE_HASH_GITLAB" >> .env
 	    echo "KONG_COOKIE_HASH_CADENCE=$$KONG_COOKIE_HASH_CADENCE" >> .env
+	    echo "KONG_COOKIE_HASH_SENTRY=$$KONG_COOKIE_HASH_SENTRY" >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
@@ -307,6 +325,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_POSTGRAPHILE=$$KONG_COOKIE_BLOCK_POSTGRAPHILE" >> .env
 	    echo "KONG_COOKIE_BLOCK_GITLAB=$$KONG_COOKIE_BLOCK_GITLAB" >> .env
 	    echo "KONG_COOKIE_BLOCK_CADENCE=$$KONG_COOKIE_BLOCK_CADENCE" >> .env
+	    echo "KONG_COOKIE_BLOCK_SENTRY=$$KONG_COOKIE_BLOCK_SENTRY" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
@@ -326,6 +345,7 @@ setup:
 	    echo "CLIENT_SECRET_POSTGRAPHILE=$$CLIENT_SECRET_POSTGRAPHILE" >> .env
 	    echo "CLIENT_SECRET_GITLAB=$$CLIENT_SECRET_GITLAB" >> .env
 	    echo "CLIENT_SECRET_CADENCE=$$CLIENT_SECRET_CADENCE" >> .env
+	    echo "CLIENT_SECRET_SENTRY=$$CLIENT_SECRET_SENTRY" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_ID_ROOT=root" >> .env
@@ -345,6 +365,7 @@ setup:
 	    echo "CLIENT_ID_POSTGRAPHILE=postgraphile" >> .env
 	    echo "CLIENT_ID_GITLAB=gitlab" >> .env
 	    echo "CLIENT_ID_CADENCE=cadence" >> .env
+	    echo "CLIENT_ID_SENTRY=sentry" >> .env
 
 	    echo "" >> .env
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"
@@ -361,6 +382,7 @@ setup:
 	export PGBOUNCER_POSTGRAPHILE_PASSWORD=md5$$(printf '%s' "$$POSTGRAPHILE_DB_PASSWORD"postgraphile | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_GITLAB_PASSWORD=md5$$(printf '%s' "$$GITLAB_ROOT_PASSWORD"gitlab | md5sum | cut -d' ' -f1)
 	export PGBOUNCER_CADENCE_PASSWORD=md5$$(printf '%s' "$$CADENCE_PASSWORD"cadence | md5sum | cut -d' ' -f1)
+	export PGBOUNCER_SENTRY_SECRET_KEY=md5$$(printf '%s' "$$SENTRY_SECRET_KEY"sentry | md5sum | cut -d' ' -f1)
 
 	echo "" > services/pgbouncer/userlist.txt
 	echo "\"keycloak\" \"$$PGBOUNCER_KC_PASSWORD\"" >> services/pgbouncer/userlist.txt
@@ -372,6 +394,7 @@ setup:
 	echo "\"gitlab\" \"$$PGBOUNCER_GITLAB_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "\"cadence\" \"$$PGBOUNCER_CADENCE_PASSWORD\"" >> services/pgbouncer/userlist.txt
 	echo "\"cadence_visibility\" \"$$PGBOUNCER_CADENCE_PASSWORD\"" >> services/pgbouncer/userlist.txt
+	echo "\"sentry\" \"$$PGBOUNCER_SENTRY_SECRET_KEY\"" >> services/pgbouncer/userlist.txt
 
 	echo "[databases]" > services/pgbouncer/databases.ini
 	echo "postgres = host=postgres port=5432 dbname=postgres" >> services/pgbouncer/databases.ini
@@ -384,6 +407,7 @@ setup:
 	echo "gitlab = host=postgres port=5432 dbname=gitlab user=gitlab password=$$GITLAB_ROOT_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "cadence = host=postgres port=5432 dbname=cadence user=cadence password=$$CADENCE_PASSWORD" >> services/pgbouncer/databases.ini
 	echo "cadence_visibility = host=postgres port=5432 dbname=cadence_visibility user=cadence password=$$CADENCE_PASSWORD" >> services/pgbouncer/databases.ini
+	echo "sentry = host=postgres port=5432 dbname=sentry user=sentry password=$$SENTRY_SECRET_KEY" >> services/pgbouncer/databases.ini
 
 	echo "" > services/postgres/init/01.sql
 	echo "CREATE ROLE keycloak WITH LOGIN PASSWORD '$$KC_DB_PASSWORD';" >> services/postgres/init/01.sql
@@ -416,6 +440,9 @@ setup:
 	echo "CREATE DATABASE cadence_visibility OWNER cadence;" >> services/postgres/init/01.sql
 	echo "GRANT ALL PRIVILEGES ON DATABASE cadence_visibility TO cadence;" >> services/postgres/init/01.sql
 	echo "" >> services/postgres/init/01.sql
+	echo "CREATE ROLE sentry WITH LOGIN PASSWORD '$$SENTRY_SECRET_KEY';" >> services/postgres/init/01.sql
+	echo "CREATE DATABASE sentry OWNER sentry;" >> services/postgres/init/01.sql
+	echo "GRANT ALL PRIVILEGES ON DATABASE sentry TO sentry;" >> services/postgres/init/01.sql
 
 	if ! command -v volta >/dev/null; then curl https://get.volta.sh | bash; fi
 	if ! command -v node >/dev/null; then volta install node@"$$NODE_VERSION"; fi

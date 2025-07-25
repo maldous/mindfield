@@ -114,5 +114,6 @@ create_stack docs docs 8005 "docs.${DOMAIN}" "${CLIENT_ID_DOCS}" "${CLIENT_SECRE
 create_stack postgraphile postgraphile 5002 "postgraphile.${DOMAIN}" "${CLIENT_ID_POSTGRAPHILE}" "${CLIENT_SECRET_POSTGRAPHILE}" postgraphile "${KONG_COOKIE_HASH_POSTGRAPHILE}" "${KONG_COOKIE_BLOCK_POSTGRAPHILE}"
 create_stack gitlab gitlab 80 "gitlab.${DOMAIN}" "${CLIENT_ID_GITLAB}" "${CLIENT_SECRET_GITLAB}" gitlab "${KONG_COOKIE_HASH_GITLAB}" "${KONG_COOKIE_BLOCK_GITLAB}"
 create_stack cadence cadence 8088 "cadence.${DOMAIN}" "${CLIENT_ID_CADENCE}" "${CLIENT_SECRET_CADENCE}" cadence "${KONG_COOKIE_HASH_CADENCE}" "${KONG_COOKIE_BLOCK_CADENCE}"
+create_stack sentry sentry 9000 "sentry.${DOMAIN}" "${CLIENT_ID_SENTRY}" "${CLIENT_SECRET_SENTRY}" sentry "${KONG_COOKIE_HASH_SENTRY}" "${KONG_COOKIE_BLOCK_SENTRY}"
 
 echo -e "\nservices/kong/configure.sh"

@@ -386,12 +386,12 @@ services:
       keycloak:
         condition: service_healthy
         required: true
-    volumes:
-      - ./services/keycloak/configure.sh:/configure.sh
     env_file:
       - .env
     networks:
       - backend
+    volumes:
+      - ./services/keycloak/configure.sh:/configure.sh
     command:
       - /configure.sh
     restart: no
@@ -909,6 +909,53 @@ services:
       start_period: 60s
     cpus: 0.5
     mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
+
+  sentry:
+    image: getsentry/sentry:latest
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${SENTRY_DB_USER}:${SENTRY_DB_PASSWORD}@${SENTRY_DB_HOST}:${SENTRY_DB_PORT}/${SENTRY_DB_NAME}
+    volumes:
+      - ./services/sentry:/etc/sentry
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      sentry-configure:
+        condition: service_completed_successfully
+    networks: [backend, frontend]
+    restart: always
+    healthcheck:
+      test: ["CMD","true"]
+    cpus: 0.5
+    mem_limit: "512MiB"
+    tmpfs:
+      - /tmp
+
+  sentry-configure:
+    image: getsentry/sentry:latest
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${SENTRY_DB_USER}:${SENTRY_DB_PASSWORD}@${SENTRY_DB_HOST}:${SENTRY_DB_PORT}/${SENTRY_DB_NAME}
+    volumes:
+      - ./services/sentry:/etc/sentry
+      - ./services/sentry/configure.sh:/configure.sh
+    command:
+      - /configure.sh
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [backend]
+    restart: "no"
+    cpus: 0.5
+    mem_limit: "128MiB"
     tmpfs:
       - /tmp
 
