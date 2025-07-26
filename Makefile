@@ -2,6 +2,28 @@
 .DEFAULT_GOAL := help
 .ONESHELL:
 SHELL := bash
+KUBECTL ?= microk8s kubectl
+
+define METALLB_YAML
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: lan-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - 192.168.1.129-192.168.1.254
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: lan-adv
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+  - lan-pool
+endef
+export METALLB_YAML
 
 # Load environment variables
 ifneq (,$(wildcard .env))
@@ -48,33 +70,15 @@ phase0-cluster: ## Setup MicroK8s with required addons
 	microk8s status --wait-ready
 	microk8s enable dns storage metallb registry
 	@echo "Configuring MetalLB IP pool..."
-	kubectl apply -f - <<-'EOF'
-	apiVersion: metallb.io/v1beta1
-	kind: IPAddressPool
-	metadata:
-	  name: default
-	  namespace: metallb-system
-	spec:
-	  addresses:
-	  - 10.0.0.200-10.0.0.250
-	---
-	apiVersion: metallb.io/v1beta1
-	kind: L2Advertisement
-	metadata:
-	  name: default
-	  namespace: metallb-system
-	spec:
-	  ipAddressPools:
-	  - default
-	EOF
+	@echo "$$METALLB_YAML" | $(KUBECTL) apply -f -
 	@echo "✅ MicroK8s cluster ready"
 
 phase0-validate: ## Validate Phase 0 deliverables
 	@echo "🔍 Phase 0: Validation"
 	@echo "Checking MicroK8s addons..."
-	microk8s status | grep -E "dns|storage|metallb|registry" | grep enabled
+	microk8s status | grep -E "dns|storage|metallb|registry"
 	@echo "Checking MetalLB configuration..."
-	kubectl get ipaddresspool -n metallb-system default
+	$(KUBECTL) get ipaddresspool -n metallb-system default-addresspool
 	@echo "✅ Phase 0 validation complete"
 
 # =============================================================================
@@ -85,7 +89,7 @@ phase1: phase1-prereqs phase1-postgres phase1-kong phase1-validate ## Complete P
 phase1-prereqs: ## Install Gateway API CRDs and cert-manager
 	@echo "🔧 Phase 1: Prerequisites"
 	@echo "Installing Gateway API CRDs..."
-	kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/$(GATEWAY_API_VERSION)/standard-install.yaml
+	$(KUBECTL) apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/$(GATEWAY_API_VERSION)/standard-install.yaml
 	@echo "Adding Helm repositories..."
 	helm repo add kong https://charts.konghq.com
 	helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -102,13 +106,13 @@ phase1-prereqs: ## Install Gateway API CRDs and cert-manager
 		--namespace external-secrets-system --create-namespace \
 		--version $(ESO_CHART_VERSION)
 	@echo "Applying ESO ClusterSecretStore..."
-	kubectl apply -f k8s/security/eso-store.yaml
+	$(KUBECTL) apply -f k8s/security/eso-store.yaml
 	@echo "✅ Prerequisites installed"
 
 phase1-postgres: ## Deploy PostgreSQL with Bitnami Helm
 	@echo "🗄️ Phase 1: PostgreSQL"
-	kubectl create namespace data --dry-run=client -o yaml | kubectl apply -f -
-	kubectl label namespace data name=data --overwrite
+	$(KUBECTL) create namespace data --dry-run=client -o yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) label namespace data name=data --overwrite
 	helm upgrade --install postgresql bitnami/postgresql \
 		--namespace data \
 		--version $(POSTGRES_CHART_VERSION) \
@@ -120,9 +124,9 @@ phase1-postgres: ## Deploy PostgreSQL with Bitnami Helm
 
 phase1-kong: ## Deploy Kong Ingress Controller (DB-less)
 	@echo "🦍 Phase 1: Kong Gateway"
-	kubectl create namespace gateway --dry-run=client -o yaml | kubectl apply -f -
-	kubectl label namespace gateway name=gateway --overwrite
-	kubectl label namespace cert-manager name=cert-manager --overwrite
+	$(KUBECTL) create namespace gateway --dry-run=client -o yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) label namespace gateway name=gateway --overwrite
+	$(KUBECTL) label namespace cert-manager name=cert-manager --overwrite
 	helm upgrade --install kong kong/kong \
 		--namespace gateway \
 		--version $(KONG_CHART_VERSION) \
@@ -137,15 +141,15 @@ phase1-kong: ## Deploy Kong Ingress Controller (DB-less)
 phase1-validate: ## Validate Phase 1 deliverables
 	@echo "🔍 Phase 1: Validation"
 	@echo "Checking Gateway API CRDs..."
-	kubectl get crd gateways.gateway.networking.k8s.io
+	$(KUBECTL) get crd gateways.gateway.networking.k8s.io
 	@echo "Checking cert-manager..."
-	kubectl get pods -n cert-manager
+	$(KUBECTL) get pods -n cert-manager
 	@echo "Checking PostgreSQL..."
-	kubectl get pods -n data -l app.kubernetes.io/name=postgresql
+	$(KUBECTL) get pods -n data -l app.kubernetes.io/name=postgresql
 	@echo "Checking Kong Gateway..."
-	kubectl get pods -n gateway -l app.kubernetes.io/name=kong
+	$(KUBECTL) get pods -n gateway -l app.kubernetes.io/name=kong
 	@echo "Checking LoadBalancer IP..."
-	kubectl get svc -n gateway kong-kong-proxy
+	$(KUBECTL) get svc -n gateway kong-kong-proxy
 	@echo "✅ Phase 1 validation complete"
 
 # =============================================================================
@@ -155,12 +159,12 @@ phase2: phase2-keycloak phase2-policies phase2-validate ## Complete Phase 2: Ide
 
 phase2-keycloak: ## Deploy Keycloak behind Kong
 	@echo "🔐 Phase 2: Keycloak"
-	kubectl create namespace auth --dry-run=client -o yaml | kubectl apply -f -
-	kubectl label namespace auth name=auth --overwrite
+	$(KUBECTL) create namespace auth --dry-run=client -o yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) label namespace auth name=auth --overwrite
 	helm repo add bitnami https://charts.bitnami.com/bitnami
 	helm repo update
 	@echo "Creating Keycloak database user..."
-	kubectl exec -n data postgresql-0 -- psql -U postgres -c "CREATE USER keycloak WITH PASSWORD '$(KC_DB_PASSWORD)'; CREATE DATABASE keycloak OWNER keycloak;" || true
+	$(KUBECTL) exec -n data postgresql-0 -- psql -U postgres -c "CREATE USER keycloak WITH PASSWORD '$(KC_DB_PASSWORD)'; CREATE DATABASE keycloak OWNER keycloak;" || true
 	helm upgrade --install keycloak bitnami/keycloak \
 		--namespace auth \
 		--version $(KEYCLOAK_CHART_VERSION) \
@@ -178,34 +182,34 @@ phase2-keycloak: ## Deploy Keycloak behind Kong
 phase2-policies: ## Implement NetworkPolicies and Pod Security Standards
 	@echo "🛡️ Phase 2: Security Policies"
 	@echo "Applying Pod Security Standards..."
-	kubectl label namespace data pod-security.kubernetes.io/enforce=restricted --overwrite
-	kubectl label namespace auth pod-security.kubernetes.io/enforce=restricted --overwrite
-	kubectl label namespace gateway pod-security.kubernetes.io/enforce=baseline --overwrite
+	$(KUBECTL) label namespace data pod-security.kubernetes.io/enforce=restricted --overwrite
+	$(KUBECTL) label namespace auth pod-security.kubernetes.io/enforce=restricted --overwrite
+	$(KUBECTL) label namespace gateway pod-security.kubernetes.io/enforce=baseline --overwrite
 	@echo "Applying NetworkPolicies..."
-	kubectl apply -f k8s/security/
+	$(KUBECTL) apply -f k8s/security/
 	@echo "Applying DNS policies..."
-	kubectl apply -f k8s/security/dns-policies.yaml
+	$(KUBECTL) apply -f k8s/security/dns-policies.yaml
 	@echo "Applying Kong plugins..."
-	kubectl apply -f k8s/gateway/kong-plugins.yaml
+	$(KUBECTL) apply -f k8s/gateway/kong-plugins.yaml
 	@echo "Applying OIDC secrets..."
-	kubectl apply -f k8s/gateway/oidc-secrets.yaml
+	$(KUBECTL) apply -f k8s/gateway/oidc-secrets.yaml
 	@echo "Deploying Redis for rate limiting..."
-	kubectl apply -f k8s/gateway/redis.yaml
+	$(KUBECTL) apply -f k8s/gateway/redis.yaml
 	@echo "Applying Gateway and HTTPRoutes..."
-	kubectl apply -f k8s/gateway/gateway.yaml
-	kubectl apply -f k8s/gateway/httproutes/
+	$(KUBECTL) apply -f k8s/gateway/gateway.yaml
+	$(KUBECTL) apply -f k8s/gateway/httproutes/
 	@echo "✅ Security policies applied"
 
 phase2-validate: ## Validate Phase 2 deliverables
 	@echo "🔍 Phase 2: Validation"
 	@echo "Checking Keycloak..."
-	kubectl get pods -n auth -l app.kubernetes.io/name=keycloak
+	$(KUBECTL) get pods -n auth -l app.kubernetes.io/name=keycloak
 	@echo "Checking Pod Security Standards..."
-	kubectl get namespace data -o jsonpath='{.metadata.labels}'
+	$(KUBECTL) get namespace data -o jsonpath='{.metadata.labels}'
 	@echo "Checking NetworkPolicies..."
-	kubectl get networkpolicy --all-namespaces
+	$(KUBECTL) get networkpolicy --all-namespaces
 	@echo "Checking Kong plugins..."
-	kubectl get kongclusterplugin
+	$(KUBECTL) get kongclusterplugin
 	@echo "✅ Phase 2 validation complete"
 
 # =============================================================================
@@ -215,8 +219,8 @@ phase3: phase3-prometheus phase3-loki phase3-tempo phase3-validate ## Complete P
 
 phase3-prometheus: ## Deploy kube-prometheus-stack
 	@echo "📊 Phase 3: Prometheus Stack"
-	kubectl create namespace observability --dry-run=client -o yaml | kubectl apply -f -
-	kubectl label namespace observability name=observability --overwrite
+	$(KUBECTL) create namespace observability --dry-run=client -o yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) label namespace observability name=observability --overwrite
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 	helm repo update
 	helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
@@ -260,13 +264,13 @@ phase3-tempo: ## Deploy Tempo
 phase3-validate: ## Validate Phase 3 deliverables
 	@echo "🔍 Phase 3: Validation"
 	@echo "Checking Prometheus..."
-	kubectl get pods -n observability -l app.kubernetes.io/name=prometheus
+	$(KUBECTL) get pods -n observability -l app.kubernetes.io/name=prometheus
 	@echo "Checking Grafana..."
-	kubectl get pods -n observability -l app.kubernetes.io/name=grafana
+	$(KUBECTL) get pods -n observability -l app.kubernetes.io/name=grafana
 	@echo "Checking Loki..."
-	kubectl get pods -n observability -l app.kubernetes.io/name=loki
+	$(KUBECTL) get pods -n observability -l app.kubernetes.io/name=loki
 	@echo "Checking Tempo..."
-	kubectl get pods -n observability -l app.kubernetes.io/name=tempo
+	$(KUBECTL) get pods -n observability -l app.kubernetes.io/name=tempo
 	@echo "✅ Phase 3 validation complete"
 
 # =============================================================================
@@ -276,13 +280,13 @@ phase4: phase4-temporal phase4-validate ## Complete Phase 4: Applications
 
 phase4-temporal: ## Deploy Temporal (replace Cadence)
 	@echo "⏰ Phase 4: Temporal"
-	kubectl create namespace temporal --dry-run=client -o yaml | kubectl apply -f -
-	kubectl label namespace temporal name=temporal --overwrite
+	$(KUBECTL) create namespace temporal --dry-run=client -o yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) label namespace temporal name=temporal --overwrite
 	helm repo add temporalio https://temporalio.github.io/helm-charts
 	helm repo update
 	@echo "Creating Temporal database users..."
-	kubectl exec -n data postgresql-0 -- psql -U postgres -c "CREATE USER temporal WITH PASSWORD '$(TEMPORAL_DB_PASSWORD)'; CREATE DATABASE temporal OWNER temporal;" || true
-	kubectl exec -n data postgresql-0 -- psql -U postgres -c "CREATE USER temporal_visibility WITH PASSWORD '$(TEMPORAL_VIS_DB_PASSWORD)'; CREATE DATABASE temporal_visibility OWNER temporal_visibility;" || true
+	$(KUBECTL) exec -n data postgresql-0 -- psql -U postgres -c "CREATE USER temporal WITH PASSWORD '$(TEMPORAL_DB_PASSWORD)'; CREATE DATABASE temporal OWNER temporal;" || true
+	$(KUBECTL) exec -n data postgresql-0 -- psql -U postgres -c "CREATE USER temporal_visibility WITH PASSWORD '$(TEMPORAL_VIS_DB_PASSWORD)'; CREATE DATABASE temporal_visibility OWNER temporal_visibility;" || true
 	@echo "Rendering Temporal values with environment variables..."
 	envsubst < k8s/configs/temporal-values.yaml > /tmp/temporal-values.rendered.yaml
 	helm upgrade --install temporal temporalio/temporal \
@@ -294,7 +298,7 @@ phase4-temporal: ## Deploy Temporal (replace Cadence)
 phase4-validate: ## Validate Phase 4 deliverables
 	@echo "🔍 Phase 4: Validation"
 	@echo "Checking Temporal..."
-	kubectl get pods -n temporal -l app.kubernetes.io/name=temporal
+	$(KUBECTL) get pods -n temporal -l app.kubernetes.io/name=temporal
 	@echo "✅ Phase 4 validation complete"
 
 # =============================================================================
@@ -337,14 +341,14 @@ phase5-validate: ## Validate Phase 5 deliverables
 	@echo "Checking Flux..."
 	flux get all || echo "Flux not configured"
 	@echo "Checking Velero..."
-	kubectl get pods -n velero -l app.kubernetes.io/name=velero
+	$(KUBECTL) get pods -n velero -l app.kubernetes.io/name=velero
 	@echo "Applying backup schedules..."
-	kubectl apply -f k8s/velero/backup-schedule.yaml
+	$(KUBECTL) apply -f k8s/velero/backup-schedule.yaml
 	@echo "Testing backup/restore..."
 	velero backup create test-backup --include-namespaces default --wait || echo "Backup test failed"
 	velero restore create test-restore --from-backup test-backup --wait || echo "Restore test failed"
 	@echo "Applying GitOps manifests..."
-	envsubst < flux/clusters/local/observability-source.yaml | kubectl apply -f -
+	envsubst < flux/clusters/local/observability-source.yaml | $(KUBECTL) apply -f -
 	@echo "✅ Phase 5 validation complete"
 
 # =============================================================================
@@ -375,16 +379,16 @@ status: ## Show cluster status
 	@echo "MicroK8s Status:"
 	microk8s status
 	@echo "\nNamespaces:"
-	kubectl get namespaces
+	$(KUBECTL) get namespaces
 	@echo "\nPods by namespace:"
-	kubectl get pods --all-namespaces
+	$(KUBECTL) get pods --all-namespaces
 	@echo "\nServices with external IPs:"
-	kubectl get svc --all-namespaces -o wide | grep -E "LoadBalancer|NodePort"
+	$(KUBECTL) get svc --all-namespaces -o wide | grep -E "LoadBalancer|NodePort"
 
 clean: ## Clean up failed deployments
 	@echo "🧽 Cleaning up..."
 	helm list --all-namespaces --failed -q | xargs -r helm delete
-	kubectl get pods --all-namespaces --field-selector=status.phase=Failed -o name | xargs -r kubectl delete
+	$(KUBECTL) get pods --all-namespaces --field-selector=status.phase=Failed -o name | xargs -r $(KUBECTL) delete
 
 reset: ## Reset entire cluster (DANGEROUS)
 	@echo "⚠️  This will destroy the entire cluster!"
