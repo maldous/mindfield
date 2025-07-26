@@ -86,6 +86,7 @@ ensure_client "${CLIENT_ID_GITLAB}" "${CLIENT_SECRET_GITLAB}" "https://gitlab.${
 ensure_client "${CLIENT_ID_CADENCE}" "${CLIENT_SECRET_CADENCE}" "https://cadence.${DOMAIN}/callback" "https://cadence.${DOMAIN}"
 ensure_client "${CLIENT_ID_SENTRY}" "${CLIENT_SECRET_SENTRY}" "https://sentry.${DOMAIN}/callback" "https://sentry.${DOMAIN}"
 ensure_client "${CLIENT_ID_NUI}" "${CLIENT_SECRET_NUI}" "https://nui.${DOMAIN}/callback" "https://nui.${DOMAIN}"
+ensure_client "${CLIENT_ID_AKHQ}" "${CLIENT_SECRET_AKHQ}" "https://akhq.${DOMAIN}/callback" "https://akhq.${DOMAIN}"
 
 role_json=$( curl -sS -H "${AUTH_HEADER}" -H "${JSON_HEADER}" "${KC_URL}/admin/realms/${NAME}/roles/user" || true)
 role_uid=$(printf '%s' "$role_json" | jq -r '.id // empty')

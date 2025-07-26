@@ -89,6 +89,7 @@ setup:
 	    KONG_COOKIE_HASH_CADENCE="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_SENTRY="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_HASH_NUI="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_HASH_AKHQ="$$(openssl rand -hex 32)"
 
 	    KONG_COOKIE_BLOCK_ROOT="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_PGADMIN="$$(openssl rand -hex 32)"
@@ -109,6 +110,7 @@ setup:
 	    KONG_COOKIE_BLOCK_CADENCE="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_SENTRY="$$(openssl rand -hex 32)"
 	    KONG_COOKIE_BLOCK_NUI="$$(openssl rand -hex 32)"
+	    KONG_COOKIE_BLOCK_AKHQ="$$(openssl rand -hex 32)"
 
 	    CLIENT_SECRET_ROOT="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_PGADMIN="$$(openssl rand -hex 32)"
@@ -129,6 +131,7 @@ setup:
 	    CLIENT_SECRET_CADENCE="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_SENTRY="$$(openssl rand -hex 32)"
 	    CLIENT_SECRET_NUI="$$(openssl rand -hex 32)"
+	    CLIENT_SECRET_AKHQ="$$(openssl rand -hex 32)"
 
 	    POSTGRES_PASSWORD="$$(pwgen -s -c -n 16 1)"
 	    MINIO_ROOT_PASSWORD="$$(pwgen -s -c -n 16 1)"
@@ -333,6 +336,9 @@ setup:
 	    echo 'CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR=1' >> .env
 	    echo 'CONNECT_STATUS_STORAGE_REPLICATION_FACTOR=1' >> .env
 	    echo 'CONNECT_REST_ADVERTISED_HOST_NAME=kafka-connect' >> .env
+	    echo 'CONNECT_OFFSET_FLUSH_INTERVAL_MS=60000' >> .env
+	    echo 'CONNECT_METRICS_SAMPLE_WINDOW_MS=60000' >> .env
+	    echo 'CONNECT_METRICS_NUM_SAMPLES=2' >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_HASH_ROOT=$$KONG_COOKIE_HASH_ROOT" >> .env
@@ -354,6 +360,7 @@ setup:
 	    echo "KONG_COOKIE_HASH_CADENCE=$$KONG_COOKIE_HASH_CADENCE" >> .env
 	    echo "KONG_COOKIE_HASH_SENTRY=$$KONG_COOKIE_HASH_SENTRY" >> .env
 	    echo "KONG_COOKIE_HASH_NUI=$$KONG_COOKIE_HASH_NUI" >> .env
+	    echo "KONG_COOKIE_HASH_AKHQ=$$KONG_COOKIE_HASH_AKHQ" >> .env
 
 	    echo "" >> .env
 	    echo "KONG_COOKIE_BLOCK_ROOT=$$KONG_COOKIE_BLOCK_ROOT" >> .env
@@ -375,6 +382,7 @@ setup:
 	    echo "KONG_COOKIE_BLOCK_CADENCE=$$KONG_COOKIE_BLOCK_CADENCE" >> .env
 	    echo "KONG_COOKIE_BLOCK_SENTRY=$$KONG_COOKIE_BLOCK_SENTRY" >> .env
 	    echo "KONG_COOKIE_BLOCK_NUI=$$KONG_COOKIE_BLOCK_NUI" >> .env
+	    echo "KONG_COOKIE_BLOCK_AKHQ=$$KONG_COOKIE_BLOCK_AKHQ" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_SECRET_ROOT=$$CLIENT_SECRET_ROOT" >> .env
@@ -396,6 +404,7 @@ setup:
 	    echo "CLIENT_SECRET_CADENCE=$$CLIENT_SECRET_CADENCE" >> .env
 	    echo "CLIENT_SECRET_SENTRY=$$CLIENT_SECRET_SENTRY" >> .env
 	    echo "CLIENT_SECRET_NUI=$$CLIENT_SECRET_NUI" >> .env
+	    echo "CLIENT_SECRET_AKHQ=$$CLIENT_SECRET_AKHQ" >> .env
 
 	    echo "" >> .env
 	    echo "CLIENT_ID_ROOT=root" >> .env
@@ -417,6 +426,7 @@ setup:
 	    echo "CLIENT_ID_CADENCE=cadence" >> .env
 	    echo "CLIENT_ID_SENTRY=sentry" >> .env
 	    echo "CLIENT_ID_NUI=nui" >> .env
+	    echo "CLIENT_ID_AKHQ=akhq" >> .env
 
 	    echo "" >> .env
 	    openssl enc -aes-256-cbc -pbkdf2 -salt -in .env -out .enc -k "$$PASSWORD"

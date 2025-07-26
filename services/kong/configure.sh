@@ -116,5 +116,6 @@ create_stack gitlab gitlab 80 "gitlab.${DOMAIN}" "${CLIENT_ID_GITLAB}" "${CLIENT
 create_stack cadence cadence 8088 "cadence.${DOMAIN}" "${CLIENT_ID_CADENCE}" "${CLIENT_SECRET_CADENCE}" cadence "${KONG_COOKIE_HASH_CADENCE}" "${KONG_COOKIE_BLOCK_CADENCE}"
 create_stack sentry sentry 9000 "sentry.${DOMAIN}" "${CLIENT_ID_SENTRY}" "${CLIENT_SECRET_SENTRY}" sentry "${KONG_COOKIE_HASH_SENTRY}" "${KONG_COOKIE_BLOCK_SENTRY}"
 create_stack nui nui 31311 "nui.${DOMAIN}" "${CLIENT_ID_NUI}" "${CLIENT_SECRET_NUI}" nui "${KONG_COOKIE_HASH_NUI}" "${KONG_COOKIE_BLOCK_NUI}"
+create_stack akhq akhq 8080 "akhq.${DOMAIN}" "${CLIENT_ID_AKHQ}" "${CLIENT_SECRET_AKHQ}" akhq "${KONG_COOKIE_HASH_AKHQ}" "${KONG_COOKIE_BLOCK_AKHQ}"
 
 echo -e "\nservices/kong/configure.sh"

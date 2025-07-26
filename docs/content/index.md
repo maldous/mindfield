@@ -1,5 +1,6 @@
 # Documentation
 
+- **[akhq](https://akhq.aldous.info/)** – Kafka cluster management
 - **[aldous.info](https://aldous.info/)** – Root domain or landing page
 - **[alertmanager](https://alertmanager.aldous.info/)** – Alert routing and management  
 - **[blackbox](https://blackbox.aldous.info/)** – Monitoring endpoint blackbox exporter  
@@ -12,6 +13,7 @@
 - **[kuma](https://kuma.aldous.info/)** – Service mesh and API gateway  
 - **[mailhog](https://mailhog.aldous.info/)** – Email testing and SMTP capture tool  
 - **[minio](https://minio.aldous.info/)** – S3-compatible object storage  
+- **[nui](https://nui.aldous.info/)** – Durable at-lease-once streams
 - **[pgadmin](https://pgadmin.aldous.info/)** – PostgreSQL database administration  
 - **[postgraphile](https://postgraphile.aldous.info/graphiql)** – GraphQL API for PostgreSQL  
 - **[promtail](https://promtail.aldous.info/)** – Log collector for Loki  
@@ -19,4 +21,3 @@
 - **[search](https://search.aldous.info/)** – Internal or site-wide search service  
 - **[sentry](https://sentry.aldous.info/)** – Error monitoring and reporting
 - **[sonarqube](https://sonarqube.aldous.info/)** – Code quality and security analysis  
-- **[nui](https://nui.aldous.info/)** – Durable at-lease-once streams

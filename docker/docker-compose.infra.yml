@@ -370,6 +370,34 @@ services:
     tmpfs:
       - /tmp
 
+  kafka-configure:
+    image: bitnami/kafka:latest
+    depends_on:
+      kafka:
+        condition: service_healthy
+        required: true
+    volumes:
+      - ./services/kafka/configure.sh:/configure.sh
+    env_file:
+      - .env
+    networks:
+      - backend
+    command:
+      - /configure.sh
+    restart: no
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 1
+    mem_limit: "1GiB"
+    tmpfs:
+      - /tmp
+
   kafka-connect:
     image: confluentinc/cp-kafka-connect:latest
     depends_on:
@@ -389,7 +417,7 @@ services:
       retries: 12
       start_period: 60s
     cpus: 0.5
-    mem_limit: "512MiB"
+    mem_limit: "2GiB"
     tmpfs:
       - /tmp
 
@@ -419,7 +447,7 @@ services:
       retries: 12
       start_period: 60s
     cpus: 0.5
-    mem_limit: "512MiB"
+    mem_limit: "1GiB"
     tmpfs:
       - /tmp
 
@@ -648,16 +676,8 @@ services:
       - -js
       - --store_dir=/data/jetstream
     restart: always
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - "curl -f http://localhost:8222/healthz || exit 1"
-      interval: 5s
-      timeout: 5s
-      retries: 12
-      start_period: 60s
     cpus: 0.5
-    mem_limit: "512MiB"
+    mem_limit: "1Gb"
     tmpfs:
       - /tmp
 
@@ -708,7 +728,7 @@ services:
       retries: 12
       start_period: 60s
     cpus: 1
-    mem_limit: "1GiB"
+    mem_limit: "2GiB"
     tmpfs:
       - /tmp
     ulimits:
@@ -1114,7 +1134,7 @@ services:
       retries: 12
       start_period: 60s
     cpus: 0.25
-    mem_limit: "256MiB"
+    mem_limit: "512MiB"
     tmpfs:
       - /tmp
 

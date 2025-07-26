@@ -7,7 +7,7 @@
   }
 }
 
-nui.{$DOMAIN}, sentry.{$DOMAIN}, cadence.{$DOMAIN}, alertmanager.{$DOMAIN}, blackbox.{$DOMAIN}, docs.{$DOMAIN}, gitlab.{$DOMAIN}, grafana.{$DOMAIN}, jaeger.{$DOMAIN}, keycloak.{$DOMAIN}, kuma.{$DOMAIN}, mailhog.{$DOMAIN}, minio.{$DOMAIN}, pgadmin.{$DOMAIN}, postgraphile.{$DOMAIN}, promtail.{$DOMAIN}, redisinsight.{$DOMAIN}, search.{$DOMAIN}, sonarqube.{$DOMAIN}, {$DOMAIN} {
+akhq.{$DOMAIN}, nui.{$DOMAIN}, sentry.{$DOMAIN}, cadence.{$DOMAIN}, alertmanager.{$DOMAIN}, blackbox.{$DOMAIN}, docs.{$DOMAIN}, gitlab.{$DOMAIN}, grafana.{$DOMAIN}, jaeger.{$DOMAIN}, keycloak.{$DOMAIN}, kuma.{$DOMAIN}, mailhog.{$DOMAIN}, minio.{$DOMAIN}, pgadmin.{$DOMAIN}, postgraphile.{$DOMAIN}, promtail.{$DOMAIN}, redisinsight.{$DOMAIN}, search.{$DOMAIN}, sonarqube.{$DOMAIN}, {$DOMAIN} {
   tls {$LETSENCRYPT_EMAIL}
   @hsts host {$DOMAIN}
   header @hsts Strict-Transport-Security "max-age=31536000"
