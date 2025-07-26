@@ -3,6 +3,9 @@ name: infra
 
 services:
 
+  netdata:
+    ports:
+      - '0.0.0.0:19999:19999/tcp'
   alertmanager:
     ports:
       - '0.0.0.0:9093:9093/tcp'

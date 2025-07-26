@@ -1,7 +1,7 @@
 # Documentation
 
-- **[akhq](https://akhq.aldous.info/)** – Kafka cluster management
 - **[aldous.info](https://aldous.info/)** – Root domain or landing page
+- **[akhq](https://akhq.aldous.info/)** – Kafka cluster management
 - **[alertmanager](https://alertmanager.aldous.info/)** – Alert routing and management  
 - **[blackbox](https://blackbox.aldous.info/)** – Monitoring endpoint blackbox exporter  
 - **[cadence](https://cadence.aldous.info/)** – Workflow orchestration system
@@ -13,6 +13,7 @@
 - **[kuma](https://kuma.aldous.info/)** – Service mesh and API gateway  
 - **[mailhog](https://mailhog.aldous.info/)** – Email testing and SMTP capture tool  
 - **[minio](https://minio.aldous.info/)** – S3-compatible object storage  
+- **[netdata](https://netdata.aldous.info/)** – Real-time system monitoring
 - **[nui](https://nui.aldous.info/)** – Durable at-lease-once streams
 - **[pgadmin](https://pgadmin.aldous.info/)** – PostgreSQL database administration  
 - **[postgraphile](https://postgraphile.aldous.info/graphiql)** – GraphQL API for PostgreSQL  

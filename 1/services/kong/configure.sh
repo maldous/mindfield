@@ -117,5 +117,7 @@ create_stack cadence cadence 8088 "cadence.${DOMAIN}" "${CLIENT_ID_CADENCE}" "${
 create_stack sentry sentry 9000 "sentry.${DOMAIN}" "${CLIENT_ID_SENTRY}" "${CLIENT_SECRET_SENTRY}" sentry "${KONG_COOKIE_HASH_SENTRY}" "${KONG_COOKIE_BLOCK_SENTRY}"
 create_stack nui nui 31311 "nui.${DOMAIN}" "${CLIENT_ID_NUI}" "${CLIENT_SECRET_NUI}" nui "${KONG_COOKIE_HASH_NUI}" "${KONG_COOKIE_BLOCK_NUI}"
 create_stack akhq akhq 8080 "akhq.${DOMAIN}" "${CLIENT_ID_AKHQ}" "${CLIENT_SECRET_AKHQ}" akhq "${KONG_COOKIE_HASH_AKHQ}" "${KONG_COOKIE_BLOCK_AKHQ}"
+create_stack netdata netdata 19999 "netdata.${DOMAIN}" "${CLIENT_ID_NETDATA}" "${CLIENT_SECRET_NETDATA}" netdata "${KONG_COOKIE_HASH_NETDATA}" "${KONG_COOKIE_BLOCK_NETDATA}"
+create_stack kong kong 8002 "kong.${DOMAIN}" "${CLIENT_ID_KONG}" "${CLIENT_SECRET_KONG}" kong "${KONG_COOKIE_HASH_KONG}" "${KONG_COOKIE_BLOCK_KONG}"
 
 echo -e "\nservices/kong/configure.sh"

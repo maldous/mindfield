@@ -1,0 +1,55 @@
+# ClusterIssuer for Cloudflare DNS-01 (supports wildcards)
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-dns
+spec:
+  acme:
+    email: root@aldous.info  # Replace with your email
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: le-account-key
+    solvers:
+    - dns01:
+        cloudflare:
+          email: root@aldous.info  # Replace with your email
+          apiTokenSecretRef:
+            name: cloudflare-api-token
+            key: token
+
+---
+# Cloudflare API Token Secret (managed by ESO)
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: cloudflare-token
+  namespace: cert-manager
+spec:
+  refreshInterval: 24h
+  secretStoreRef:
+    name: k8s-secrets-store
+    kind: ClusterSecretStore
+  target:
+    name: cloudflare-api-token
+    creationPolicy: Owner
+  data:
+  - secretKey: token
+    remoteRef:
+      key: cloudflare-api-token-source
+      property: token
+
+---
+# Wildcard TLS certificate for Kong
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: edge-cert
+  namespace: gateway
+spec:
+  secretName: edge-cert
+  issuerRef:
+    name: letsencrypt-dns
+    kind: ClusterIssuer
+  dnsNames:
+    - "aldous.info"
+    - "*.aldous.info"

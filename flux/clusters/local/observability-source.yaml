@@ -1,0 +1,38 @@
+# GitRepository for observability manifests
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: observability-source
+  namespace: flux-system
+spec:
+  interval: 5m
+  url: https://github.com/${GITHUB_USER}/${GITHUB_REPO}
+  ref:
+    branch: main
+  ignore: |
+    # exclude all
+    /*
+    # include observability
+    !/k8s/observability/
+
+---
+# Kustomization for observability
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: observability
+  namespace: flux-system
+spec:
+  interval: 10m
+  sourceRef:
+    kind: GitRepository
+    name: observability-source
+  path: "./k8s/observability"
+  prune: true
+  wait: true
+  timeout: 5m
+  healthChecks:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: kube-prometheus-stack-operator
+    namespace: observability
