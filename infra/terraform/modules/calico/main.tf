@@ -16,7 +16,6 @@ locals {
     "search",
     "devtools",
     "minio",
-    "rook-ceph",
   ]
   apiserver_cidr = "${data.kubernetes_service.apiserver.spec[0].cluster_ip}/32"
   node_api_ports = [6443, 16443]

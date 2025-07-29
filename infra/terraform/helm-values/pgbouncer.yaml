@@ -1,0 +1,58 @@
+# PgBouncer Configuration
+image:
+  tag: "1.23.1"
+
+auth:
+  username: "pgbouncer"
+  password: "pgbouncer"
+  database: "mindfield"
+
+postgresql:
+  hostname: "postgresql"
+  port: 5432
+  username: "mindfield"
+  password: "mindfield"
+  database: "mindfield"
+
+pgbouncer:
+  poolMode: "transaction"
+  maxClientConnections: 100
+  defaultPoolSize: 25
+  reservePoolSize: 5
+  reservePoolTimeout: 5
+  maxDbConnections: 50
+  maxUserConnections: 50
+  serverRoundRobin: 1
+  logConnections: 1
+  logDisconnections: 1
+  logPoolerErrors: 1
+  statsUsers: "pgbouncer"
+  adminUsers: "pgbouncer"
+
+resources:
+  requests:
+    memory: 64Mi
+    cpu: 50m
+  limits:
+    memory: 128Mi
+    cpu: 100m
+
+service:
+  type: ClusterIP
+  port: 5432
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1

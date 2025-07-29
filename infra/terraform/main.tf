@@ -42,7 +42,78 @@ module "external_dns" {
   zone_id      = var.cloudflare_zone_id
   cf_api_token = local.cloudflare_api_token
   depends_on = [
-    module.cert_manager
+    module.cert_issuers
+  ]
+}
+
+# Storage Operators
+module "rook_operator" {
+  source  = "./modules/rook_operator"
+  enabled = true
+  depends_on = [
+    module.calico
+  ]
+}
+
+module "rook_cluster" {
+  source       = "./modules/rook_cluster"
+  enabled      = true
+  storage_size = var.opensearch_storage
+  depends_on = [
+    module.rook_operator
+  ]
+}
+
+module "minio_operator" {
+  source  = "./modules/minio_operator"
+  enabled = true
+  depends_on = [
+    module.calico
+  ]
+}
+
+module "minio_tenant" {
+  source       = "./modules/minio_tenant"
+  enabled      = true
+  storage_size = var.minio_storage
+  depends_on = [
+    module.minio_operator,
+    module.rook_cluster
+  ]
+}
+
+# Datastores
+module "postgres" {
+  source       = "./modules/postgres"
+  enabled      = true
+  storage_size = var.postgres_storage
+  pg_version   = var.postgres_version
+  depends_on = [
+    module.rook_cluster
+  ]
+}
+
+module "redis" {
+  source  = "./modules/redis"
+  enabled = true
+  depends_on = [
+    module.rook_cluster
+  ]
+}
+
+module "pgbouncer" {
+  source  = "./modules/pgbouncer"
+  enabled = true
+  depends_on = [
+    module.postgres
+  ]
+}
+
+module "postgraphile" {
+  source  = "./modules/postgraphile"
+  enabled = true
+  depends_on = [
+    module.postgres
   ]
 }
 

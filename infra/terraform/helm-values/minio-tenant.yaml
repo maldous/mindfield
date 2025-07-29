@@ -1,0 +1,89 @@
+# MinIO Tenant Configuration
+tenant:
+  name: minio-tenant
+  image:
+    repository: quay.io/minio/minio
+    tag: RELEASE.2024-12-18T13-15-44Z
+    pullPolicy: IfNotPresent
+  
+  pools:
+    - servers: 1
+      name: pool-0
+      volumesPerServer: 4
+      size: 100Gi
+      storageClassName: ceph-block
+      
+  mountPath: /export
+  subPath: /data
+  
+  requestAutoCert: false
+  
+  s3:
+    bucketDNS: false
+  
+  podManagementPolicy: Parallel
+  
+  liveness:
+    httpGet:
+      path: /minio/health/live
+      port: 9000
+    initialDelaySeconds: 120
+    periodSeconds: 20
+  
+  readiness:
+    httpGet:
+      path: /minio/health/ready
+      port: 9000
+    initialDelaySeconds: 120
+    periodSeconds: 20
+  
+  startup:
+    httpGet:
+      path: /minio/health/live
+      port: 9000
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 30
+
+  exposeServices:
+    minio: true
+    console: true
+
+  serviceAccountName: minio-tenant
+
+  users:
+    - accessKey: minio
+      secretKey: minio123
+      policy: readwrite
+
+  buckets:
+    - name: data
+      policy: none
+      purge: false
+    - name: backups
+      policy: none
+      purge: false
+
+  certificate:
+    requestAutoCert: false
+
+  features:
+    bucketDNS: false
+    domains: {}
+
+  ## List of secret names to use for generating MinIO users during tenant provisioning
+  credsSecret: {}
+
+  ## PodDisruptionBudget settings
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
+  podDisruptionBudget:
+    enabled: false
+    maxUnavailable: 1
+
+  ## Specify the service account to use for the MinIO pods. If 'create' is set to 'false'
+  ## and 'name' is left empty, the account 'default' will be used.
+  serviceAccount:
+    create: true
+    ## The name of the service account to use.
+    ## If not set and create is true, a name is generated using the fullname template
+    name: minio-tenant

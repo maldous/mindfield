@@ -1,0 +1,34 @@
+# Rook Operator Configuration
+image:
+  tag: v1.15.8
+
+resources:
+  limits:
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Enable monitoring
+monitoring:
+  enabled: false
+
+# CSI configuration
+csi:
+  enableRbdDriver: true
+  enableCephfsDriver: true
+  enableGrpcMetrics: false
+
+# Admission controller
+admissionController:
+  tolerations: []
+  nodeAffinity: {}
+
+# Discover devices
+discoverDaemonUdev: true
+
+# Enable host networking for better performance
+hostpathRequiresPrivileged: true
+
+# Log level
+logLevel: INFO

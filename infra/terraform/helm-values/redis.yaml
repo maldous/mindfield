@@ -1,0 +1,42 @@
+# Redis Configuration
+image:
+  tag: "7.4"
+
+auth:
+  enabled: true
+  password: "redis"
+
+master:
+  persistence:
+    enabled: true
+    storageClass: "ceph-block"
+    size: 8Gi
+    accessModes:
+      - ReadWriteOnce
+  
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 200m
+
+replica:
+  replicaCount: 0
+
+metrics:
+  enabled: false
+
+commonConfiguration: |
+  # Enable AOF persistence
+  appendonly yes
+  appendfsync everysec
+  
+  # Memory management
+  maxmemory-policy allkeys-lru
+  
+  # Disable dangerous commands
+  rename-command FLUSHDB ""
+  rename-command FLUSHALL ""
+  rename-command DEBUG ""

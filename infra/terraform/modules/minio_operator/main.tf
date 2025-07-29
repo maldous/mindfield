@@ -1,9 +1,15 @@
-# Placeholder. Implement helm_release / manifests when enabling.
-locals {
-  noop = true
-}
+resource "helm_release" "minio_operator" {
+  count            = var.enabled ? 1 : 0
+  name             = "minio-operator"
+  namespace        = "minio-operator"
+  create_namespace = true
 
-# Example (disabled): null_resource just to be structurally valid
-resource "null_resource" "noop" {
-  count = var.enabled ? 1 : 0
+  repository      = "https://operator.min.io"
+  chart           = "operator"
+  version         = "~> 6.0"
+  timeout         = 300
+  atomic          = true
+  cleanup_on_fail = true
+
+  values = [file("${path.root}/helm-values/minio-operator.yaml")]
 }

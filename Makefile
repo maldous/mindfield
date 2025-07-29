@@ -6,9 +6,9 @@ ifneq (,$(wildcard .env))
 	export TF_VAR_cloudflare_api_token := $(CLOUDFLARE_API_TOKEN)
 endif
 
-.PHONY: all microk8s terraform install addons calico certs issuers secrets dns apply destroy
+.PHONY: all microk8s terraform install addons calico certs issuers dns storage datastores apply destroy
 
-all: microk8s terraform addons calico certs issuers secrets dns
+all: microk8s terraform addons calico certs issuers dns storage # datastores
 
 install: microk8s terraform
 
@@ -32,11 +32,20 @@ certs:
 issuers:
 	cd $(TF_DIR) && terraform apply -target=module.cert_issuers -auto-approve
 
-secrets:
-	cd $(TF_DIR) && terraform apply -target=module.external_secrets -auto-approve
-
 dns:
 	cd $(TF_DIR) && terraform apply -target=module.external_dns -auto-approve
+
+storage:
+	cd $(TF_DIR) && terraform apply -target=module.rook_operator -auto-approve
+	cd $(TF_DIR) && terraform apply -target=module.rook_cluster -auto-approve
+	cd $(TF_DIR) && terraform apply -target=module.minio_operator -auto-approve
+	cd $(TF_DIR) && terraform apply -target=module.minio_tenant -auto-approve
+
+datastores:
+	cd $(TF_DIR) && terraform apply -target=module.postgres -auto-approve
+	cd $(TF_DIR) && terraform apply -target=module.redis -auto-approve
+	cd $(TF_DIR) && terraform apply -target=module.pgbouncer -auto-approve
+	cd $(TF_DIR) && terraform apply -target=module.postgraphile -auto-approve
 
 apply:
 	cd $(TF_DIR) && terraform apply -auto-approve

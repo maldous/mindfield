@@ -1,9 +1,15 @@
-# Placeholder. Implement helm_release / manifests when enabling.
-locals {
-  noop = true
-}
+resource "helm_release" "pgbouncer" {
+  count            = var.enabled ? 1 : 0
+  name             = "pgbouncer"
+  namespace        = "data"
+  create_namespace = false
 
-# Example (disabled): null_resource just to be structurally valid
-resource "null_resource" "noop" {
-  count = var.enabled ? 1 : 0
+  repository      = "https://charts.bitnami.com/bitnami"
+  chart           = "pgbouncer"
+  version         = "~> 1.0"
+  timeout         = 300
+  atomic          = true
+  cleanup_on_fail = true
+
+  values = [file("${path.root}/helm-values/pgbouncer.yaml")]
 }
