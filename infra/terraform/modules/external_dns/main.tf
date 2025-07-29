@@ -3,13 +3,10 @@ resource "helm_release" "external_dns" {
   name             = "external-dns"
   namespace        = "networking"
   create_namespace = true
-
-  repository = "https://kubernetes-sigs.github.io/external-dns/"
-  chart      = "external-dns"
-  version    = "1.18.0"
-
-  values = [file("${path.root}/helm-values/external-dns.yaml")]
-
+  repository       = "https://kubernetes-sigs.github.io/external-dns/"
+  chart            = "external-dns"
+  version          = "1.18.0"
+  values           = [file("${path.root}/helm-values/external-dns.yaml")]
   set {
     name  = "provider.name"
     value = "cloudflare"

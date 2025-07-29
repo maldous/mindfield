@@ -1,44 +1,44 @@
 data "kubernetes_service" "apiserver" {
   metadata {
-    name = "kubernetes"
+    name      = "kubernetes"
     namespace = "default"
   }
 }
 locals {
   namespaces = [
     "cert-manager",
-    "networking",     
+    "networking",
     "eso",
-    "gateway",        
-    "auth",           
-    "data",           
-    "monitoring",     
-    "search",         
-    "devtools",       
+    "gateway",
+    "auth",
+    "data",
+    "monitoring",
+    "search",
+    "devtools",
     "minio",
     "rook-ceph",
   ]
   apiserver_cidr = "${data.kubernetes_service.apiserver.spec[0].cluster_ip}/32"
   node_api_ports = [6443, 16443]
-  webhook_port = 10250
+  webhook_port   = 10250
 }
 resource "kubernetes_namespace_v1" "ns" {
   count = var.enabled ? length(local.namespaces) : 0
   metadata {
     name = local.namespaces[count.index]
     labels = {
-      "pod-security.kubernetes.io/enforce" = "baseline"
+      "pod-security.kubernetes.io/enforce"         = "baseline"
       "pod-security.kubernetes.io/enforce-version" = "latest"
-      "pod-security.kubernetes.io/audit" = "baseline"
-      "pod-security.kubernetes.io/warn" = "baseline"
+      "pod-security.kubernetes.io/audit"           = "baseline"
+      "pod-security.kubernetes.io/warn"            = "baseline"
     }
   }
 }
 resource "kubernetes_network_policy_v1" "default_deny" {
-  depends_on = [ kubernetes_namespace_v1.ns ]
-  for_each = var.enabled ? toset(local.namespaces) : []
+  depends_on = [kubernetes_namespace_v1.ns]
+  for_each   = var.enabled ? toset(local.namespaces) : []
   metadata {
-    name = "default-deny-all"
+    name      = "default-deny-all"
     namespace = each.value
   }
   spec {
@@ -47,10 +47,10 @@ resource "kubernetes_network_policy_v1" "default_deny" {
   }
 }
 resource "kubernetes_network_policy_v1" "allow_dns" {
-  depends_on = [ kubernetes_namespace_v1.ns ]
-  for_each = var.enabled ? toset(local.namespaces) : []
+  depends_on = [kubernetes_namespace_v1.ns]
+  for_each   = var.enabled ? toset(local.namespaces) : []
   metadata {
-    name = "allow-dns"
+    name      = "allow-dns"
     namespace = each.value
   }
   spec {
@@ -65,21 +65,21 @@ resource "kubernetes_network_policy_v1" "allow_dns" {
         }
       }
       ports {
-        port = 53
+        port     = 53
         protocol = "UDP"
       }
       ports {
-        port = 53
+        port     = 53
         protocol = "TCP"
       }
     }
   }
 }
 resource "kubernetes_network_policy_v1" "allow_apiserver_service_egress" {
-  depends_on = [ kubernetes_namespace_v1.ns ]
-  for_each = var.enabled ? toset(local.namespaces) : []
+  depends_on = [kubernetes_namespace_v1.ns]
+  for_each   = var.enabled ? toset(local.namespaces) : []
   metadata {
-    name = "allow-apiserver-egress"
+    name      = "allow-apiserver-egress"
     namespace = each.value
   }
   spec {
@@ -92,17 +92,17 @@ resource "kubernetes_network_policy_v1" "allow_apiserver_service_egress" {
         }
       }
       ports {
-        port = 443
+        port     = 443
         protocol = "TCP"
       }
     }
   }
 }
 resource "kubernetes_network_policy_v1" "allow_apiserver_node_egress" {
-  depends_on = [ kubernetes_namespace_v1.ns ]
-  for_each = var.enabled ? toset(local.namespaces) : []
+  depends_on = [kubernetes_namespace_v1.ns]
+  for_each   = var.enabled ? toset(local.namespaces) : []
   metadata {
-    name = "allow-apiserver-node-egress"
+    name      = "allow-apiserver-node-egress"
     namespace = each.value
   }
   spec {
@@ -119,7 +119,7 @@ resource "kubernetes_network_policy_v1" "allow_apiserver_node_egress" {
         dynamic "ports" {
           for_each = toset(local.node_api_ports)
           content {
-            port = ports.value
+            port     = ports.value
             protocol = "TCP"
           }
         }
@@ -128,10 +128,10 @@ resource "kubernetes_network_policy_v1" "allow_apiserver_node_egress" {
   }
 }
 resource "kubernetes_network_policy_v1" "cm_egress_internet" {
-  depends_on = [ kubernetes_namespace_v1.ns ]
-  count = var.enabled ? 1 : 0
+  depends_on = [kubernetes_namespace_v1.ns]
+  count      = var.enabled ? 1 : 0
   metadata {
-    name = "allow-egress-internet"
+    name      = "allow-egress-internet"
     namespace = "cert-manager"
   }
   spec {
@@ -147,10 +147,10 @@ resource "kubernetes_network_policy_v1" "cm_egress_internet" {
   }
 }
 resource "kubernetes_network_policy_v1" "extdns_egress_internet" {
-  depends_on = [ kubernetes_namespace_v1.ns ]
-  count = var.enabled ? 1 : 0
+  depends_on = [kubernetes_namespace_v1.ns]
+  count      = var.enabled ? 1 : 0
   metadata {
-    name = "allow-egress-internet"
+    name      = "allow-egress-internet"
     namespace = "networking"
   }
   spec {
@@ -166,10 +166,10 @@ resource "kubernetes_network_policy_v1" "extdns_egress_internet" {
   }
 }
 resource "kubernetes_network_policy_v1" "eso_egress_internet" {
-  depends_on = [ kubernetes_namespace_v1.ns ]
-  count = var.enabled ? 1 : 0
+  depends_on = [kubernetes_namespace_v1.ns]
+  count      = var.enabled ? 1 : 0
   metadata {
-    name = "allow-egress-internet"
+    name      = "allow-egress-internet"
     namespace = "eso"
   }
   spec {
@@ -182,21 +182,21 @@ resource "kubernetes_network_policy_v1" "eso_egress_internet" {
         }
       }
       ports {
-        port = 443
+        port     = 443
         protocol = "TCP"
       }
       ports {
-        port = 80
+        port     = 80
         protocol = "TCP"
       }
     }
   }
 }
 resource "kubernetes_network_policy_v1" "webhook_ingress_cert_manager" {
-  depends_on = [ kubernetes_namespace_v1.ns ]
-  count = var.enabled ? 1 : 0
+  depends_on = [kubernetes_namespace_v1.ns]
+  count      = var.enabled ? 1 : 0
   metadata {
-    name = "allow-webhook-ingress"
+    name      = "allow-webhook-ingress"
     namespace = "cert-manager"
   }
   spec {
@@ -219,17 +219,17 @@ resource "kubernetes_network_policy_v1" "webhook_ingress_cert_manager" {
         }
       }
       ports {
-        port = local.webhook_port
+        port     = local.webhook_port
         protocol = "TCP"
       }
     }
   }
 }
 resource "kubernetes_network_policy_v1" "webhook_ingress_eso" {
-  depends_on = [ kubernetes_namespace_v1.ns ]
-  count = var.enabled ? 1 : 0
+  depends_on = [kubernetes_namespace_v1.ns]
+  count      = var.enabled ? 1 : 0
   metadata {
-    name = "allow-webhook-ingress"
+    name      = "allow-webhook-ingress"
     namespace = "eso"
   }
   spec {
@@ -252,7 +252,7 @@ resource "kubernetes_network_policy_v1" "webhook_ingress_eso" {
         }
       }
       ports {
-        port = local.webhook_port
+        port     = local.webhook_port
         protocol = "TCP"
       }
     }

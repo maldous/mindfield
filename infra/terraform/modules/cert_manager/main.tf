@@ -7,10 +7,6 @@ resource "kubernetes_secret" "cloudflare_api_token" {
     token = var.cf_api_token
   }
 }
-
-###############################################################################
-# Install cert‑manager CRDs via Helm
-###############################################################################
 resource "helm_release" "cert_manager" {
   count            = var.enabled ? 1 : 0
   name             = "cert-manager"
@@ -31,13 +27,8 @@ resource "helm_release" "cert_manager" {
     kubernetes_secret.cloudflare_api_token
   ]
 }
-
-###############################################################################
-# Apply ClusterIssuer and Certificate with kubectl (avoids CRD-plan errors)
-###############################################################################
 resource "null_resource" "clusterissuer_staging" {
   count = var.enabled ? 1 : 0
-
   provisioner "local-exec" {
     command = <<-EOT
       microk8s kubectl apply -f - <<EOF
@@ -66,10 +57,8 @@ EOF
 
   depends_on = [helm_release.cert_manager]
 }
-
 resource "null_resource" "clusterissuer_prod" {
   count = var.enabled ? 1 : 0
-
   provisioner "local-exec" {
     command = <<-EOT
       microk8s kubectl apply -f - <<EOF
@@ -101,7 +90,6 @@ EOF
 
 resource "null_resource" "wildcard_certificate" {
   count = var.enabled ? 1 : 0
-
   provisioner "local-exec" {
     command = <<-EOT
       microk8s kubectl apply -f - <<EOF
@@ -124,6 +112,5 @@ spec:
 EOF
     EOT
   }
-
   depends_on = [null_resource.clusterissuer_prod]
 }

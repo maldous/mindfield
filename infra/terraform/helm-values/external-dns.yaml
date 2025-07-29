@@ -1,21 +1,15 @@
 interval: 1m
-
 provider:
   name: cloudflare
   cloudflare:
     proxied: true
-
 policy: upsert-only
-
 sources:
   - ingress
-
 txtPrefix: "k8s."
 txtOwnerId: "mindfield-dev"
-
 serviceMonitor:
   enabled: false
-
 env:
   - name: CF_API_TOKEN
     valueFrom:

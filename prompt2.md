@@ -242,7 +242,6 @@ module "external_dns" {
   enabled      = false
   domain       = var.domain
   zone_id      = var.cloudflare_zone_id
-  cf_api_token = var.cloudflare_api_token
 }
 
 module "external_secrets" {
