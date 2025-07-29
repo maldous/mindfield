@@ -1,0 +1,209 @@
+---
+name: infra
+
+services:
+
+  netdata:
+    ports:
+      - '0.0.0.0:19999:19999/tcp'
+  alertmanager:
+    ports:
+      - '0.0.0.0:9093:9093/tcp'
+  analyzer:
+    ports:
+      - '0.0.0.0:3003:3000/tcp' # 3003
+  anonymizer:
+    ports:
+      - '0.0.0.0:3004:3000/tcp' # 3004
+  blackbox:
+    ports:
+      - '0.0.0.0:9115:9115/tcp'
+  caddy:
+    ports:
+      - '0.0.0.0:80:80/tcp'
+      - '0.0.0.0:443:443/tcp'
+      - '0.0.0.0:443:443/udp'
+      - '0.0.0.0:2019:2019/tcp'
+  cadence:
+    ports:
+      - '0.0.0.0:8088:8088/tcp'
+  cadence-server:
+    ports:
+      - '0.0.0.0:7833:7833/tcp'
+      - '0.0.0.0:7933:7933/tcp'
+      - '0.0.0.0:7934:7934/tcp'
+      - '0.0.0.0:7935:7935/tcp'
+      - '0.0.0.0:7939:7939/tcp'
+  collector:
+    ports:
+      - '0.0.0.0:4317:4317/tcp'
+      - '0.0.0.0:4318:4318/tcp'
+      - '0.0.0.0:8888:8888/tcp'
+      - '0.0.0.0:8889:8889/tcp'
+      - '0.0.0.0:55678:55678/tcp'
+      - '0.0.0.0:55679:55679/tcp'
+  docs:
+    ports:
+      - '0.0.0.0:8005:8005/tcp'
+  exporter:
+    ports:
+      - '0.0.0.0:9100:9100/tcp'
+  gitlab:
+    ports:
+      - '0.0.0.0:2222:22/tcp'
+      - '0.0.0.0:8082:80/tcp' # 8082
+  grafana:
+    ports:
+      - '0.0.0.0:3001:3000/tcp' # 3001
+  jaeger:
+    ports:
+      - '0.0.0.0:4417:4317/tcp' # 4417
+      - '0.0.0.0:4418:4318/tcp' # 4418
+      - '0.0.0.0:5775:5775/udp'
+      - '0.0.0.0:5778:5778/tcp'
+      - '0.0.0.0:6831:6831/udp'
+      - '0.0.0.0:6832:6832/udp'
+      - '0.0.0.0:9411:9411/tcp'
+      - '0.0.0.0:14250:14250/tcp'
+      - '0.0.0.0:14268:14268/tcp'
+      - '0.0.0.0:14269:14269/tcp'
+      - '0.0.0.0:16685:16685/tcp'
+      - '0.0.0.0:16686:16686/tcp'
+  keycloak:
+    ports:
+      - '0.0.0.0:8080:8080/tcp'
+      - '0.0.0.0:9002:9000/tcp' # 9002
+  kong:
+    ports:
+      - '0.0.0.0:8000:8000/tcp'
+      - '0.0.0.0:8001:8001/tcp'
+      - '0.0.0.0:8002:8002/tcp'
+      - '0.0.0.0:8003:8003/tcp'
+      - '0.0.0.0:8004:8004/tcp'
+  kuma:
+    ports:
+      - '0.0.0.0:3002:3001/tcp' # 3002
+  loki:
+    ports:
+      - '0.0.0.0:3100:3100/tcp'
+      - '0.0.0.0:9096:9096/tcp'
+  mailhog:
+    ports:
+      - '0.0.0.0:1025:1025/tcp'
+      - '0.0.0.0:8025:8025/tcp'
+  minio:
+    ports:
+      - '0.0.0.0:9000:9000/tcp'
+      - '0.0.0.0:9001:9001/tcp'
+  opensearch:
+    ports:
+      - '0.0.0.0:9200:9200/tcp'
+      - '0.0.0.0:9300:9300/tcp'
+      - '0.0.0.0:9600:9600/tcp'
+      - '0.0.0.0:9650:9650/tcp'
+  pgadmin:
+    ports:
+      - '0.0.0.0:8081:80/tcp' # 8081
+  pgbouncer:
+    ports:
+      - '0.0.0.0:5433:5433/tcp'
+  postgraphile:
+    ports:
+      - '0.0.0.0:5002:5002/tcp'
+  postgres:
+    ports:
+      - '0.0.0.0:5432:5432/tcp'
+  prometheus:
+    ports:
+      - '0.0.0.0:9090:9090/tcp'
+  promtail:
+    ports:
+      - '0.0.0.0:9080:9080/tcp'
+  redactor:
+    ports:
+      - '0.0.0.0:3005:3000/tcp' # 3005
+  redis:
+    ports:
+      - '0.0.0.0:6379:6379/tcp'
+  redisinsight:
+    ports:
+      - '0.0.0.0:5540:5540/tcp'
+  sentry:
+    ports:
+      - '0.0.0.0:9005:9000/tcp' # 9005
+  search:
+    ports:
+      - '0.0.0.0:5601:5601/tcp'
+  sonarqube:
+    ports:
+      - '0.0.0.0:9003:9000/tcp' # 9003
+      - '0.0.0.0:9004:9001/tcp' # 9004
+  nats:
+    ports:
+      - '0.0.0.0:4222:4222/tcp'
+      - '0.0.0.0:6222:6222/tcp'
+      - '0.0.0.0:8222:8222/tcp'
+  nui:
+    ports:
+      - '0.0.0.0:31311:31311/tcp'
+  kafka:
+    ports:
+      - '0.0.0.0:9092:9092/tcp'
+  schema-registry:
+    ports:
+      - '0.0.0.0:8084:8081/tcp' # 8084
+  kafka-connect:
+    ports:
+      - '0.0.0.0:8083:8083/tcp'
+
+networks:
+
+  backend:
+    name: infra_backend
+    driver: bridge
+  frontend:
+    name: infra_frontend
+    driver: bridge
+  monitoring:
+    name: infra_monitoring
+    driver: bridge
+
+#  default:
+#    name: infra_default
+# volumes:
+#  storybook_next:
+#    name: mindfield_storybook_next
+#  storybook_node_modules:
+#    name: mindfield_storybook_node_modules
+#  web_next:
+#    name: mindfield_web_next
+#  web_node_modules:
+#    name: mindfield_web_node_modules
+#
+#   api:
+#     ports:
+#       - '0.0.0.0:3000:3000'
+#   grapesjs:
+#     ports:
+#       - '0.0.0.0:3000:3000'
+#   redoc:
+#     ports:
+#       - '0.0.0.0:3000:3000'
+#   render:
+#     ports:
+#       - '0.0.0.0:3000:3000'
+#   storybook:
+#     ports:
+#       - '0.0.0.0:6006:6006'
+#   submission:
+#     ports:
+#       - '0.0.0.0:3000:3000'
+#   swagger-ui:
+#     ports:
+#       - '0.0.0.0:3000:3000'
+#   transform:
+#     ports:
+#       - '0.0.0.0:3000:3000'
+#   web:
+#     ports:
+#       - '0.0.0.0:3000:3000'

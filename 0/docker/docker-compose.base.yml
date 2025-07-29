@@ -1,0 +1,90 @@
+---
+x-build-env:
+
+  BUILDKIT_INLINE_CACHE: "1"
+  BUILDKIT_PROGRESS: plain
+  DOCKER_BUILDKIT: "1"
+
+name: mindfield
+
+networks:
+
+  backend:
+    name: mindfield_backend
+    driver: bridge
+
+  default:
+    name: mindfield_default
+
+  frontend:
+    name: mindfield_frontend
+    driver: bridge
+
+  monitoring:
+    name: mindfield_monitoring
+    driver: bridge
+
+volumes:
+
+  grafana_dashboards:
+    name: mindfield_grafana_dashboards
+
+  grafana_data:
+    name: mindfield_grafana_data
+
+  grafana_provisioning:
+    name: mindfield_grafana_provisioning
+
+  keycloak_data:
+    name: mindfield_keycloak_data
+
+  kong_db_data:
+    name: mindfield_kong_db_data
+
+  minio_data:
+    name: mindfield_minio_data
+
+  opensearch_data:
+    name: mindfield_opensearch_data
+
+  pgadmin_data:
+    name: mindfield_pgadmin_data
+
+  postgres_data:
+    name: mindfield_postgres_data
+
+  prometheus_data:
+    name: mindfield_prometheus_data
+
+  redis_data:
+    name: mindfield_redis_data
+
+  sonarqube_db_data:
+    name: mindfield_sonarqube_db_data
+
+  sonarqube_es7:
+    name: mindfield_sonarqube_es7
+
+  sonarqube_extensions:
+    name: mindfield_sonarqube_extensions
+
+  sonarqube_logs:
+    name: mindfield_sonarqube_logs
+
+  storybook_next:
+    name: mindfield_storybook_next
+
+  storybook_node_modules:
+    name: mindfield_storybook_node_modules
+
+  trivy_cache:
+    name: mindfield_trivy_cache
+
+  uptime_kuma_data:
+    name: mindfield_uptime_kuma_data
+
+  web_next:
+    name: mindfield_web_next
+
+  web_node_modules:
+    name: mindfield_web_node_modules

@@ -1,0 +1,48 @@
+# edge-cert-mirror.yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: edge-cert
+  namespace: auth
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: k8s-secrets-store
+  target:
+    name: edge-cert
+    creationPolicy: Owner
+    template:
+      type: kubernetes.io/tls
+  data:
+    - secretKey: tls.crt
+      remoteRef:
+        key: edge-cert
+        property: tls.crt
+        namespace: gateway
+    - secretKey: tls.key
+      remoteRef:
+        key: edge-cert
+        property: tls.key
+        namespace: gateway
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: edge-cert
+  namespace: ci
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: k8s-secrets-store
+  target:
+    name: edge-cert
+    creationPolicy: Owner
+    template:
+      type: kubernetes.io/tls
+  data:
+    - secretKey: tls.crt
+      remoteRef: { key: edge-cert, property: tls.crt, namespace: gateway }
+    - secretKey: tls.key
+      remoteRef: { key: edge-cert, property: tls.key, namespace: gateway }

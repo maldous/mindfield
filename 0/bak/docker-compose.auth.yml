@@ -1,0 +1,129 @@
+---
+name: mindfield
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    depends_on:
+      mailhog:
+        condition: service_healthy
+        required: true
+      pgbouncer:
+        condition: service_healthy
+        required: true
+    volumes:
+      - type: bind
+        source: ./services/keycloak/themes
+        target: /opt/keycloak/themes
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+    command:
+      - start
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.5
+    mem_limit: "536870912"
+
+  keycloak-configure:
+    image: badouralix/curl-jq:latest
+    depends_on:
+      keycloak:
+        condition: service_healthy
+        required: true
+    volumes:
+      - type: bind
+        source: ./services/keycloak/configure.sh
+        target: /configure.sh
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+    command:
+      - /configure.sh
+    restart: no
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    cpus: 0.25
+
+  kong:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.kong
+      cache_from:
+        - type=registry,ref=localhost:5001/cache
+      cache_to:
+        - type=registry,ref=localhost:5001/cache,mode=max
+    depends_on:
+      kong-bootstrap:
+        condition: service_completed_successfully
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - frontend
+      - backend
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - kong health
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+
+  kong-bootstrap:
+    image: mindfield/kong:local
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - backend
+    command: kong migrations bootstrap
+    restart: no
+
+  kong-configure:
+    image: badouralix/curl-jq:latest
+    depends_on:
+      kong:
+        condition: service_healthy
+        required: true
+    volumes:
+      - type: bind
+        source: ./services/kong/configure.sh
+        target: /configure.sh
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+    command:
+      - /configure.sh
+    restart: "no"
+    cpus: 0.25

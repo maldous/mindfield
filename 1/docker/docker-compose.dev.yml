@@ -1,0 +1,98 @@
+#---
+#name: infra
+#
+#services:
+#
+#   redoc:
+#     image: redocly/redoc:latest
+#     depends_on:
+#       api:
+#         condition: service_started
+#         required: true
+#     env_file:
+#       - .env
+#     networks:
+#       - backend
+#       - frontend
+#     cpus: 0.25
+#     mem_limit: "128MiB"
+#
+#   swagger-ui:
+#     image: swaggerapi/swagger-ui:latest
+#     depends_on:
+#       api:
+#         condition: service_started
+#         required: true
+#     env_file:
+#       - .env
+#     networks:
+#       - backend
+#       - frontend
+#     cpus: 0.25
+#     mem_limit: "128MiB"
+#
+#   storybook:
+#     build:
+#       context: .
+#       dockerfile: docker/Dockerfile.storybook
+#       args:
+#         NODE_MAJOR: ${NODE_MAJOR}
+#       cache_from:
+#         - type=registry,ref=localhost:5001/cache
+#       cache_to:
+#         - type=registry,ref=localhost:5001/cache,mode=max
+#     volumes:
+#       - type: bind
+#         source: ./core/ui
+#         target: /app/core/ui
+#         bind:
+#           create_host_path: true
+#       - type: bind
+#         source: ./apps/web
+#         target: /app/apps/web
+#         bind:
+#           create_host_path: true
+#       - type: bind
+#         source: .
+#         target: /app
+#         bind:
+#           create_host_path: true
+#       - type: volume
+#         source: storybook_next
+#         target: /app/.next
+#         volume: {}
+#       - type: volume
+#         source: storybook_node_modules
+#         target: /app/apps/web/node_modules
+#         volume: {}
+#     env_file:
+#       - .env
+#     networks:
+#       - frontend
+#     cpus: 0.5
+#     mem_limit: "512MiB"
+#
+#   grapesjs:
+#     build:
+#       context: .
+#       dockerfile: docker/Dockerfile.grapesjs
+#       args:
+#         NODE_MAJOR: "24"
+#       cache_from:
+#         - type=registry,ref=localhost:5001/cache
+#       cache_to:
+#         - type=registry,ref=localhost:5001/cache,mode=max
+#     depends_on:
+#       minio:
+#         condition: service_healthy
+#         required: true
+#       pgbouncer:
+#         condition: service_healthy
+#         required: true
+#     env_file:
+#       - .env
+#     networks:
+#       - backend
+#       - frontend
+#     cpus: 0.5
+#     mem_limit: "256MiB"

@@ -1,0 +1,153 @@
+Name:             keycloak-0
+Namespace:        auth
+Priority:         0
+Service Account:  keycloak
+Node:             foo/192.168.1.26
+Start Time:       Sun, 27 Jul 2025 22:47:08 +1000
+Labels:           app.kubernetes.io/app-version=26.3.2
+                  app.kubernetes.io/component=keycloak
+                  app.kubernetes.io/instance=keycloak
+                  app.kubernetes.io/managed-by=Helm
+                  app.kubernetes.io/name=keycloak
+                  app.kubernetes.io/version=26.3.2
+                  apps.kubernetes.io/pod-index=0
+                  controller-revision-hash=keycloak-cbd65cdc8
+                  helm.sh/chart=keycloak-24.8.1
+                  statefulset.kubernetes.io/pod-name=keycloak-0
+Annotations:      checksum/configmap-env-vars: 0066c2590df4a7d73046a0f94e3447b4e7a60fc6bc4134722d95b318141901c7
+                  checksum/secrets: 4f52ee7246b6b1a69ee210edb409c0c61a5c1426f3dd2f801a70ee8f0990cd73
+                  cni.projectcalico.org/containerID: f88d820d320f0aa57850cb42907f9525a0321a1fb5c285c56afbe141dba0d232
+                  cni.projectcalico.org/podIP: 10.1.24.20/32
+                  cni.projectcalico.org/podIPs: 10.1.24.20/32
+Status:           Running
+IP:               10.1.24.20
+IPs:
+  IP:           10.1.24.20
+Controlled By:  StatefulSet/keycloak
+Init Containers:
+  prepare-write-dirs:
+    Container ID:    containerd://7bbc83efda65121eb08d473730dd3c171e855b624182b95171eeaefc9bacfd9d
+    Image:           docker.io/bitnami/keycloak:26.3.2-debian-12-r0
+    Image ID:        docker.io/bitnami/keycloak@sha256:7c534a00285e6029f1f0a5a951f6254dea8a78ad73d05380c35100d6c7fb31e2
+    Port:            <none>
+    Host Port:       <none>
+    SeccompProfile:  RuntimeDefault
+    Command:
+      /bin/bash
+    Args:
+      -ec
+      . /opt/bitnami/scripts/liblog.sh
+      
+      info "Copying writable dirs to empty dir"
+      # In order to not break the application functionality we need to make some
+      # directories writable, so we need to copy it to an empty dir volume
+      cp -r --preserve=mode,timestamps /opt/bitnami/keycloak/lib/quarkus /emptydir/app-quarkus-dir
+      cp -r --preserve=mode,timestamps /opt/bitnami/keycloak/data /emptydir/app-data-dir
+      cp -r --preserve=mode,timestamps /opt/bitnami/keycloak/providers /emptydir/app-providers-dir
+      cp -r --preserve=mode,timestamps /opt/bitnami/keycloak/themes /emptydir/app-themes-dir
+      info "Copy operation completed"
+      
+    State:          Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Sun, 27 Jul 2025 22:47:08 +1000
+      Finished:     Sun, 27 Jul 2025 22:47:08 +1000
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:                750m
+      ephemeral-storage:  2Gi
+      memory:             768Mi
+    Requests:
+      cpu:                500m
+      ephemeral-storage:  50Mi
+      memory:             512Mi
+    Environment:          <none>
+    Mounts:
+      /emptydir from empty-dir (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-x8v6t (ro)
+Containers:
+  keycloak:
+    Container ID:    containerd://b937cdff5e7573c5579a4e269545b2fa170a1ace734c72514f6f2889ee5ed20c
+    Image:           docker.io/bitnami/keycloak:26.3.2-debian-12-r0
+    Image ID:        docker.io/bitnami/keycloak@sha256:7c534a00285e6029f1f0a5a951f6254dea8a78ad73d05380c35100d6c7fb31e2
+    Ports:           8080/TCP, 7800/TCP
+    Host Ports:      0/TCP, 0/TCP
+    SeccompProfile:  RuntimeDefault
+    State:           Waiting
+      Reason:        CrashLoopBackOff
+    Last State:      Terminated
+      Reason:        Error
+      Exit Code:     1
+      Started:       Sun, 27 Jul 2025 22:50:46 +1000
+      Finished:      Sun, 27 Jul 2025 22:50:52 +1000
+    Ready:           False
+    Restart Count:   5
+    Limits:
+      cpu:                750m
+      ephemeral-storage:  2Gi
+      memory:             768Mi
+    Requests:
+      cpu:                500m
+      ephemeral-storage:  50Mi
+      memory:             512Mi
+    Liveness:             tcp-socket :http delay=300s timeout=5s period=1s #success=1 #failure=3
+    Readiness:            http-get http://:http/realms/master delay=30s timeout=1s period=10s #success=1 #failure=3
+    Environment Variables from:
+      keycloak-env-vars  ConfigMap  Optional: false
+    Environment:
+      KUBERNETES_NAMESPACE:              auth (v1:metadata.namespace)
+      BITNAMI_DEBUG:                     false
+      KC_BOOTSTRAP_ADMIN_PASSWORD_FILE:  /opt/bitnami/keycloak/secrets/admin-password
+      KEYCLOAK_DATABASE_PASSWORD_FILE:   /opt/bitnami/keycloak/secrets/db-db-password
+      KEYCLOAK_HTTP_RELATIVE_PATH:       /
+      KC_SPI_ADMIN_REALM:                master
+    Mounts:
+      /bitnami/keycloak from empty-dir (rw,path="app-volume-dir")
+      /opt/bitnami/keycloak/conf from empty-dir (rw,path="app-conf-dir")
+      /opt/bitnami/keycloak/data from empty-dir (rw,path="app-data-dir")
+      /opt/bitnami/keycloak/lib/quarkus from empty-dir (rw,path="app-quarkus-dir")
+      /opt/bitnami/keycloak/providers from empty-dir (rw,path="app-providers-dir")
+      /opt/bitnami/keycloak/secrets from keycloak-secrets (rw)
+      /opt/bitnami/keycloak/themes from empty-dir (rw,path="app-themes-dir")
+      /tmp from empty-dir (rw,path="tmp-dir")
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-x8v6t (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  empty-dir:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+  keycloak-secrets:
+    Type:                Projected (a volume that contains injected data from multiple sources)
+    SecretName:          keycloak
+    SecretOptionalName:  <nil>
+    SecretName:          keycloak-externaldb
+    SecretOptionalName:  <nil>
+  kube-api-access-x8v6t:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                   From               Message
+  ----     ------     ----                  ----               -------
+  Normal   Scheduled  5m13s                 default-scheduler  Successfully assigned auth/keycloak-0 to foo
+  Normal   Pulled     5m14s                 kubelet            Container image "docker.io/bitnami/keycloak:26.3.2-debian-12-r0" already present on machine
+  Normal   Created    5m14s                 kubelet            Created container: prepare-write-dirs
+  Normal   Started    5m14s                 kubelet            Started container prepare-write-dirs
+  Normal   Pulled     96s (x6 over 5m13s)   kubelet            Container image "docker.io/bitnami/keycloak:26.3.2-debian-12-r0" already present on machine
+  Normal   Created    96s (x6 over 5m13s)   kubelet            Created container: keycloak
+  Normal   Started    96s (x6 over 5m13s)   kubelet            Started container keycloak
+  Warning  BackOff    24s (x25 over 4m46s)  kubelet            Back-off restarting failed container keycloak in pod keycloak-0_auth(95fab10a-d7ec-4863-a89c-b960437b3583)

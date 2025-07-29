@@ -1,0 +1,52 @@
+# Daily backup schedule
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: daily-backup
+  namespace: velero
+spec:
+  schedule: "0 2 * * *"  # 2 AM daily
+  template:
+    ttl: 720h  # 30 days
+    includedNamespaces:
+    - data
+    - auth
+    - gateway
+    - observability
+    - temporal
+    excludedResources:
+    - events
+    - events.events.k8s.io
+    storageLocation: default
+    volumeSnapshotLocations:
+    - default
+
+---
+# Weekly full backup
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: weekly-full-backup
+  namespace: velero
+spec:
+  schedule: "0 1 * * 0"  # 1 AM every Sunday
+  template:
+    ttl: 2160h  # 90 days
+    includedNamespaces:
+    - "*"
+    excludedResources:
+    - events
+    - events.events.k8s.io
+    storageLocation: default
+    volumeSnapshotLocations:
+    - default
+
+---
+# Test backup for validation
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup-test
+  namespace: default
+data:
+  test: "This is a test configmap for backup validation"

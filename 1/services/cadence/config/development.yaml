@@ -1,0 +1,12 @@
+clusterMetadata:
+  enableGlobalDomain: false
+  failoverVersionIncrement: 1
+  masterClusterName: cluster0
+  currentClusterName: cluster0
+  clusterInformation:
+    cluster0:
+      enabled: true
+      initialFailoverVersion: 1
+      rpcName: cadence-frontend
+      rpcAddress: cadence-server:7833
+

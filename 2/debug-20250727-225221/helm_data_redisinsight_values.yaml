@@ -1,0 +1,11 @@
+USER-SUPPLIED VALUES:
+image:
+  tag: 2.50.0
+persistence:
+  enabled: true
+  size: 2Gi
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+service:
+  type: ClusterIP

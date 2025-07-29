@@ -1,0 +1,19 @@
+packages:
+  - apps/*
+  - core/*
+  - services/*
+
+onlyBuiltDependencies:
+  - "@nestjs/core"
+  - "@scarf/scarf"
+  - chromedriver
+  - core-js-pure
+  - esbuild
+  - msgpackr-extract
+  - nestjs-pino
+  - protobufjs
+  - puppeteer
+  - sharp
+  - unrs-resolver
+
+workspace-concurrency: 0

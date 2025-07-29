@@ -1,0 +1,48 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["**/.env.*local"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"]
+    },
+    "build:prod": {
+      "dependsOn": ["build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"]
+    },
+    "build:android": {
+      "dependsOn": ["^build"],
+      "outputs": ["build/**", "*.apk", "*.aab"]
+    },
+
+    "storybook": {
+      "cache": false,
+      "persistent": true
+    },
+    "build-storybook": {
+      "dependsOn": ["build"],
+      "outputs": ["storybook-static/**"]
+    },
+
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+
+    "lint": {
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "type-check": {
+      "outputs": []
+    },
+
+    "clean": {
+      "cache": false
+    }
+  }
+}

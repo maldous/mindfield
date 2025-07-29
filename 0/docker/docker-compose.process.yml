@@ -1,0 +1,86 @@
+---
+x-build-env:
+
+  BUILDKIT_INLINE_CACHE: "1"
+  BUILDKIT_PROGRESS: plain
+  DOCKER_BUILDKIT: "1"
+
+name: mindfield
+
+services:
+  grapesjs:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.grapesjs
+      args:
+        NODE_MAJOR: "24"
+      cache_from:
+        - type=registry,ref=localhost:5001/mindfield-cache
+      cache_to:
+        - type=registry,ref=localhost:5001/mindfield-cache,mode=max
+    depends_on:
+      minio:
+        condition: service_healthy
+        required: true
+      pgbouncer:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+    cpus: 0.5
+    mem_limit: "268435456"
+
+  presidio-analyzer:
+    image: mcr.microsoft.com/presidio-analyzer:latest
+    depends_on:
+      redis:
+        condition: service_healthy
+        required: true
+    volumes:
+      - type: bind
+        source: services/presidio-analyzer/healthcheck.sh
+        target: /healthcheck.sh
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /healthcheck.sh
+      timeout: 20s
+      interval: 30s
+      retries: 3
+    cpus: 1
+    mem_limit: "1073741824"
+
+  presidio-anonymizer:
+    image: mcr.microsoft.com/presidio-anonymizer:latest
+    depends_on:
+      presidio-analyzer:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+    cpus: 0.5
+    mem_limit: "536870912"
+
+  presidio-image-redactor:
+    image: mcr.microsoft.com/presidio-image-redactor:latest
+    depends_on:
+      presidio-analyzer:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+    cpus: 1
+    mem_limit: "1073741824"

@@ -1,0 +1,182 @@
+--- a/1.sh
++++ b/1.sh
+@@ -1,6 +1,24 @@
+-#!/usr/bin/env bash
+-set -e
++#!/usr/bin/env bash
++set -euo pipefail
+ 
++# ---------- helpers ----------
++ns() { kubectl create ns "$1" --dry-run=client -o yaml | kubectl apply -f -; }
++label_psa() {
++  for n in "$@"; do
++    kubectl label ns "$n" \
++      pod-security.kubernetes.io/enforce=baseline \
++      pod-security.kubernetes.io/warn=restricted \
++      pod-security.kubernetes.io/audit=restricted \
++      pod-security.kubernetes.io/enforce-version=latest \
++      --overwrite
++  done
++}
++
++# ---------- namespaces ----------
++ns apps; ns auth; ns ci; ns data; ns docs; ns gateway; ns messaging; ns observability; ns temporal
++# relaxed (dev) PSA so charts without strict securityContext can start
++label_psa apps auth ci data docs gateway messaging observability temporal
++
+ # ---------- repos ----------
+ helm repo add bitnami https://charts.bitnami.com/bitnami
+ helm repo add grafana https://grafana.github.io/helm-charts
+@@ -15,6 +33,65 @@
+ helm repo update
+ 
++# ---------- External Secrets: mirror edge-cert to all namespaces ----------
++# We already have ClusterSecretStore k8s-secrets-store validated; create a gateway-scoped store
++cat <<'YAML' | kubectl apply -f -
++apiVersion: external-secrets.io/v1beta1
++kind: ClusterSecretStore
++metadata:
++  name: k8s-gateway-secrets
++spec:
++  provider:
++    kubernetes:
++      remoteNamespace: gateway
++      server:
++        url: https://kubernetes.default.svc
++      auth:
++        serviceAccount:
++          name: external-secrets
++          namespace: external-secrets
++YAML
++
++mirror_edge() {
++  local ns="$1"
++  cat <<YAML | kubectl apply -f -
++apiVersion: external-secrets.io/v1beta1
++kind: ExternalSecret
++metadata:
++  name: edge-cert
++  namespace: ${ns}
++spec:
++  refreshInterval: 1h
++  secretStoreRef:
++    kind: ClusterSecretStore
++    name: k8s-gateway-secrets
++  target:
++    name: edge-cert
++    template:
++      type: kubernetes.io/tls
++  data:
++    - secretKey: tls.crt
++      remoteRef: { key: edge-cert, property: tls.crt }
++    - secretKey: tls.key
++      remoteRef: { key: edge-cert, property: tls.key }
++YAML
++}
++for n in auth ci apps data messaging observability temporal; do mirror_edge "$n"; done
++
++# ---------- Postgres / PgBouncer (data) ----------
++# (assumes already installed earlier in script)
++# ensure keycloak DB + users exist
++kubectl -n data exec statefulset/postgresql -- bash -lc '
++  set -euo pipefail
++  PGPASSWORD="$POSTGRES_PASSWORD" psql -U postgres <<SQL
++CREATE DATABASE keycloak OWNER postgres;
++DO $$BEGIN
++  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '\''keycloak'\'') THEN
++    CREATE USER keycloak WITH LOGIN;
++  END IF;
++END$$;
++GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
++SQL
++'
++
+ # ---------- Keycloak ----------
+ # external Postgres via PgBouncer (preferred). Fallback: direct Postgres.
++KC_DB_PASS="$(kubectl get secret -n auth keycloak-externaldb -o jsonpath='{.data.db-password}' 2>/dev/null | base64 -d || echo keycloak_pwd)"
++kubectl -n data exec statefulset/postgresql -- bash -lc "PGPASSWORD=\$POSTGRES_PASSWORD psql -U postgres -d postgres -c \"ALTER USER keycloak WITH PASSWORD '${KC_DB_PASS//\'/\'\'}';\""
+ 
+-helm upgrade --install keycloak bitnami/keycloak -n auth \
++helm upgrade --install keycloak bitnami/keycloak -n auth \
+   --set postgresql.enabled=false \
+-  --set externalDatabase.host=pgbouncer.data.svc.cluster.local \
++  --set externalDatabase.host=pgbouncer.data.svc.cluster.local \
+   --set externalDatabase.port=6432 \
+   --set externalDatabase.user=keycloak \
+-  --set externalDatabase.password=\$KEYCLOAK_DB_PASSWORD \
++  --set externalDatabase.password="$KC_DB_PASS" \
+   --set externalDatabase.database=keycloak \
+   --set proxy=edge \
+   --set proxyAddressForwarding=true
+@@ -35,20 +112,76 @@
+ # ---------- Observability ----------
+ # kube-prometheus-stack + Loki + Tempo + OTel
+-helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack -n observability \
+-  -f observability/kps-values.yaml
++# Grafana: avoid init chown (fails under restricted), use fsGroup instead
++helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack -n observability \
++  --values observability/kps-values.yaml \
++  --set grafana.initChownData.enabled=false \
++  --set grafana.securityContext.runAsUser=472 \
++  --set grafana.securityContext.runAsGroup=472 \
++  --set grafana.podSecurityContext.fsGroup=472
+ 
+-helm upgrade --install loki grafana/loki -n observability \
+-  -f observability/loki-values.yaml
++# Loki: boltdb-shipper + disable structured metadata (error you saw)
++helm upgrade --install loki grafana/loki -n observability \
++  --values observability/loki-values.yaml \
++  --set loki.limits_config.allow_structured_metadata=false
+ 
+-helm upgrade --install tempo grafana/tempo -n observability \
+-  -f observability/tempo-values.yaml
++helm upgrade --install tempo grafana/tempo -n observability \
++  --values observability/tempo-values.yaml
+ 
+-helm upgrade --install opentelemetry-collector open-telemetry/opentelemetry-collector -n observability \
+-  -f observability/otel-values.yaml
++# OTel: replace unsupported "logging" exporter with "debug"
++helm upgrade --install opentelemetry-collector open-telemetry/opentelemetry-collector -n observability \
++  --set mode=daemonset \
++  -f - <<'OTEL'
++config:
++  receivers:
++    otlp:
++      protocols: { http: {}, grpc: {} }
++  processors:
++    batch: {}
++  exporters:
++    otlphttp/tempo:
++      endpoint: http://tempo.observability.svc.cluster.local:4318
++      tls: { insecure: true }
++    debug: {}
++  service:
++    pipelines:
++      traces: { receivers: [otlp], processors: [batch], exporters: [otlphttp/tempo, debug] }
++      logs:   { receivers: [otlp], processors: [batch], exporters: [debug] }
++OTEL
+ 
+ # ---------- Temporal ----------
+-helm upgrade --install temporal temporal/temporal -n temporal \
+-  -f temporal/values.yaml
++# Disable Elasticsearch & schema steps; pure SQL visibility.
++helm upgrade --install temporal temporal/temporal -n temporal \
++  --values temporal/values.yaml \
++  --set elasticsearch.enabled=false \
++  --set server.elasticsearch.enabled=false \
++  --set schema.setup.elasticsearch.enabled=false \
++  --set cassandra.enabled=false \
++  --set mysql.enabled=false \
++  --set postgresql.enabled=false \
++  --set schema.setup.default.type=sql \
++  --set schema.setup.visibility.type=sql \
++  --set prometheus.nodeExporter.enabled=false
++
++# delete any stuck old schema job (idempotent)
++kubectl -n temporal delete job -l app.kubernetes.io/name=temporal,job-name=temporal-schema-1 --ignore-not-found
++
++# ---------- Final checks ----------
++echo
++kubectl get po -A | egrep -v 'Running|Completed' || true
++echo "If anything is still failing, run: kubectl get events -A --sort-by=.lastTimestamp | tail -n 200"
+

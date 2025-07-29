@@ -1,0 +1,14 @@
+ARG NODE_MAJOR=24
+
+FROM node:${NODE_MAJOR}-alpine AS base
+ENV PNPM_STORE_PATH=/root/.pnpm-store
+RUN \
+    --mount=type=cache,id=apk-cache,target=/var/cache/apk \
+    apk add --no-cache \
+    g++ \
+    make \
+    python3 && \
+    corepack enable && \
+    corepack prepare pnpm@latest --activate && \
+    pnpm config set node-linker hoisted
+WORKDIR /app

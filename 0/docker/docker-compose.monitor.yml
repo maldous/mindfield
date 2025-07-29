@@ -1,0 +1,225 @@
+---
+x-build-env:
+
+  BUILDKIT_INLINE_CACHE: "1"
+  BUILDKIT_PROGRESS: plain
+  DOCKER_BUILDKIT: "1"
+
+name: mindfield
+
+services:
+  alertmanager:
+    image: prom/alertmanager:latest
+    volumes:
+      - type: bind
+        source: ./services/alertmanager/alertmanager.yml
+        target: /etc/alertmanager/alertmanager.yml
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+      monitoring: null
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+    cpus: 0.25
+    mem_limit: "134217728"
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter:latest
+    volumes:
+      - type: bind
+        source: ./services/blackbox/blackbox.yml
+        target: /etc/blackbox_exporter/config.yml
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      monitoring: null
+    cpus: 0.25
+    mem_limit: "134217728"
+
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      mailhog:
+        condition: service_started
+        required: true
+    volumes:
+      - type: volume
+        source: grafana_data
+        target: /var/lib/grafana
+        volume: {}
+      - type: volume
+        source: grafana_provisioning
+        target: /etc/grafana/provisioning
+        volume: {}
+      - type: volume
+        source: grafana_dashboards
+        target: /var/lib/grafana/dashboards
+        volume: {}
+    env_file:
+      - .env
+    networks:
+      frontend: null
+      monitoring: null
+    cpus: 0.5
+    mem_limit: "268435456"
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+      monitoring: null
+    cpus: 0.5
+    mem_limit: "268435456"
+
+  loki:
+    image: grafana/loki:latest
+    volumes:
+      - type: bind
+        source: ./services/loki/loki-config.yml
+        target: /etc/loki/local-config.yaml
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+      monitoring: null
+    command:
+      - -config.file=/etc/loki/local-config.yaml
+    cpus: 0.5
+    mem_limit: "536870912"
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    volumes:
+      - type: bind
+        source: /
+        target: /host
+        read_only: true
+        bind:
+          propagation: rslave
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      monitoring: null
+    command:
+      - --path.rootfs=/host
+    cpus: 0.25
+    mem_limit: "134217728"
+    pid: host
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    depends_on:
+      jaeger:
+        condition: service_started
+        required: true
+      opensearch:
+        condition: service_started
+        required: true
+      prometheus:
+        condition: service_started
+        required: true
+    volumes:
+      - type: bind
+        source: ./services/otel/otel-collector-config.yaml
+        target: /etc/otel-collector-config.yaml
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+      monitoring: null
+    command:
+      - --config=/etc/otel-collector-config.yaml
+    cpus: 0.5
+    mem_limit: "268435456"
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - type: bind
+        source: ./services/prometheus/prometheus.yml
+        target: /etc/prometheus/prometheus.yml
+        bind:
+          create_host_path: true
+      - type: volume
+        source: prometheus_data
+        target: /prometheus
+        volume: {}
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+      monitoring: null
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.console.templates=/etc/prometheus/consoles
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+    cpus: 0.5
+    mem_limit: "536870912"
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - type: bind
+        source: ./services/promtail/promtail-config.yml
+        target: /etc/promtail/config.yml
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /var/log
+        target: /var/log
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /var/lib/docker/containers
+        target: /var/lib/docker/containers
+        read_only: true
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      monitoring: null
+    command:
+      - -config.file=/etc/promtail/config.yml
+    cpus: 0.25
+    mem_limit: "134217728"
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    volumes:
+      - type: volume
+        source: uptime_kuma_data
+        target: /app/data
+        volume: {}
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+    cpus: 0.5
+    mem_limit: "268435456"

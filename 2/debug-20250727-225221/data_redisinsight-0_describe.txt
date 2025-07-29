@@ -1,0 +1,62 @@
+Name:             redisinsight-0
+Namespace:        data
+Priority:         0
+Service Account:  redisinsight
+Node:             foo/192.168.1.26
+Start Time:       Sun, 27 Jul 2025 22:47:47 +1000
+Labels:           app.kubernetes.io/instance=redisinsight
+                  app.kubernetes.io/name=redisinsight
+                  apps.kubernetes.io/pod-index=0
+                  controller-revision-hash=redisinsight-8678d799dd
+                  statefulset.kubernetes.io/pod-name=redisinsight-0
+Annotations:      cni.projectcalico.org/containerID: 585f16c6e8e6acbd9e1df4117c5273405d9a0d245b37187fa8ce07a15195ca73
+                  cni.projectcalico.org/podIP: 10.1.24.60/32
+                  cni.projectcalico.org/podIPs: 10.1.24.60/32
+Status:           Pending
+IP:               10.1.24.60
+IPs:
+  IP:           10.1.24.60
+Controlled By:  StatefulSet/redisinsight
+Containers:
+  redisinsight:
+    Container ID:   
+    Image:          redis/redisinsight:2.46
+    Image ID:       
+    Port:           5540/TCP
+    Host Port:      0/TCP
+    State:          Waiting
+      Reason:       CreateContainerConfigError
+    Ready:          False
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /data from redisinsight-volume (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-v5s55 (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  redisinsight-volume:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  redisinsight
+    ReadOnly:   false
+  kube-api-access-v5s55:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                   From               Message
+  ----     ------     ----                  ----               -------
+  Normal   Scheduled  4m35s                 default-scheduler  Successfully assigned data/redisinsight-0 to foo
+  Normal   Pulled     10s (x23 over 4m35s)  kubelet            Container image "redis/redisinsight:2.46" already present on machine
+  Warning  Failed     10s (x23 over 4m35s)  kubelet            Error: container has runAsNonRoot and image has non-numeric user (node), cannot verify user is non-root (pod: "redisinsight-0_data(ca7529a1-27d8-4f15-867b-2d32b7368632)", container: redisinsight)

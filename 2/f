@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+for ns in apps auth ci data docs gateway messaging observability temporal; do
+  kubectl label ns "$ns" \
+    pod-security.kubernetes.io/enforce=baseline \
+    pod-security.kubernetes.io/warn=restricted \
+    pod-security.kubernetes.io/audit=restricted \
+    pod-security.kubernetes.io/enforce-version=latest \
+    --overwrite || true
+done
+
+cat <<'Y' | kubectl apply -f -
+# (edge-cert mirrors for auth & ci)
+<<PASTE edge-cert-mirror.yaml FROM ABOVE>>
+Y
+
+# Loki
+helm -n observability upgrade --install loki grafana/loki --reuse-values \
+  --set loki.limits_config.allow_structured_metadata=false
+
+# Grafana
+helm -n observability upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack --reuse-values \
+  --set grafana.initChownData.enabled=false \
+  --set grafana.securityContext.runAsUser=472 \
+  --set grafana.securityContext.runAsGroup=472 \
+  --set grafana.podSecurityContext.fsGroup=472
+
+# OTel
+helm -n observability upgrade --install opentelemetry-collector opentelemetry/opentelemetry-collector -f - <<'EOF'
+mode: daemonset
+image: { repository: otel/opentelemetry-collector-k8s }
+config:
+  receivers: { otlp: { protocols: { http: {}, grpc: {} } } }
+  processors: { batch: {} }
+  exporters:
+    otlphttp/tempo: { endpoint: http://tempo.observability.svc.cluster.local:4318, tls: { insecure: true } }
+    debug: {}
+  service:
+    pipelines:
+      traces: { receivers: [otlp], processors: [batch], exporters: [otlphttp/tempo, debug] }
+      logs:   { receivers: [otlp], processors: [batch], exporters: [debug] }
+EOF
+
+# Temporal
+helm -n temporal upgrade --install temporal temporal/temporal --reuse-values \
+  --set elasticsearch.enabled=false \
+  --set server.elasticsearch.enabled=false \
+  --set cassandra.enabled=false \
+  --set mysql.enabled=false \
+  --set postgresql.enabled=false \
+  --set schema.setup.elasticsearch.enabled=false \
+  --set schema.setup.default.type=sql \
+  --set schema.setup.visibility.type=sql
+
+# Remind about Keycloak DB password
+echo
+echo ">>> Run the Keycloak ALTER USER to sync password with secret 'auth/keycloak-externaldb'."
+

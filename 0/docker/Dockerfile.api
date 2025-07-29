@@ -1,0 +1,40 @@
+ARG NODE_MAJOR=24
+ARG REGISTRY_CACHE=localhost:5001/mindfield-cache
+
+FROM ${REGISTRY_CACHE}/base-deps:${NODE_MAJOR} AS deps
+ARG NODE_MAJOR
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN \
+    mkdir -p \
+    core/logic \
+    core/ui \
+    services/api
+COPY core/logic/package.json ./core/logic/
+COPY core/ui/package.json ./core/ui/
+COPY services/api/package.json ./services/api/
+RUN \
+    --mount=type=cache,id=pnpm-store-${NODE_MAJOR}-full,target=/root/.pnpm-store,sharing=locked \
+    pnpm install \
+    --filter @mindfield/api \
+    --prefer-offline
+
+FROM deps AS build
+COPY core/logic core/logic/
+COPY services/api services/api/
+RUN \
+    pnpm --filter @mindfield/api run build
+
+FROM build AS deploy
+RUN \
+    pnpm deploy --filter @mindfield/api --legacy --prod /app/deploy
+
+FROM node:${NODE_MAJOR}-alpine AS runtime
+RUN \
+    addgroup -S nodejs && adduser -S nestjs -G nodejs -u1001
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=deploy /app/deploy ./
+
+USER nestjs
+EXPOSE 3000
+CMD ["node", "dist/main.js"]

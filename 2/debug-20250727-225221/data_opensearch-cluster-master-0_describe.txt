@@ -1,0 +1,123 @@
+Name:             opensearch-cluster-master-0
+Namespace:        data
+Priority:         0
+Service Account:  default
+Node:             foo/192.168.1.26
+Start Time:       Sun, 27 Jul 2025 22:47:53 +1000
+Labels:           app.kubernetes.io/component=opensearch-cluster-master
+                  app.kubernetes.io/instance=opensearch
+                  app.kubernetes.io/managed-by=Helm
+                  app.kubernetes.io/name=opensearch
+                  app.kubernetes.io/version=3.1.0
+                  apps.kubernetes.io/pod-index=0
+                  controller-revision-hash=opensearch-cluster-master-76dd7f546d
+                  helm.sh/chart=opensearch-3.1.0
+                  statefulset.kubernetes.io/pod-name=opensearch-cluster-master-0
+Annotations:      cni.projectcalico.org/containerID: 608db17e3ad4d3908357ae8e3cf13a885bba448d29d724199cead39fb745a315
+                  cni.projectcalico.org/podIP: 10.1.24.63/32
+                  cni.projectcalico.org/podIPs: 10.1.24.63/32
+                  configchecksum: 4ac135e4dbd1f22c72d28f855cb5436e017ebbdf58c266419c817d7c060b376
+Status:           Pending
+IP:               10.1.24.63
+IPs:
+  IP:           10.1.24.63
+Controlled By:  StatefulSet/opensearch-cluster-master
+Init Containers:
+  fsgroup-volume:
+    Container ID:  
+    Image:         busybox:latest
+    Image ID:      
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sh
+      -c
+    Args:
+      chown -R 1000:1000 /usr/share/opensearch/data
+    State:          Waiting
+      Reason:       CreateContainerConfigError
+    Ready:          False
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /usr/share/opensearch/data from opensearch-cluster-master (rw)
+  configfile:
+    Container ID:  
+    Image:         opensearchproject/opensearch:3.1.0
+    Image ID:      
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sh
+      -c
+      #!/usr/bin/env bash
+      cp -r /tmp/configfolder/*  /tmp/config/
+      
+    State:          Waiting
+      Reason:       PodInitializing
+    Ready:          False
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /tmp/config/ from config-emptydir (rw)
+      /tmp/configfolder/opensearch.yml from config (rw,path="opensearch.yml")
+Containers:
+  opensearch:
+    Container ID:   
+    Image:          opensearchproject/opensearch:3.1.0
+    Image ID:       
+    Ports:          9200/TCP, 9300/TCP, 9600/TCP
+    Host Ports:     0/TCP, 0/TCP, 0/TCP
+    State:          Waiting
+      Reason:       PodInitializing
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     1
+      memory:  2Gi
+    Requests:
+      cpu:      100m
+      memory:   512Mi
+    Readiness:  tcp-socket :9200 delay=0s timeout=3s period=5s #success=1 #failure=3
+    Startup:    tcp-socket :9200 delay=5s timeout=3s period=10s #success=1 #failure=30
+    Environment:
+      node.name:             opensearch-cluster-master-0 (v1:metadata.name)
+      discovery.seed_hosts:  opensearch-cluster-master-headless
+      cluster.name:          opensearch-cluster
+      network.host:          0.0.0.0
+      OPENSEARCH_JAVA_OPTS:  -Xmx512M -Xms512M
+      node.roles:            master,ingest,data,remote_cluster_client,
+      discovery.type:        single-node
+    Mounts:
+      /usr/share/opensearch/config/opensearch.yml from config-emptydir (rw,path="opensearch.yml")
+      /usr/share/opensearch/data from opensearch-cluster-master (rw)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 False 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  opensearch-cluster-master:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  opensearch-cluster-master-opensearch-cluster-master-0
+    ReadOnly:   false
+  config:
+    Type:      ConfigMap (a volume populated by a ConfigMap)
+    Name:      opensearch-cluster-master-config
+    Optional:  false
+  config-emptydir:
+    Type:        EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:      
+    SizeLimit:   <unset>
+QoS Class:       Burstable
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                  From               Message
+  ----     ------     ----                 ----               -------
+  Normal   Scheduled  4m29s                default-scheduler  Successfully assigned data/opensearch-cluster-master-0 to foo
+  Normal   Pulled     8s (x23 over 4m29s)  kubelet            Container image "busybox:latest" already present on machine
+  Warning  Failed     8s (x23 over 4m29s)  kubelet            Error: container's runAsUser breaks non-root policy (pod: "opensearch-cluster-master-0_data(b22dc624-f61b-4289-b631-346215f95f0a)", container: fsgroup-volume)

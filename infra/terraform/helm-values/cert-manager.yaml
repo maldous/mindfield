@@ -1,0 +1,20 @@
+# helm-values/cert-manager.yaml
+installCRDs: true
+
+# number of controller replicas (default 1; bump to ≥2 + enable PDB for HA)
+replicaCount: 1
+
+# disable built‑in Prometheus ServiceMonitor until CRDs exist
+prometheus:
+  enabled: false     # turn true once you’ve installed monitoring CRDs
+  servicemonitor:
+    enabled: false
+
+# inject CF token into controller via env
+extraEnv:
+  - name: CF_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: cloudflare-api-token
+        key: token
+

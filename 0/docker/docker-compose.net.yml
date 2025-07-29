@@ -1,0 +1,280 @@
+---
+x-build-env:
+
+  BUILDKIT_INLINE_CACHE: "1"
+  BUILDKIT_PROGRESS: plain
+  DOCKER_BUILDKIT: "1"
+
+name: mindfield
+
+services:
+  alertmanager:
+    ports:
+      - mode: ingress
+        target: 9093
+        published: "9093"
+        protocol: tcp
+
+  api:
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3001"
+        protocol: tcp
+
+  blackbox-exporter:
+    ports:
+      - mode: ingress
+        target: 9115
+        published: "9115"
+        protocol: tcp
+
+  grafana:
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3009"
+        protocol: tcp
+
+  grapesjs:
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3008"
+        protocol: tcp
+
+  jaeger:
+    ports:
+      - mode: ingress
+        target: 14268
+        published: "14268"
+        protocol: tcp
+      - mode: ingress
+        target: 16686
+        published: "16686"
+        protocol: tcp
+
+  keycloak:
+    ports:
+      - mode: ingress
+        target: 8080
+        published: "3019"
+        protocol: tcp
+
+  kong:
+    ports:
+      - mode: ingress
+        target: 8000
+        published: "8002"
+        protocol: tcp
+      - mode: ingress
+        target: 8001
+        published: "8003"
+        protocol: tcp
+      - mode: ingress
+        target: 8443
+        published: "8444"
+        protocol: tcp
+      - mode: ingress
+        target: 8444
+        published: "8445"
+        protocol: tcp
+
+  loki:
+    ports:
+      - mode: ingress
+        target: 3100
+        published: "3100"
+        protocol: tcp
+
+  mailhog:
+    ports:
+      - mode: ingress
+        target: 1025
+        published: "2025"
+        protocol: tcp
+      - mode: ingress
+        target: 8025
+        published: "8025"
+        protocol: tcp
+
+  minio:
+    ports:
+      - mode: ingress
+        target: 9000
+        published: "9000"
+        protocol: tcp
+      - mode: ingress
+        target: 9001
+        published: "9001"
+        protocol: tcp
+
+  mkdocs:
+    ports:
+      - mode: ingress
+        target: 8000
+        published: "8001"
+        protocol: tcp
+
+  node-exporter:
+    ports:
+      - mode: ingress
+        target: 9100
+        published: "9100"
+        protocol: tcp
+
+  opensearch:
+    ports:
+      - mode: ingress
+        target: 9200
+        published: "9200"
+        protocol: tcp
+      - mode: ingress
+        target: 9600
+        published: "9600"
+        protocol: tcp
+
+  opensearch-dashboards:
+    ports:
+      - mode: ingress
+        target: 5601
+        published: "5601"
+        protocol: tcp
+
+  otel-collector:
+    ports:
+      - mode: ingress
+        target: 4317
+        published: "4317"
+        protocol: tcp
+      - mode: ingress
+        target: 4318
+        published: "4318"
+        protocol: tcp
+      - mode: ingress
+        target: 8888
+        published: "8888"
+        protocol: tcp
+      - mode: ingress
+        target: 8889
+        published: "8889"
+        protocol: tcp
+
+  pgadmin:
+    ports:
+      - mode: ingress
+        target: 80
+        published: "3016"
+        protocol: tcp
+
+  postgraphile:
+    ports:
+      - mode: ingress
+        target: 5000
+        published: "3011"
+        protocol: tcp
+
+  presidio-analyzer:
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3005"
+        protocol: tcp
+
+  presidio-anonymizer:
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3006"
+        protocol: tcp
+
+  presidio-image-redactor:
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3007"
+        protocol: tcp
+
+  prometheus:
+    ports:
+      - mode: ingress
+        target: 9090
+        published: "9090"
+        protocol: tcp
+
+  redis-insight:
+    ports:
+      - mode: ingress
+        target: 5540
+        published: "5540"
+        protocol: tcp
+
+  redoc:
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3014"
+        protocol: tcp
+
+  render:
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3004"
+        protocol: tcp
+
+  sonarqube:
+    ports:
+      - mode: ingress
+        target: 9000
+        published: "3018"
+        protocol: tcp
+
+  storybook:
+    ports:
+      - mode: ingress
+        target: 6006
+        published: "3015"
+        protocol: tcp
+
+  submission:
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3002"
+        protocol: tcp
+
+  swagger-ui:
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3013"
+        protocol: tcp
+
+  transform:
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3003"
+        protocol: tcp
+
+  trivy:
+    ports:
+      - mode: ingress
+        target: 8080
+        published: "8004"
+        protocol: tcp
+
+  uptime-kuma:
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3020"
+        protocol: tcp
+
+  web:
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3000"
+        protocol: tcp
