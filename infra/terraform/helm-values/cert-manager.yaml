@@ -4,9 +4,3 @@ prometheus:
   enabled: false
   servicemonitor:
     enabled: false
-extraEnv:
-  - name: CF_API_TOKEN
-    valueFrom:
-      secretKeyRef:
-        name: cloudflare-api-token
-        key: token

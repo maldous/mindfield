@@ -3,28 +3,25 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.32.0"
+      version = "~> 2.37"
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "2.13.2"
+      version = "~> 2.13"
     }
     null = {
       source  = "hashicorp/null"
-      version = "3.2.2"
+      version = "~> 3.2"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.6.2"
+      version = "~> 3.6"
     }
     tls = {
       source  = "hashicorp/tls"
-      version = "4.0.5"
+      version = "~> 4.0"
     }
-    dotenv = {
-      source  = "jrhouston/dotenv"
-      version = "~> 1.0"
-    }
+
   }
 }
 provider "kubernetes" {

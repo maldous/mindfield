@@ -1,17 +1,21 @@
 locals {
-  addons_list = [
+  base_addons = [
     "dns",
     "rbac",
     "helm3",
     "metrics-server",
     "metallb:${var.metallb_range}",
-    "gpu",
   ]
+  gpu_addons = var.enable_gpu_addons ? ["gpu"] : []
+  addons_list = concat(local.base_addons, local.gpu_addons)
 }
 resource "null_resource" "addons" {
   count = var.enabled ? 1 : 0
   triggers = {
-    addons_hash = join(",", local.addons_list)
+    addons_hash      = join(",", local.addons_list)
+    metallb_range    = var.metallb_range
+    kong_proxy_ip    = var.kong_proxy_ip
+    enable_gpu_addons = var.enable_gpu_addons
   }
   provisioner "local-exec" {
     command = <<-EOT

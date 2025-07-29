@@ -27,10 +27,7 @@ variable "kong_proxy_ip" {
   type    = string
   default = "192.168.1.251"
 }
-variable "cidr_allow_admin" {
-  type    = list(string)
-  default = ["192.168.0.0/16"]
-}
+
 variable "postgres_version" {
   type    = string
   default = "16"
@@ -63,7 +60,9 @@ variable "tempo_storage" {
   type    = string
   default = "100Gi"
 }
-variable "external_secrets_create_objects" {
-  type    = bool
-  default = false
+
+variable "enable_gpu_addons" {
+  type        = bool
+  default     = false
+  description = "Enable GPU addons for MicroK8s"
 }
