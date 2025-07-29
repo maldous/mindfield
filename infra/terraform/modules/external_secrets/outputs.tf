@@ -1,1 +1,0 @@
-output "enabled" { value = true }
