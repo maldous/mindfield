@@ -25,6 +25,16 @@ module "cert_manager" {
     module.calico,
   ]
 }
+module "cert_issuers" {
+  source     = "./modules/cert_issuers"
+  enabled    = true
+  domain     = var.domain
+  acme_email = var.acme_email
+  depends_on = [
+    module.cert_manager
+  ]
+}
+
 module "external_dns" {
   source       = "./modules/external_dns"
   enabled      = true
