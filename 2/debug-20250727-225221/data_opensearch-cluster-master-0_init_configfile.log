@@ -1,1 +1,0 @@
-Error from server (BadRequest): container "configfile" in pod "opensearch-cluster-master-0" is waiting to start: PodInitializing
