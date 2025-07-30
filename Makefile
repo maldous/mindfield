@@ -21,6 +21,7 @@ help: ## list commands
 	| awk 'BEGIN{FS=":.*## "}{printf "\033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 install: ## install MicroK8s, Ceph, Terraform, Addons, Data, Network
+	microk8s enable registry
 	microk8s status --wait-ready
 	microk8s config > $$HOME/.kube/config
 	sudo microceph cluster bootstrap
@@ -38,6 +39,10 @@ build: ## (re)apply everything
 	$(TF) apply -auto-approve
 
 keycloak: ## deploy keycloak only
+	cd infra && \
+	docker build -t localhost:32000/mindfield/kong-oidc:latest -f docker/Dockerfile.kong . && \
+	docker push localhost:32000/mindfield/kong-oidc:latest && \
+	cd -
 	$(TF) apply -auto-approve -target=module.keycloak
 
 kong: ## deploy kong only
