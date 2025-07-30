@@ -91,3 +91,23 @@ module "postgraphile" {
     module.postgres
   ]
 }
+
+# Authentication
+module "keycloak" {
+  source              = "./modules/keycloak"
+  enabled             = true
+  postgres_dependency = module.postgres
+  depends_on = [
+    module.postgres
+  ]
+}
+
+module "kong" {
+  source          = "./modules/kong"
+  enabled         = true
+  proxy_ip        = var.kong_proxy_ip
+  cert_dependency = module.cert_issuers
+  depends_on = [
+    module.cert_issuers
+  ]
+}

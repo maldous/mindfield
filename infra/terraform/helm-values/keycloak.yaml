@@ -1,0 +1,64 @@
+# Modern Keycloak X Configuration
+image:
+  tag: "26.0.7"
+
+# Disable internal PostgreSQL
+postgresql:
+  enabled: false
+
+# Modern Keycloak X configuration with KC_ variables
+extraEnv: |
+  - name: KC_DB
+    value: postgres
+  - name: KC_DB_URL_HOST
+    value: postgres-postgresql.data.svc.cluster.local
+  - name: KC_DB_URL_PORT
+    value: "5432"
+  - name: KC_DB_URL_DATABASE
+    value: keycloak
+  - name: KC_DB_USERNAME
+    value: keycloak
+  - name: KC_DB_PASSWORD
+    value: keycloak
+  - name: KEYCLOAK_ADMIN
+    value: admin
+  - name: KEYCLOAK_ADMIN_PASSWORD
+    value: admin123
+  - name: KC_HOSTNAME_STRICT
+    value: "false"
+  - name: KC_HOSTNAME_STRICT_HTTPS
+    value: "false"
+  - name: KC_HTTP_ENABLED
+    value: "true"
+  - name: KC_PROXY
+    value: "edge"
+  - name: KC_HOSTNAME_URL
+    value: "https://keycloak.aldous.info"
+
+# Service configuration
+service:
+  type: ClusterIP
+  httpPort: 8080
+
+# Resources
+resources:
+  requests:
+    memory: 512Mi
+    cpu: 250m
+  limits:
+    memory: 1Gi
+    cpu: 500m
+
+# High availability
+replicaCount: 1
+
+# Health checks
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 300
+  timeoutSeconds: 5
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  timeoutSeconds: 1

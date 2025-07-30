@@ -14,6 +14,7 @@ endif
 
 NET := calico cert_manager cert_issuers external_dns
 DATA := minio_operator minio_tenant postgres redis pgbouncer postgraphile
+AUTH := keycloak kong
 
 help: ## list commands
 	@grep -Eh '^[a-zA-Z][a-zA-Z0-9_-]+:.*##' $(MAKEFILE_LIST) \
@@ -29,11 +30,18 @@ install: ## install MicroK8s, Ceph, Terraform, Addons, Data, Network
 	$(TF) init -upgrade
 	$(TF) apply -auto-approve -target=module.microk8s_addons
 	@for m in $(NET); do $(TF) apply -auto-approve -target=module.$$m; done
-	@for m in $(DATA); do $(TF) apply -auto-approve -target=module.$$m; done
+	@for m in $(DATA); do $(TF) apply -auto-approve -target=module.$m; done
+	@for m in $(AUTH); do $(TF) apply -auto-approve -target=module.$m; done
 	microk8s status --wait-ready
 
 build: ## (re)apply everything
 	$(TF) apply -auto-approve
+
+keycloak: ## deploy keycloak only
+	$(TF) apply -auto-approve -target=module.keycloak
+
+kong: ## deploy kong only
+	$(TF) apply -auto-approve -target=module.kong
 
 reset: ## destroy everything
 	$(TF) destroy -auto-approve
