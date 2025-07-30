@@ -1,4 +1,5 @@
 # Rook Ceph Cluster Configuration
+
 cephClusterSpec:
   cephVersion:
     image: quay.io/ceph/ceph:v18.2.4
@@ -15,11 +16,17 @@ cephClusterSpec:
   mgr:
     count: 1
     allowMultiplePerNode: false
-  
+
   dashboard:
     enabled: true
     ssl: true
-  
+
+  cephConfig:
+    global:
+      osd_pool_default_size: "1"
+      osd_pool_default_min_size: "1"
+      mon_allow_pool_size_one: "true"
+
   monitoring:
     enabled: false
   
@@ -45,19 +52,12 @@ cephClusterSpec:
       dataSource: zero
       iteration: 1
     allowUninstallWithVolumes: false
-  
+
   storage:
     useAllNodes: true
     useAllDevices: false
-    config:
-      osdsPerDevice: "1"
-    nodes:
-    - name: "foo"
-      devices:
-      - name: "/dev/ceph-loops/osd1"
-        config:
-          storeType: bluestore
-    
+    devicePathFilter: "nbd0$"
+
 cephBlockPools:
   - name: ceph-blockpool
     spec:
@@ -84,3 +84,4 @@ cephBlockPools:
 
 cephFileSystems: []
 cephObjectStores: []
+
