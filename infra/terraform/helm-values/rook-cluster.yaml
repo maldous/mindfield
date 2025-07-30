@@ -48,9 +48,15 @@ cephClusterSpec:
   
   storage:
     useAllNodes: true
-    useAllDevices: true
+    useAllDevices: false
     config:
       osdsPerDevice: "1"
+    nodes:
+    - name: "foo"
+      directories:
+      - path: "/var/lib/rook/osd0"
+        config:
+          storeType: bluestore
     
 cephBlockPools:
   - name: ceph-blockpool

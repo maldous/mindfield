@@ -10,8 +10,8 @@ tenant:
     - servers: 1
       name: pool-0
       volumesPerServer: 4
-      size: 100Gi
-      storageClassName: ceph-block
+      size: 10Gi
+      storageClassName: microk8s-hostpath
       
   mountPath: /export
   subPath: /data
@@ -23,28 +23,6 @@ tenant:
   
   podManagementPolicy: Parallel
   
-  liveness:
-    httpGet:
-      path: /minio/health/live
-      port: 9000
-    initialDelaySeconds: 120
-    periodSeconds: 20
-  
-  readiness:
-    httpGet:
-      path: /minio/health/ready
-      port: 9000
-    initialDelaySeconds: 120
-    periodSeconds: 20
-  
-  startup:
-    httpGet:
-      path: /minio/health/live
-      port: 9000
-    initialDelaySeconds: 10
-    periodSeconds: 10
-    failureThreshold: 30
-
   exposeServices:
     minio: true
     console: true
@@ -71,19 +49,6 @@ tenant:
     bucketDNS: false
     domains: {}
 
-  ## List of secret names to use for generating MinIO users during tenant provisioning
-  credsSecret: {}
-
-  ## PodDisruptionBudget settings
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
-  podDisruptionBudget:
-    enabled: false
-    maxUnavailable: 1
-
-  ## Specify the service account to use for the MinIO pods. If 'create' is set to 'false'
-  ## and 'name' is left empty, the account 'default' will be used.
   serviceAccount:
     create: true
-    ## The name of the service account to use.
-    ## If not set and create is true, a name is generated using the fullname template
     name: minio-tenant

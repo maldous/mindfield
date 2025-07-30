@@ -9,7 +9,7 @@ auth:
 master:
   persistence:
     enabled: true
-    storageClass: "ceph-block"
+    storageClass: "microk8s-hostpath"
     size: 8Gi
     accessModes:
       - ReadWriteOnce
@@ -35,8 +35,3 @@ commonConfiguration: |
   
   # Memory management
   maxmemory-policy allkeys-lru
-  
-  # Disable dangerous commands
-  rename-command FLUSHDB ""
-  rename-command FLUSHALL ""
-  rename-command DEBUG ""

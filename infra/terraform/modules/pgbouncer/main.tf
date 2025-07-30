@@ -1,5 +1,5 @@
 resource "helm_release" "pgbouncer" {
-  count            = var.enabled ? 1 : 0
+  count            = 0  # Disabled - no pgbouncer chart available
   name             = "pgbouncer"
   namespace        = "data"
   create_namespace = false

@@ -1,6 +1,6 @@
 resource "helm_release" "postgres" {
   count            = var.enabled ? 1 : 0
-  name             = "postgresql"
+  name             = "postgres"
   namespace        = "data"
   create_namespace = true
 

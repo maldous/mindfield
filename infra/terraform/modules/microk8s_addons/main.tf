@@ -4,6 +4,7 @@ locals {
     "rbac",
     "helm3",
     "metrics-server",
+    "hostpath-storage",
     "metallb:${var.metallb_range}",
   ]
   gpu_addons = var.enable_gpu_addons ? ["gpu"] : []

@@ -30,11 +30,11 @@ resource "kubernetes_deployment" "postgraphile" {
           }
           env {
             name  = "DATABASE_URL"
-            value = "postgres://mindfield:mindfield@postgresql:5432/mindfield"
+            value = "postgres://mindfield:mindfield@postgres-postgresql:5432/mindfield"
           }
           env {
             name  = "POSTGRAPHILE_OPTIONS"
-            value = "--enhance-graphiql --allow-explain --dynamic-json --no-setof-functions-contain-nulls --no-ignore-rbac --show-error-stack=json --extended-errors hint,detail,errcode --append-plugins @graphile-contrib/pg-simplify-inflector --export-schema-graphql schema.graphql --graphiql / --enhance-graphiql --allow-explain --enable-query-batching --legacy-relations omit --connection postgresql://mindfield:mindfield@postgresql:5432/mindfield"
+            value = "--enhance-graphiql --allow-explain --dynamic-json --no-setof-functions-contain-nulls --no-ignore-rbac --show-error-stack=json --extended-errors hint,detail,errcode --append-plugins @graphile-contrib/pg-simplify-inflector --export-schema-graphql schema.graphql --graphiql / --enhance-graphiql --allow-explain --enable-query-batching --legacy-relations omit --connection postgresql://mindfield:mindfield@postgres-postgresql:5432/mindfield"
           }
           resources {
             requests = {
