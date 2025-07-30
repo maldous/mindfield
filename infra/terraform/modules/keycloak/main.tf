@@ -36,19 +36,13 @@ resource "kubernetes_job" "keycloak_db_setup" {
             set -e
             export PGPASSWORD=postgres
             
-            # Connect as postgres superuser
-            # Check if database exists, create if not
-            if ! psql -h postgres-postgresql.data.svc.cluster.local -U postgres -d postgres -lqt | cut -d \| -f 1 | grep -qw keycloak; then
-              createdb -h postgres-postgresql.data.svc.cluster.local -U postgres keycloak
-            fi
+            echo "Creating keycloak user..."
+            psql -h postgres-postgresql.data.svc.cluster.local -U postgres -d postgres -c "CREATE USER keycloak WITH PASSWORD 'keycloak';"
             
-            # Check if user exists, create if not
-            if ! psql -h postgres-postgresql.data.svc.cluster.local -U postgres -d postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='keycloak'" | grep -q 1; then
-              psql -h postgres-postgresql.data.svc.cluster.local -U postgres -d postgres -c "CREATE USER keycloak WITH PASSWORD 'keycloak';"
-            fi
+            echo "Creating keycloak database..."
+            createdb -h postgres-postgresql.data.svc.cluster.local -U postgres -O keycloak keycloak
             
-            # Grant privileges
-            psql -h postgres-postgresql.data.svc.cluster.local -U postgres -d keycloak -c "GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;"
+            echo "Granting privileges..."
             psql -h postgres-postgresql.data.svc.cluster.local -U postgres -d keycloak -c "GRANT ALL ON SCHEMA public TO keycloak;"
             
             echo "Keycloak database setup completed successfully"
@@ -63,11 +57,13 @@ resource "kubernetes_job" "keycloak_db_setup" {
     create = "5m"
     update = "5m"
   }
+  depends_on = [var.postgres_dependency]
 }
 
 # Keycloak database secret
 resource "kubernetes_secret" "keycloak_db_secret" {
   count = var.enabled ? 1 : 0
+  depends_on = [helm_release.keycloak]
   metadata {
     name      = "keycloak-db-secret"
     namespace = "auth"
@@ -80,11 +76,119 @@ resource "kubernetes_secret" "keycloak_db_secret" {
 # Keycloak admin secret
 resource "kubernetes_secret" "keycloak_admin_secret" {
   count = var.enabled ? 1 : 0
+  depends_on = [helm_release.keycloak]
   metadata {
     name      = "keycloak-admin-secret"
     namespace = "auth"
   }
   data = {
     password = "admin123"
+  }
+}
+
+# Network policies for auth namespace
+resource "kubernetes_network_policy" "auth_default_deny" {
+  count = var.enabled ? 1 : 0
+  depends_on = [helm_release.keycloak]
+  metadata {
+    name      = "default-deny-all"
+    namespace = "auth"
+  }
+  spec {
+    pod_selector {}
+    policy_types = ["Ingress", "Egress"]
+  }
+}
+
+resource "kubernetes_network_policy" "auth_allow_dns" {
+  count = var.enabled ? 1 : 0
+  depends_on = [helm_release.keycloak]
+  metadata {
+    name      = "allow-dns"
+    namespace = "auth"
+  }
+  spec {
+    pod_selector {}
+    policy_types = ["Egress"]
+    egress {
+      ports {
+        protocol = "UDP"
+        port     = "53"
+      }
+    }
+  }
+}
+
+resource "kubernetes_network_policy" "auth_internal_communication" {
+  count = var.enabled ? 1 : 0
+  depends_on = [helm_release.keycloak]
+  metadata {
+    name      = "allow-internal-auth"
+    namespace = "auth"
+  }
+  spec {
+    pod_selector {}
+    policy_types = ["Ingress", "Egress"]
+    ingress {
+      from {
+        pod_selector {}
+      }
+    }
+    egress {
+      to {
+        pod_selector {}
+      }
+    }
+  }
+}
+
+resource "kubernetes_network_policy" "keycloak_external_access" {
+  count = var.enabled ? 1 : 0
+  depends_on = [helm_release.keycloak]
+  metadata {
+    name      = "keycloak-external-access"
+    namespace = "auth"
+  }
+  spec {
+    pod_selector {
+      match_labels = {
+        "app.kubernetes.io/name" = "keycloakx"
+      }
+    }
+    policy_types = ["Ingress", "Egress"]
+    ingress {
+      from {
+        namespace_selector {
+          match_labels = {
+            "kubernetes.io/metadata.name" = "gateway"
+          }
+        }
+      }
+      ports {
+        protocol = "TCP"
+        port     = "8080"
+      }
+    }
+    egress {
+      # Allow DNS
+      ports {
+        protocol = "UDP"
+        port     = "53"
+      }
+    }
+    egress {
+      # Allow PostgreSQL
+      to {
+        namespace_selector {
+          match_labels = {
+            "kubernetes.io/metadata.name" = "data"
+          }
+        }
+      }
+      ports {
+        protocol = "TCP"
+        port     = "5432"
+      }
+    }
   }
 }

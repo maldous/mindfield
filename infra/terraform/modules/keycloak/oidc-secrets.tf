@@ -2,6 +2,7 @@
 # OIDC secrets in auth namespace for Keycloak config job
 resource "kubernetes_secret" "oidc_client_secrets_auth" {
   count = var.enabled ? 1 : 0
+  depends_on = [helm_release.keycloak]
   metadata {
     name      = "oidc-client-secrets"
     namespace = "auth"
@@ -24,6 +25,7 @@ resource "kubernetes_secret" "oidc_client_secrets_auth" {
 # OIDC secrets in gateway namespace for Kong
 resource "kubernetes_secret" "oidc_client_secrets_gateway" {
   count = var.enabled ? 1 : 0
+  depends_on = [helm_release.keycloak]
   metadata {
     name      = "oidc-client-secrets"
     namespace = "gateway"

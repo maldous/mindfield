@@ -4,7 +4,8 @@ set -euo pipefail
 echo "Building custom Kong image with oidcify plugin..."
 
 # Build the custom Kong image
-docker build -t mindfield/kong-oidc:latest -f infra/docker/Dockerfile.kong .
+# docker build -t mindfield/kong-oidc:latest -f infra/docker/Dockerfile.kong .
+cd infra && microk8s ctr images build -t docker.io/mindfield/kong-oidc:latest -f docker/Dockerfile.kong .
 
 echo "Kong oidcify image built successfully!"
 echo "To deploy:"

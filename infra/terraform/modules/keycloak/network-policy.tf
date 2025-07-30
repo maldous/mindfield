@@ -1,6 +1,7 @@
 # Network policy to allow Keycloak setup to connect to PostgreSQL
 resource "kubernetes_network_policy" "keycloak_db_access" {
   count = var.enabled ? 1 : 0
+  depends_on = [helm_release.keycloak]
   metadata {
     name      = "keycloak-db-access"
     namespace = "auth"

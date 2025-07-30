@@ -5,16 +5,21 @@ image:
 # Number of replicas
 replicas: 1
 
+# Disable embedded PostgreSQL
+postgresql:
+  enabled: false
+
+# Command to start Keycloak in production mode
+command:
+  - "/opt/keycloak/bin/kc.sh"
+  - "start"
+
 # Environment variables for Keycloak configuration
 extraEnv: |
   - name: KC_DB
     value: postgres
-  - name: KC_DB_URL_HOST
-    value: postgres-postgresql.data.svc.cluster.local
-  - name: KC_DB_URL_PORT
-    value: "5432"
-  - name: KC_DB_URL_DATABASE
-    value: keycloak
+  - name: KC_DB_URL
+    value: jdbc:postgresql://postgres-postgresql.data.svc.cluster.local:5432/keycloak
   - name: KC_DB_USERNAME
     value: keycloak
   - name: KC_DB_PASSWORD
@@ -23,16 +28,18 @@ extraEnv: |
     value: admin
   - name: KEYCLOAK_ADMIN_PASSWORD
     value: admin123
+  - name: KC_HOSTNAME
+    value: keycloak.aldous.info
   - name: KC_HOSTNAME_STRICT
-    value: "false"
-  - name: KC_HOSTNAME_STRICT_HTTPS
     value: "false"
   - name: KC_HTTP_ENABLED
     value: "true"
-  - name: KC_PROXY
-    value: "edge"
-  - name: KC_HOSTNAME_URL
-    value: "https://keycloak.aldous.info"
+  - name: KC_PROXY_HEADERS
+    value: "xforwarded"
+  - name: KC_CACHE
+    value: "local"
+  - name: KC_HTTP_RELATIVE_PATH
+    value: "/auth"
 
 # Resources
 resources:

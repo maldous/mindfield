@@ -1,3 +1,82 @@
+# Create admin user through database
+resource "kubernetes_job" "keycloak_admin_setup" {
+  count = var.enabled ? 1 : 0
+  metadata {
+    name      = "keycloak-admin-setup"
+    namespace = "auth"
+  }
+  spec {
+    template {
+      metadata {}
+      spec {
+        restart_policy = "OnFailure"
+        container {
+          name  = "admin-setup"
+          image = "postgres:16"
+          command = ["/bin/bash"]
+          args = ["-c", <<-EOT
+            set -e
+            export PGPASSWORD=keycloak
+            
+            # Wait for Keycloak to initialize the database
+            echo "Waiting for Keycloak to initialize database..."
+            until psql -h postgres-postgresql.data.svc.cluster.local -U keycloak -d keycloak -c "SELECT 1 FROM realm WHERE name='master'" 2>/dev/null; do
+              echo "Waiting for master realm..."
+              sleep 5
+            done
+            
+            # Check if admin user exists
+            if ! psql -h postgres-postgresql.data.svc.cluster.local -U keycloak -d keycloak -tAc "SELECT 1 FROM user_entity WHERE username='admin' AND realm_id=(SELECT id FROM realm WHERE name='master')" | grep -q 1; then
+              echo "Creating admin user..."
+              # Get master realm ID
+              REALM_ID=$(psql -h postgres-postgresql.data.svc.cluster.local -U keycloak -d keycloak -tAc "SELECT id FROM realm WHERE name='master'")
+              
+              # Create admin user
+              psql -h postgres-postgresql.data.svc.cluster.local -U keycloak -d keycloak <<SQL
+                INSERT INTO user_entity (id, email, email_constraint, email_verified, enabled, federation_link, first_name, last_name, realm_id, username, created_timestamp, service_account_client_link, not_before)
+                VALUES (gen_random_uuid()::text, NULL, gen_random_uuid()::text, false, true, NULL, NULL, NULL, '$REALM_ID', 'admin', extract(epoch from now()) * 1000, NULL, 0);
+                
+                INSERT INTO credential (id, salt, type, user_id, created_date, user_label, secret_data, credential_data, priority)
+                SELECT gen_random_uuid()::text, NULL, 'password', id, extract(epoch from now()) * 1000, NULL,
+                  '{"value":"JDJhJDEwJGNZS2JpZmJjTjlwN0lTSldSQ0NOcnVmQ2FDdGFOL0YxNS9IYlhJZDdpN1BhU3k4RDBPNW1T","salt":null,"additionalParameters":{}}',
+                  '{"hashIterations":27500,"algorithm":"pbkdf2-sha256","additionalParameters":{}}',
+                  10
+                FROM user_entity WHERE username='admin' AND realm_id='$REALM_ID';
+                
+                INSERT INTO user_role_mapping (role_id, user_id)
+                SELECT r.id, u.id
+                FROM keycloak_role r, user_entity u
+                WHERE r.name = 'admin' AND r.realm_id = '$REALM_ID'
+                  AND u.username = 'admin' AND u.realm_id = '$REALM_ID';
+SQL
+              echo "Admin user created successfully"
+            else
+              echo "Admin user already exists"
+            fi
+          EOT
+          ]
+        }
+      }
+    }
+  }
+  wait_for_completion = true
+  timeouts {
+    create = "10m"
+    update = "10m"
+  }
+  depends_on = [
+    helm_release.keycloak,
+    time_sleep.wait_for_keycloak
+  ]
+}
+
+# Wait for Keycloak to be ready
+resource "time_sleep" "wait_for_keycloak" {
+  count = var.enabled ? 1 : 0
+  depends_on = [helm_release.keycloak]
+  create_duration = "60s"
+}
+
 # Keycloak Configuration Job
 resource "kubernetes_job" "keycloak_config" {
   count = var.enabled ? 1 : 0
@@ -18,18 +97,24 @@ resource "kubernetes_job" "keycloak_config" {
             set -e
             
             # Wait for Keycloak to be ready
-            until curl -fs http://keycloak.auth.svc.cluster.local:8080/realms/master >/dev/null; do
+            echo "Waiting for Keycloak to be ready..."
+            until curl -fs http://keycloak-keycloakx-http.auth.svc.cluster.local:80/auth/realms/master >/dev/null; do
               echo "Waiting for Keycloak..."
               sleep 5
             done
             
+            # Wait a bit more for admin user to be created automatically
+            echo "Waiting for admin user to be created automatically..."
+            sleep 30
+            
             # Get admin token
+            echo "Getting admin token..."
             KC_TOKEN=$(curl -fs \
               -d "client_id=admin-cli" \
               -d "username=admin" \
               -d "password=admin123" \
               -d "grant_type=password" \
-              "http://keycloak.auth.svc.cluster.local:8080/realms/master/protocol/openid-connect/token" \
+              "http://keycloak-keycloakx-http.auth.svc.cluster.local:80/auth/realms/master/protocol/openid-connect/token" \
               | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p')
             
             if [ -z "$KC_TOKEN" ]; then
@@ -37,8 +122,11 @@ resource "kubernetes_job" "keycloak_config" {
               exit 1
             fi
             
+            echo "Successfully authenticated as admin"
+            
             # Create realm
-            curl -fs -X POST "http://keycloak.auth.svc.cluster.local:8080/admin/realms" \
+            echo "Creating mindfield realm..."
+            curl -fs -X POST "http://keycloak-keycloakx-http.auth.svc.cluster.local:80/auth/admin/realms" \
               -H "Authorization: Bearer $KC_TOKEN" \
               -H "Content-Type: application/json" \
               -d '{
@@ -52,7 +140,8 @@ resource "kubernetes_job" "keycloak_config" {
               }' || echo "Realm might already exist"
             
             # Create root client
-            curl -fs -X POST "http://keycloak.auth.svc.cluster.local:8080/admin/realms/mindfield/clients" \
+            echo "Creating root client..."
+            curl -fs -X POST "http://keycloak-keycloakx-http.auth.svc.cluster.local:80/auth/admin/realms/mindfield/clients" \
               -H "Authorization: Bearer $KC_TOKEN" \
               -H "Content-Type: application/json" \
               -d '{
@@ -68,7 +157,8 @@ resource "kubernetes_job" "keycloak_config" {
               }' || echo "Root client might already exist"
             
             # Create postgraphile client
-            curl -fs -X POST "http://keycloak.auth.svc.cluster.local:8080/admin/realms/mindfield/clients" \
+            echo "Creating postgraphile client..."
+            curl -fs -X POST "http://keycloak-keycloakx-http.auth.svc.cluster.local:80/auth/admin/realms/mindfield/clients" \
               -H "Authorization: Bearer $KC_TOKEN" \
               -H "Content-Type: application/json" \
               -d '{
@@ -83,7 +173,7 @@ resource "kubernetes_job" "keycloak_config" {
                 "protocol": "openid-connect"
               }' || echo "PostGraphile client might already exist"
             
-            echo "Keycloak configuration completed"
+            echo "Keycloak configuration completed successfully"
           EOT
           ]
           volume_mount {

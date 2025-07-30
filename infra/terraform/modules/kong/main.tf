@@ -1,3 +1,11 @@
+# Install Gateway API CRDs
+resource "null_resource" "gateway_api_crds" {
+  count = var.enabled ? 1 : 0
+  provisioner "local-exec" {
+    command = "microk8s kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/standard-install.yaml"
+  }
+}
+
 resource "helm_release" "kong" {
   count            = var.enabled ? 1 : 0
   name             = "kong"
@@ -18,7 +26,10 @@ resource "helm_release" "kong" {
     value = var.proxy_ip
   }
 
-  depends_on = [var.cert_dependency]
+  depends_on = [
+    var.cert_dependency,
+    null_resource.gateway_api_crds
+  ]
 }
 
 resource "time_sleep" "wait_for_kong" {
