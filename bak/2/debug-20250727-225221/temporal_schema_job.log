@@ -1,0 +1,2 @@
+Defaulted container "done" out of: done, check-cassandra (init), check-elasticsearch (init), create-default-store (init), setup-default-store (init), setup-visibility-store (init), update-default-store (init)
+Error from server (BadRequest): container "done" in pod "temporal-schema-1-fnjph" is waiting to start: PodInitializing

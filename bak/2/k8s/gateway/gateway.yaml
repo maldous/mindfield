@@ -1,0 +1,23 @@
+# Main Gateway for Kong LoadBalancer
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: edge
+  namespace: gateway
+spec:
+  gatewayClassName: kong
+  listeners:
+  - name: https
+    protocol: HTTPS
+    port: 443
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: edge-cert
+  - name: http
+    protocol: HTTP
+    port: 80
+    # Redirect HTTP to HTTPS
+    allowedRoutes:
+      namespaces:
+        from: All

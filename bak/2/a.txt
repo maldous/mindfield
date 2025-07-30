@@ -1,0 +1,161 @@
+🔧 Phase 1: Prerequisites
+Installing Gateway API CRDs...
+customresourcedefinition.apiextensions.k8s.io/gatewayclasses.gateway.networking.k8s.io configured
+customresourcedefinition.apiextensions.k8s.io/gateways.gateway.networking.k8s.io configured
+customresourcedefinition.apiextensions.k8s.io/grpcroutes.gateway.networking.k8s.io configured
+customresourcedefinition.apiextensions.k8s.io/httproutes.gateway.networking.k8s.io configured
+customresourcedefinition.apiextensions.k8s.io/referencegrants.gateway.networking.k8s.io configured
+Adding Helm repositories...
+"kong" already exists with the same configuration, skipping
+"bitnami" already exists with the same configuration, skipping
+"jetstack" already exists with the same configuration, skipping
+"external-secrets" already exists with the same configuration, skipping
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "kong" chart repository
+...Successfully got an update from the "open-telemetry" chart repository
+...Successfully got an update from the "jetstack" chart repository
+...Successfully got an update from the "grafana" chart repository
+...Successfully got an update from the "external-secrets" chart repository
+...Successfully got an update from the "bitnami" chart repository
+Update Complete. ⎈Happy Helming!⎈
+Installing cert-manager...
+Release "cert-manager" has been upgraded. Happy Helming!
+NAME: cert-manager
+LAST DEPLOYED: Sun Jul 27 11:12:12 2025
+NAMESPACE: cert-manager
+STATUS: deployed
+REVISION: 3
+TEST SUITE: None
+NOTES:
+⚠️  WARNING: `installCRDs` is deprecated, use `crds.enabled` instead.
+⚠️  WARNING: New default private key rotation policy for Certificate resources.
+The default private key rotation policy for Certificate resources was
+changed to `Always` in cert-manager >= v1.18.0.
+Learn more in the [1.18 release notes](https://cert-manager.io/docs/releases/release-notes/release-notes-1.18).
+
+cert-manager v1.18.2 has been deployed successfully!
+
+In order to begin issuing certificates, you will need to set up a ClusterIssuer
+or Issuer resource (for example, by creating a 'letsencrypt-staging' issuer).
+
+More information on the different types of issuers and how to configure them
+can be found in our documentation:
+
+https://cert-manager.io/docs/configuration/
+
+For information on how to configure cert-manager to automatically provision
+Certificates for Ingress resources, take a look at the `ingress-shim`
+documentation:
+
+https://cert-manager.io/docs/usage/ingress/
+Installing External Secrets Operator...
+Release "external-secrets" has been upgraded. Happy Helming!
+NAME: external-secrets
+LAST DEPLOYED: Sun Jul 27 11:12:13 2025
+NAMESPACE: external-secrets-system
+STATUS: deployed
+REVISION: 3
+TEST SUITE: None
+NOTES:
+external-secrets has been deployed successfully in namespace external-secrets-system!
+
+In order to begin using ExternalSecrets, you will need to set up a SecretStore
+or ClusterSecretStore resource (for example, by creating a 'vault' SecretStore).
+
+More information on the different types of SecretStores and how to configure them
+can be found in our Github: https://github.com/external-secrets/external-secrets
+Applying ESO ClusterSecretStore...
+serviceaccount/external-secrets-sa unchanged
+clusterrole.rbac.authorization.k8s.io/external-secrets-reader unchanged
+clusterrolebinding.rbac.authorization.k8s.io/external-secrets-reader-binding unchanged
+Error from server (Forbidden): error when creating "k8s/security/eso-store.yaml": admission webhook "validate.clustersecretstore.external-secrets.io" denied the request: CAProvider.namespace must not be empty with ClusterSecretStore
+✅ Prerequisites installed
+🗄️ Phase 1: PostgreSQL
+namespace/data configured
+namespace/data not labeled
+Release "postgresql" has been upgraded. Happy Helming!
+NAME: postgresql
+LAST DEPLOYED: Sun Jul 27 11:12:17 2025
+NAMESPACE: data
+STATUS: deployed
+REVISION: 3
+TEST SUITE: None
+NOTES:
+CHART NAME: postgresql
+CHART VERSION: 15.2.5
+APP VERSION: 16.2.0
+
+** Please be patient while the chart is being deployed **
+
+PostgreSQL can be accessed via port 5432 on the following DNS names from within your cluster:
+
+    postgresql.data.svc.cluster.local - Read/Write connection
+
+To get the password for "postgres" run:
+
+    export POSTGRES_PASSWORD=$(kubectl get secret --namespace data postgresql -o jsonpath="{.data.postgres-password}" | base64 -d)
+
+To connect to your database run the following command:
+
+    kubectl run postgresql-client --rm --tty -i --restart='Never' --namespace data --image docker.io/bitnami/postgresql:16.2.0-debian-12-r15 --env="PGPASSWORD=$POSTGRES_PASSWORD" \
+      --command -- psql --host postgresql -U postgres -d mindfield -p 5432
+
+    > NOTE: If you access the container using bash, make sure that you execute "/opt/bitnami/scripts/postgresql/entrypoint.sh /bin/bash" in order to avoid the error "psql: local user with ID 1001} does not exist"
+
+To connect to your database from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace data svc/postgresql 5432:5432 &
+    PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgres -d mindfield -p 5432
+
+WARNING: The configured password will be ignored on new installation in case when previous PostgreSQL release was deleted through the helm command. In that case, old PVC will have an old password, and setting it through helm won't take effect. Deleting persistent volumes (PVs) will solve the issue.
+
+WARNING: There are "resources" sections in the chart not set. Using "resourcesPreset" is not recommended for production. For production installations, please set the following values according to your workload needs:
+  - primary.resources
+  - readReplicas.resources
++info https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+✅ PostgreSQL deployed
+🦍 Phase 1: Kong Gateway
+namespace/gateway configured
+namespace/gateway not labeled
+namespace/cert-manager not labeled
+Release "kong" has been upgraded. Happy Helming!
+NAME: kong
+LAST DEPLOYED: Sun Jul 27 11:12:18 2025
+NAMESPACE: gateway
+STATUS: deployed
+REVISION: 3
+TEST SUITE: None
+NOTES:
+To connect to Kong, please execute the following commands:
+
+HOST=$(kubectl get svc --namespace gateway kong-kong-proxy -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+PORT=$(kubectl get svc --namespace gateway kong-kong-proxy -o jsonpath='{.spec.ports[0].port}')
+export PROXY_IP=${HOST}:${PORT}
+curl $PROXY_IP
+
+Once installed, please follow along the getting started guide to start using
+Kong: https://docs.konghq.com/kubernetes-ingress-controller/latest/guides/getting-started/
+
+WARNING: Kong Manager will not be functional because the Admin API is not
+enabled. Setting both .admin.enabled and .admin.http.enabled and/or
+.admin.tls.enabled to true to enable the Admin API over HTTP/TLS.
+✅ Kong Gateway deployed
+🔍 Phase 1: Validation
+Checking Gateway API CRDs...
+NAME                                 CREATED AT
+gateways.gateway.networking.k8s.io   2025-07-26T12:40:51Z
+Checking cert-manager...
+NAME                                       READY   STATUS    RESTARTS   AGE
+cert-manager-58dd99f969-8pqh5              1/1     Running   1          12h
+cert-manager-cainjector-55cd9f77b5-q5xf6   1/1     Running   1          12h
+cert-manager-webhook-7987476d56-h2xjs      1/1     Running   1          12h
+Checking PostgreSQL...
+NAME           READY   STATUS    RESTARTS   AGE
+postgresql-0   1/1     Running   1          12h
+Checking Kong Gateway...
+NAME                        READY   STATUS    RESTARTS   AGE
+kong-kong-764ccf849-x4hls   2/2     Running   2          12h
+Checking LoadBalancer IP...
+NAME              TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+kong-kong-proxy   LoadBalancer   10.152.183.68   <pending>     80:31926/TCP,443:31191/TCP   12h
+✅ Phase 1 validation complete

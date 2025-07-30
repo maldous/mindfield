@@ -2,12 +2,11 @@
 image:
   tag: "26.0.7"
 
-# Disable internal PostgreSQL
-postgresql:
-  enabled: false
+# Number of replicas
+replicas: 1
 
-# Modern Keycloak X configuration with KC_ variables
-extraEnv: |
+# Environment variables for Keycloak configuration
+extraEnv:
   - name: KC_DB
     value: postgres
   - name: KC_DB_URL_HOST
@@ -48,9 +47,6 @@ resources:
   limits:
     memory: 1Gi
     cpu: 500m
-
-# High availability
-replicaCount: 1
 
 # Health checks
 livenessProbe:

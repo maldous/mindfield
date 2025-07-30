@@ -1,0 +1,24 @@
+USER-SUPPLIED VALUES:
+server:
+  config:
+    persistence:
+      default:
+        driver: sql
+        sql:
+          database: temporal
+          driver: postgres
+          host: postgresql.data.svc.cluster.local
+          password: temporal_pwd
+          port: 5432
+          user: temporal
+      visibility:
+        driver: sql
+        sql:
+          database: temporal_visibility
+          driver: postgres
+          host: postgresql.data.svc.cluster.local
+          password: temporal_vis_pwd
+          port: 5432
+          user: temporal_visibility
+web:
+  enabled: true

@@ -1,0 +1,20 @@
+USER-SUPPLIED VALUES:
+masterService: opensearch-cluster-master
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: microk8s-hostpath
+podSecurityContext:
+  runAsNonRoot: true
+replicas: 1
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 100m
+    memory: 512Mi
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+singleNode: true

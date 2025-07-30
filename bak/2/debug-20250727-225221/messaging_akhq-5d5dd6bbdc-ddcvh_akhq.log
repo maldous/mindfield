@@ -1,0 +1,15 @@
+2025-07-27 12:50:52,085 [34mINFO [0;39m [35mmain        [0;39m [36mContext$RuntimeConfiguredEnvironment[0;39m Established active environments: [k8s, cloud]
+2025-07-27 12:50:52,148 [1;31mERROR[0;39m [35mmain        [0;39m [36mio.micronaut.runtime.Micronaut[0;39m Error starting Micronaut server: Failed to read configuration file: /app/application.yml
+io.micronaut.context.exceptions.ConfigurationException: Failed to read configuration file: /app/application.yml
+	at io.micronaut.context.env.DefaultEnvironment.readPropertiesFromLoader(DefaultEnvironment.java:661)
+	at io.micronaut.context.env.DefaultEnvironment.lambda$readPropertySourceListFromFiles$4(DefaultEnvironment.java:518)
+	at java.base/java.util.Optional.ifPresent(Unknown Source)
+	at io.micronaut.context.env.DefaultEnvironment.readPropertySourceListFromFiles(DefaultEnvironment.java:508)
+	at io.micronaut.context.env.DefaultEnvironment.readPropertySources(DefaultEnvironment.java:447)
+	at io.micronaut.context.env.DefaultEnvironment.start(DefaultEnvironment.java:277)
+	at io.micronaut.context.DefaultApplicationContext$RuntimeConfiguredEnvironment.start(DefaultApplicationContext.java:909)
+	at io.micronaut.context.DefaultApplicationContext$RuntimeConfiguredEnvironment.start(DefaultApplicationContext.java:878)
+	at io.micronaut.context.DefaultApplicationContext.startEnvironment(DefaultApplicationContext.java:266)
+	at io.micronaut.context.DefaultApplicationContext.start(DefaultApplicationContext.java:201)
+	at io.micronaut.runtime.Micronaut.start(Micronaut.java:74)
+	at org.akhq.App.main(App.java:29)

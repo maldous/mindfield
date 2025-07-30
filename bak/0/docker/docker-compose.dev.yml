@@ -1,0 +1,149 @@
+---
+x-build-env:
+
+  BUILDKIT_INLINE_CACHE: "1"
+  BUILDKIT_PROGRESS: plain
+  DOCKER_BUILDKIT: "1"
+
+name: mindfield
+
+services:
+  redis-insight:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.redisinsight
+      cache_from:
+        - type=registry,ref=localhost:5001/mindfield-cache
+      cache_to:
+        - type=registry,ref=localhost:5001/mindfield-cache,mode=max
+    depends_on:
+      redis:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - -qO-
+        - http://localhost:8001
+      timeout: 5s
+      interval: 10s
+      retries: 5
+    cpus: 0.5
+    mem_limit: "536870912"
+
+  sonarqube:
+    image: sonarqube:community
+    depends_on:
+      sonarqube-db:
+        condition: service_healthy
+        required: true
+    volumes:
+      - type: volume
+        source: sonarqube_es7
+        target: /opt/sonarqube/data/es7
+        volume: {}
+      - type: volume
+        source: sonarqube_logs
+        target: /opt/sonarqube/logs
+        volume: {}
+      - type: volume
+        source: sonarqube_extensions
+        target: /opt/sonarqube/extensions
+        volume: {}
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+    cpus: 1
+    mem_limit: "2147483648"
+
+  sonarqube-db:
+    image: postgres:17-alpine
+    volumes:
+      - type: volume
+        source: sonarqube_db_data
+        target: /var/lib/postgresql/data
+        volume: {}
+    environment:
+      POSTGRES_DB: ${SONAR_POSTGRES_DB}
+      POSTGRES_USER: ${SONAR_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${SONAR_POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    networks:
+      backend: null
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U sonarqube
+      timeout: 5s
+      interval: 10s
+      retries: 5
+    cpus: 0.5
+    mem_limit: "268435456"
+
+  storybook:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.storybook
+      args:
+        NODE_MAJOR: ${NODE_MAJOR}
+      cache_from:
+        - type=registry,ref=localhost:5001/mindfield-cache
+      cache_to:
+        - type=registry,ref=localhost:5001/mindfield-cache,mode=max
+    volumes:
+      - type: bind
+        source: ./core/ui
+        target: /app/core/ui
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ./apps/web
+        target: /app/apps/web
+        bind:
+          create_host_path: true
+      - type: bind
+        source: .
+        target: /app
+        bind:
+          create_host_path: true
+      - type: volume
+        source: storybook_next
+        target: /app/.next
+        volume: {}
+      - type: volume
+        source: storybook_node_modules
+        target: /app/apps/web/node_modules
+        volume: {}
+    env_file:
+      - .env
+    networks:
+      frontend: null
+    cpus: 0.5
+    mem_limit: "536870912"
+
+  trivy:
+    image: aquasec/trivy:latest
+    volumes:
+      - type: volume
+        source: trivy_cache
+        target: /root/.cache
+        volume: {}
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+    command:
+      - server
+      - --listen
+      - 0.0.0.0:8080
+    cpus: 0.5
+    mem_limit: "536870912"

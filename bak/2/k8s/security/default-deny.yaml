@@ -1,0 +1,53 @@
+# Default-deny NetworkPolicy for data namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: data
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+
+---
+# Default-deny NetworkPolicy for auth namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: auth
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+
+---
+# Default-deny NetworkPolicy for gateway namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: gateway
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+
+---
+# Default-deny NetworkPolicy for observability namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: observability
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+
+---
+# Default-deny NetworkPolicy for temporal namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: temporal
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]

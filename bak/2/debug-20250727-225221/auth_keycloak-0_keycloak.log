@@ -1,0 +1,80 @@
+[38;5;6mkeycloak [38;5;5m12:50:46.09 [0m[38;5;2mINFO [0m ==> 
+[38;5;6mkeycloak [38;5;5m12:50:46.09 [0m[38;5;2mINFO [0m ==> [1mWelcome to the Bitnami keycloak container[0m
+[38;5;6mkeycloak [38;5;5m12:50:46.09 [0m[38;5;2mINFO [0m ==> Subscribe to project updates by watching [1mhttps://github.com/bitnami/containers[0m
+[38;5;6mkeycloak [38;5;5m12:50:46.10 [0m[38;5;2mINFO [0m ==> [38;5;3mNOTICE: Starting August 28th, 2025, only a limited subset of images/charts will remain available for free. Backup will be available for some time at the 'Bitnami Legacy' repository. More info at https://github.com/bitnami/containers/issues/83267[0m
+[38;5;6mkeycloak [38;5;5m12:50:46.10 [0m[38;5;2mINFO [0m ==> 
+[38;5;6mkeycloak [38;5;5m12:50:46.10 [0m[38;5;2mINFO [0m ==> ** Starting keycloak setup **
+[38;5;6mkeycloak [38;5;5m12:50:46.10 [0m[38;5;2mINFO [0m ==> Validating settings in KEYCLOAK_* env vars...
+[38;5;6mkeycloak [38;5;5m12:50:46.11 [0m[38;5;2mINFO [0m ==> Trying to connect to PostgreSQL server pgbouncer.data.svc.cluster.local...
+[38;5;6mkeycloak [38;5;5m12:50:46.12 [0m[38;5;2mINFO [0m ==> Found PostgreSQL server listening at pgbouncer.data.svc.cluster.local:6432
+[38;5;6mkeycloak [38;5;5m12:50:46.12 [0m[38;5;2mINFO [0m ==> Configuring database settings
+[38;5;6mkeycloak [38;5;5m12:50:46.13 [0m[38;5;2mINFO [0m ==> Enabling statistics
+[38;5;6mkeycloak [38;5;5m12:50:46.14 [0m[38;5;2mINFO [0m ==> Enabling health endpoints
+[38;5;6mkeycloak [38;5;5m12:50:46.14 [0m[38;5;2mINFO [0m ==> Configuring http settings
+[38;5;6mkeycloak [38;5;5m12:50:46.16 [0m[38;5;2mINFO [0m ==> Configuring hostname settings
+[38;5;6mkeycloak [38;5;5m12:50:46.16 [0m[38;5;2mINFO [0m ==> Configuring cache count
+[38;5;6mkeycloak [38;5;5m12:50:46.16 [0m[38;5;2mINFO [0m ==> Configuring log level
+[38;5;6mkeycloak [38;5;5m12:50:46.17 [0m[38;5;2mINFO [0m ==> Configuring proxy
+[38;5;6mkeycloak [38;5;5m12:50:46.17 [0m[38;5;2mINFO [0m ==> ** keycloak setup finished! **
+
+[38;5;6mkeycloak [38;5;5m12:50:46.18 [0m[38;5;2mINFO [0m ==> ** Starting keycloak **
+Appending additional Java properties to JAVA_OPTS
+WARNING: The following used options or option values are DEPRECATED and will be removed or their behaviour changed in a future release:
+	- cache-stack=kubernetes: Use 'jdbc-ping' instead by leaving it unset.
+Consult the Release Notes for details.
+Running the server in development mode. DO NOT use this configuration in production.
+2025-07-27 12:50:51,577 WARN  [io.agroal.pool] (agroal-11) Datasource '<default>': FATAL: unsupported startup parameter: search_path
+2025-07-27 12:50:51,578 WARN  [org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator] (JPA Startup Thread) HHH000342: Could not obtain connection to query metadata: org.hibernate.exception.JDBCConnectionException: unable to obtain isolated JDBC connection [FATAL: unsupported startup parameter: search_path] [n/a]
+	at org.hibernate.exception.internal.SQLStateConversionDelegate.convert(SQLStateConversionDelegate.java:100)
+	at org.hibernate.exception.internal.StandardSQLExceptionConverter.convert(StandardSQLExceptionConverter.java:58)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:108)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:94)
+	at org.hibernate.resource.transaction.backend.jta.internal.JtaIsolationDelegate.doTheWork(JtaIsolationDelegate.java:206)
+	at org.hibernate.resource.transaction.backend.jta.internal.JtaIsolationDelegate.lambda$delegateWork$3(JtaIsolationDelegate.java:91)
+	at org.hibernate.resource.transaction.backend.jta.internal.JtaIsolationDelegate.doInSuspendedTransaction(JtaIsolationDelegate.java:125)
+	at org.hibernate.resource.transaction.backend.jta.internal.JtaIsolationDelegate.delegateWork(JtaIsolationDelegate.java:88)
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.getJdbcEnvironmentUsingJdbcMetadata(JdbcEnvironmentInitiator.java:336)
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.initiateService(JdbcEnvironmentInitiator.java:129)
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.initiateService(JdbcEnvironmentInitiator.java:81)
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.initiateService(StandardServiceRegistryImpl.java:130)
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.createService(AbstractServiceRegistryImpl.java:263)
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:238)
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:215)
+	at org.hibernate.service.ServiceRegistry.requireService(ServiceRegistry.java:68)
+	at org.hibernate.engine.jdbc.internal.JdbcServicesImpl.configure(JdbcServicesImpl.java:52)
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.configureService(StandardServiceRegistryImpl.java:136)
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:247)
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:215)
+	at org.hibernate.service.ServiceRegistry.requireService(ServiceRegistry.java:68)
+	at org.hibernate.boot.internal.SessionFactoryOptionsBuilder.<init>(SessionFactoryOptionsBuilder.java:290)
+	at io.quarkus.hibernate.orm.runtime.recording.PrevalidatedQuarkusMetadata.buildSessionFactoryOptionsBuilder(PrevalidatedQuarkusMetadata.java:72)
+	at io.quarkus.hibernate.orm.runtime.boot.FastBootEntityManagerFactoryBuilder.build(FastBootEntityManagerFactoryBuilder.java:84)
+	at io.quarkus.hibernate.orm.runtime.FastBootHibernatePersistenceProvider.createEntityManagerFactory(FastBootHibernatePersistenceProvider.java:72)
+	at jakarta.persistence.Persistence.createEntityManagerFactory(Persistence.java:80)
+	at jakarta.persistence.Persistence.createEntityManagerFactory(Persistence.java:55)
+	at io.quarkus.hibernate.orm.runtime.JPAConfig$LazyPersistenceUnit.get(JPAConfig.java:163)
+	at io.quarkus.hibernate.orm.runtime.JPAConfig$1.run(JPAConfig.java:63)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: org.postgresql.util.PSQLException: FATAL: unsupported startup parameter: search_path
+	at org.postgresql.core.v3.ConnectionFactoryImpl.doAuthentication(ConnectionFactoryImpl.java:777)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.tryConnect(ConnectionFactoryImpl.java:234)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:289)
+	at org.postgresql.core.ConnectionFactory.openConnection(ConnectionFactory.java:57)
+	at org.postgresql.jdbc.PgConnection.<init>(PgConnection.java:277)
+	at org.postgresql.Driver.makeConnection(Driver.java:448)
+	at org.postgresql.Driver.connect(Driver.java:298)
+	at io.agroal.pool.ConnectionFactory.createConnection(ConnectionFactory.java:225)
+	at io.agroal.pool.ConnectionPool$CreateConnectionTask.call(ConnectionPool.java:585)
+	at io.agroal.pool.ConnectionPool$CreateConnectionTask.call(ConnectionPool.java:566)
+	at java.base/java.util.concurrent.FutureTask.run(Unknown Source)
+	at io.agroal.pool.util.PriorityScheduledExecutor.beforeExecute(PriorityScheduledExecutor.java:75)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	... 1 more
+
+2025-07-27 12:50:52,474 WARN  [io.agroal.pool] (agroal-11) Datasource '<default>': FATAL: unsupported startup parameter: search_path
+2025-07-27 12:50:52,475 INFO  [com.arjuna.ats.jbossatx] (main) ARJUNA032014: Stopping transaction recovery manager
+2025-07-27 12:50:52,488 ERROR [org.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler] (main) ERROR: Failed to start server in (development) mode
+2025-07-27 12:50:52,488 ERROR [org.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler] (main) ERROR: Failed to obtain JDBC connection
+2025-07-27 12:50:52,488 ERROR [org.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler] (main) ERROR: FATAL: unsupported startup parameter: search_path
+2025-07-27 12:50:52,488 ERROR [org.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler] (main) For more details run the same command passing the '--verbose' option. Also you can use '--help' to see the details about the usage of the particular command.

@@ -1,0 +1,46 @@
+---
+name: infra
+
+volumes:
+
+  alertmanager_data:
+    driver: local
+
+  gitlab_config:
+    driver: local
+
+  gitlab_data:
+    driver: local
+
+  gitlab_logs:
+    driver: local
+
+  kuma_data:
+    driver: local
+
+  loki_data:
+    driver: local
+
+  minio_data:
+    driver: local
+
+  opensearch_data:
+    driver: local
+
+  postgres_data:
+    driver: local
+
+  prometheus_data:
+    driver: local
+
+  redis_data:
+    driver: local
+
+  sonarqube_data:
+    driver: local
+
+  sonarqube_extensions:
+    driver: local
+
+  sonarqube_logs:
+    driver: local

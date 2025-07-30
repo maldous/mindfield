@@ -1,0 +1,34 @@
+---
+name: mindfield
+
+services:
+
+  sonarqube:
+    image: sonarqube:community
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+        required: true
+    volumes:
+      - type: bind
+        source: data/sonarqube/es7
+        target: /opt/sonarqube/data/es7
+        bind:
+          create_host_path: true
+      - type: bind
+        source: data/sonarqube/logs
+        target: /opt/sonarqube/logs
+        bind:
+          create_host_path: true
+      - type: bind
+        source: data/sonarqube/extensions
+        target: /opt/sonarqube/extensions
+        bind:
+          create_host_path: true
+    env_file:
+      - .env
+    networks:
+      backend: null
+      frontend: null
+    cpus: 1
+    mem_limit: "2147483648"

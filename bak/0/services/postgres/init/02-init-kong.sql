@@ -1,0 +1,3 @@
+CREATE USER kong WITH PASSWORD 'kong_dev_password';
+CREATE DATABASE kong OWNER kong;
+GRANT ALL PRIVILEGES ON DATABASE kong TO kong;
