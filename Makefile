@@ -35,11 +35,20 @@ issuers:
 dns:
 	cd $(TF_DIR) && terraform apply -target=module.external_dns -auto-approve
 
-storage:
+storage: setup-ceph-devices
 	cd $(TF_DIR) && terraform apply -target=module.rook_operator -auto-approve
 	cd $(TF_DIR) && terraform apply -target=module.rook_cluster -auto-approve
 	cd $(TF_DIR) && terraform apply -target=module.minio_operator -auto-approve
 	cd $(TF_DIR) && terraform apply -target=module.minio_tenant -auto-approve
+
+setup-ceph-devices:
+	sudo mkdir -p /var/lib/rook
+	[ -f /var/lib/rook/osd1.img ] || sudo fallocate -l 20G /var/lib/rook/osd1.img
+	LOOPDEV=$$(sudo losetup -j /var/lib/rook/osd1.img | cut -d':' -f1); \
+	if [ -z "$$LOOPDEV" ]; then LOOPDEV=$$(sudo losetup --find --show /var/lib/rook/osd1.img); fi; \
+	sudo mkdir -p /dev/ceph-loops; \
+	sudo ln -sf "$$LOOPDEV" /dev/ceph-loops/osd1; \
+	echo "Loop device created: $$LOOPDEV -> /dev/ceph-loops/osd1"
 
 datastores:
 	cd $(TF_DIR) && terraform apply -target=module.postgres -auto-approve

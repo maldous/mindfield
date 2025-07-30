@@ -9,7 +9,7 @@ auth:
 master:
   persistence:
     enabled: true
-    storageClass: "microk8s-hostpath"
+    storageClass: "ceph-block"
     size: 8Gi
     accessModes:
       - ReadWriteOnce
