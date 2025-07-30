@@ -11,7 +11,7 @@ tenant:
       name: pool-0
       volumesPerServer: 4
       size: 10Gi
-      storageClassName: microk8s-hostpath
+      storageClassName: ceph-rbd
       
   mountPath: /export
   subPath: /data

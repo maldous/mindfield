@@ -6,9 +6,9 @@ ifneq (,$(wildcard .env))
 	export TF_VAR_cloudflare_api_token := $(CLOUDFLARE_API_TOKEN)
 endif
 
-.PHONY: all microk8s terraform install addons calico certs issuers dns storage datastores apply destroy
+.PHONY: all microk8s terraform install addons calico certs issuers dns microceph minio datastores apply destroy
 
-all: microk8s terraform addons calico certs issuers dns storage # datastores
+all: microk8s terraform addons calico certs issuers dns microceph minio # datastores
 
 install: microk8s terraform
 
@@ -35,12 +35,15 @@ issuers:
 dns:
 	cd $(TF_DIR) && terraform apply -target=module.external_dns -auto-approve
 
-# fallocate -l 512G /var/lib/rook/osd1.img
-# qemu-nbd --connect=/dev/nbd0 /var/lib/rook/osd1.img
+microceph:
+	sudo microceph cluster bootstrap
+	sudo microceph disk add loop,100G,3
+	sudo microk8s enable rook-ceph
+	sudo microk8s connect-external-ceph
+	microk8s kubectl delete pods -n rook-ceph -l app=csi-rbdplugin --ignore-not-found=true
+	microk8s kubectl delete pods -n rook-ceph -l app=csi-rbdplugin-provisioner --ignore-not-found=true
 
-storage: 
-	cd $(TF_DIR) && terraform apply -target=module.rook_operator -auto-approve
-	cd $(TF_DIR) && terraform apply -target=module.rook_cluster -auto-approve
+minio: 
 	cd $(TF_DIR) && terraform apply -target=module.minio_operator -auto-approve
 	cd $(TF_DIR) && terraform apply -target=module.minio_tenant -auto-approve
 

@@ -11,7 +11,7 @@ auth:
 primary:
   persistence:
     enabled: true
-    storageClass: "ceph-block"
+    storageClass: "ceph-rbd"
     size: 50Gi
     accessModes:
       - ReadWriteOnce

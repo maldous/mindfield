@@ -46,24 +46,6 @@ module "external_dns" {
   ]
 }
 
-# Storage Operators
-module "rook_operator" {
-  source  = "./modules/rook_operator"
-  enabled = true
-  depends_on = [
-    module.calico
-  ]
-}
-
-module "rook_cluster" {
-  source       = "./modules/rook_cluster"
-  enabled      = true
-  storage_size = var.opensearch_storage
-  depends_on = [
-    module.rook_operator
-  ]
-}
-
 module "minio_operator" {
   source  = "./modules/minio_operator"
   enabled = true
@@ -77,8 +59,7 @@ module "minio_tenant" {
   enabled      = true
   storage_size = var.minio_storage
   depends_on = [
-    module.minio_operator,
-    module.rook_cluster
+    module.minio_operator
   ]
 }
 
@@ -88,17 +69,11 @@ module "postgres" {
   enabled      = true
   storage_size = var.postgres_storage
   pg_version   = var.postgres_version
-  depends_on = [
-    module.rook_cluster
-  ]
 }
 
 module "redis" {
   source  = "./modules/redis"
   enabled = true
-  depends_on = [
-    module.rook_cluster
-  ]
 }
 
 module "pgbouncer" {
@@ -116,4 +91,3 @@ module "postgraphile" {
     module.postgres
   ]
 }
-

@@ -9,7 +9,7 @@ auth:
 master:
   persistence:
     enabled: true
-    storageClass: "ceph-block"
+    storageClass: "ceph-rbd"
     size: 8Gi
     accessModes:
       - ReadWriteOnce
