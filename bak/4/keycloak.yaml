@@ -1,0 +1,40 @@
+image:
+  tag: "26.0.7"
+replicas: 1
+postgresql:
+  enabled: false
+command:
+  - "/opt/keycloak/bin/kc.sh"
+  - "start"
+extraEnv: |
+  - name: KC_DB
+    value: postgres
+  - name: KC_DB_URL
+    value: jdbc:postgresql://postgres-postgresql.data.svc.cluster.local:5432/keycloak
+  - name: KC_DB_USERNAME
+    value: keycloak
+  - name: KC_DB_PASSWORD
+    value: keycloak
+  - name: KEYCLOAK_ADMIN
+    value: admin
+  - name: KEYCLOAK_ADMIN_PASSWORD
+    value: admin123
+  - name: KC_HOSTNAME
+    value: keycloak.aldous.info
+  - name: KC_HOSTNAME_STRICT
+    value: "false"
+  - name: KC_HTTP_ENABLED
+    value: "true"
+  - name: KC_PROXY_HEADERS
+    value: "xforwarded"
+  - name: KC_CACHE
+    value: "local"
+  - name: KC_HTTP_RELATIVE_PATH
+    value: "/auth"
+resources:
+  requests:
+    memory: 512Mi
+    cpu: 250m
+  limits:
+    memory: 1Gi
+    cpu: 500m

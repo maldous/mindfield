@@ -1,0 +1,93 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-iam-authenticator
+  namespace: kube-system
+data:
+  config.yaml: |
+    clusterID: aws-cluster-eksd
+    server:
+      mapRoles:
+        - roleARN: arn:aws:iam::810358012972:role/AdministratorAccess
+          username: kubernetes-admin
+          groups:
+            - system:masters
+      mapUsers: []
+      mapAccounts:
+        - "810358012972"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aws-iam-authenticator
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aws-iam-authenticator
+rules:
+  - apiGroups:
+      - iamauthenticator.k8s.aws
+    resources:
+      - iamidentitymappings
+      - iamidentitymappings/status
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+      - update
+  - apiGroups: [""]
+    resources:
+      - events
+      - configmaps
+    verbs:
+      - create
+      - update
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: aws-iam-authenticator
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aws-iam-authenticator
+subjects:
+  - kind: ServiceAccount
+    name: aws-iam-authenticator
+    namespace: kube-system
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: aws-iam-authenticator
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: aws-iam-authenticator
+  template:
+    metadata:
+      labels:
+        name: aws-iam-authenticator
+    spec:
+      serviceAccountName: aws-iam-authenticator
+      hostNetwork: true
+      containers:
+        - name: aws-iam-authenticator
+          image: andrewazores/aws-iam-authenticator:latest
+          args:
+            - serve
+            - --config=/etc/aws-iam-authenticator/config.yaml
+          volumeMounts:
+            - name: config
+              mountPath: /etc/aws-iam-authenticator
+      volumes:
+        - name: config
+          configMap:
+            name: aws-iam-authenticator

@@ -1,0 +1,41 @@
+tenant:
+  name: minio-tenant
+  image:
+    repository: quay.io/minio/minio
+    tag: RELEASE.2024-12-18T13-15-44Z
+    pullPolicy: IfNotPresent
+  pools:
+    - servers: 1
+      name: pool-0
+      volumesPerServer: 4
+      size: 10Gi
+      storageClassName: ceph-rbd
+  mountPath: /export
+  subPath: /data
+  requestAutoCert: false
+  s3:
+    bucketDNS: false
+  podManagementPolicy: Parallel
+  exposeServices:
+    minio: true
+    console: true
+  serviceAccountName: minio-tenant
+  users:
+    - accessKey: minio
+      secretKey: minio123
+      policy: readwrite
+  buckets:
+    - name: data
+      policy: none
+      purge: false
+    - name: backups
+      policy: none
+      purge: false
+  certificate:
+    requestAutoCert: false
+  features:
+    bucketDNS: false
+    domains: {}
+  serviceAccount:
+    create: true
+    name: minio-tenant

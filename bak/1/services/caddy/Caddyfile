@@ -1,51 +1,78 @@
 {
-  email {$LETSENCRYPT_EMAIL}
-  order rate_limit before reverse_proxy
-  storage redis {
-    host redis
-    port 6379
-  }
+    order rate_limit before reverse_proxy
+    email {$LETSENCRYPT_EMAIL}
 }
-
-kong.{$DOMAIN}, netdata.{$DOMAIN}, akhq.{$DOMAIN}, nui.{$DOMAIN}, sentry.{$DOMAIN}, cadence.{$DOMAIN}, alertmanager.{$DOMAIN}, blackbox.{$DOMAIN}, docs.{$DOMAIN}, gitlab.{$DOMAIN}, grafana.{$DOMAIN}, jaeger.{$DOMAIN}, keycloak.{$DOMAIN}, kuma.{$DOMAIN}, mailhog.{$DOMAIN}, minio.{$DOMAIN}, pgadmin.{$DOMAIN}, postgraphile.{$DOMAIN}, promtail.{$DOMAIN}, redisinsight.{$DOMAIN}, search.{$DOMAIN}, sonarqube.{$DOMAIN}, {$DOMAIN} {
-  tls {$LETSENCRYPT_EMAIL}
-  @hsts host {$DOMAIN}
-  header @hsts Strict-Transport-Security "max-age=31536000"
-  header {
-    X-Content-Type-Options "nosniff"
-    X-Frame-Options "DENY"
-    X-XSS-Protection "1; mode=block"
-    Referrer-Policy "strict-origin-when-cross-origin"
-  }
-  log {
-    output file /var/log/caddy/access.log
-    format json
-  }
-  rate_limit {remote.ip} 6000r/m
-  @authExpired {
-    path /callback
-    query error=temporarily_unavailable
-  }
-  handle @authExpired {
-    redir https://{host}/ 302
-  }
-  @keycloak host keycloak.{$DOMAIN}
-  header @keycloak {
-    -X-Frame-Options
-    X-Frame-Options SAMEORIGIN
-  }
-  handle @keycloak {
-    reverse_proxy keycloak:8080 {
-      header_up Host {host}
+{$DOMAIN},
+api.{$DOMAIN},
+docs.{$DOMAIN},
+grafana.{$DOMAIN},
+grapesjs.{$DOMAIN},
+keycloak.{$DOMAIN},
+minio-console.{$DOMAIN},
+mailhog.{$DOMAIN},
+redis-insight.{$DOMAIN},
+prometheus.{$DOMAIN},
+loki.{$DOMAIN},
+jaeger.{$DOMAIN},
+alertmanager.{$DOMAIN},
+opensearch.{$DOMAIN},
+opensearch-dashboards.{$DOMAIN},
+node-exporter.{$DOMAIN},
+blackbox-exporter.{$DOMAIN},
+uptime-kuma.{$DOMAIN},
+trivy.{$DOMAIN},
+postgraphile.{$DOMAIN},
+pgadmin.{$DOMAIN},
+storybook.{$DOMAIN},
+sonarqube.{$DOMAIN},
+gitea.{$DOMAIN},
+presidio-analyzer.{$DOMAIN},
+presidio-anonymizer.{$DOMAIN},
+presidio-image.{$DOMAIN},
+render.{$DOMAIN},
+transform.{$DOMAIN},
+submission.{$DOMAIN},
+kong.{$DOMAIN},
+swagger-ui.{$DOMAIN},
+redoc.{$DOMAIN}
+{
+    tls {$LETSENCRYPT_EMAIL}
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
     }
-  }
-  handle {
+    log {
+	output file /var/log/caddy/access.log
+        format json
+    }
+    # Keycloak - direct access (needed for OIDC provider)
+    # Note: Keycloak cannot be protected by Kong due to circular dependency
+    # For admin access, use SSH tunnel: ssh -L 3019:localhost:3019 user@server
+    @keycloak_prod host keycloak.{$DOMAIN}
+    header @keycloak_prod {
+        -X-Frame-Options
+        X-Frame-Options SAMEORIGIN
+    }
+    reverse_proxy @keycloak_prod keycloak:8080 {
+        header_up Host             {host}
+        header_up X-Forwarded-Host {host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-For  {remote_host}
+    }
+    
+    # Kong Admin - direct access (for configuration)
+    @kong_admin host kong.{$DOMAIN}
+    reverse_proxy @kong_admin kong:8001
+    
+    # All other services through Kong for OIDC protection
     reverse_proxy kong:8000 {
-      header_up Host {host}
+        header_up Host             {host}
+        header_up X-Forwarded-Host {host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-For  {remote_host}
     }
-  }
-}
 
-http://{$DOMAIN}, http://*.{$DOMAIN} {
-  redir https://{host}{uri} 302
 }

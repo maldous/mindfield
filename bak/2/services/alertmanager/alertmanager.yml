@@ -1,0 +1,30 @@
+global:
+  smtp_smarthost: "mailhog:1025"
+  smtp_from: "alerts@localhost"
+  smtp_require_tls: false
+
+route:
+  group_by: ["alertname"]
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: "web.hook"
+
+receivers:
+  - name: "web.hook"
+    email_configs:
+      - to: "admin@localhost"
+        require_tls: false
+        html: |
+          Alert: {{ .GroupLabels.alertname }}
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          {{ end }}
+
+inhibit_rules:
+  - source_match:
+      severity: "critical"
+    target_match:
+      severity: "warning"
+    equal: ["alertname", "dev", "instance"]

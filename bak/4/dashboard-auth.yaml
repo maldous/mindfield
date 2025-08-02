@@ -1,0 +1,38 @@
+# kube-system/dashboard-oidc plugin
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: dashboard-oidc
+  namespace: kube-system
+config:
+  client_id: kubedash
+  client_secret: "P1ehhi2T7jk6mJBX"
+  discovery: https://keycloak.aldous.info/realms/k8s/.well-known/openid-configuration
+  scopes: openid,profile,email
+plugin: oidc
+---
+# Ingress for the dashboard
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kubernetes-dashboard
+  namespace: kube-system
+  annotations:
+    konghq.com/plugins: dashboard-oidc
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare
+spec:
+  ingressClassName: kong
+  tls:
+  - hosts: [dashboard.aldous.info]
+    secretName: wildcard-aldous-tls
+  rules:
+  - host: dashboard.aldous.info
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kubernetes-dashboard
+            port:
+              number: 443

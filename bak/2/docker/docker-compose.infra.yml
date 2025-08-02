@@ -1,0 +1,1071 @@
+---
+name: infra
+
+services:
+
+  netdata:
+    image: netdata/netdata:latest
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    ports:
+      - "19999:19999"
+    volumes:
+      - /var/lib/docker/persist/netdata/config:/etc/netdata
+      - /var/lib/docker/persist/netdata/lib:/var/lib/netdata
+      - /var/lib/docker/persist/netdata/cache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+    restart: unless-stopped
+
+  akhq:
+    image: tchiotludo/akhq:latest
+    volumes:
+      - ./services/akhq/application.yml:/app/application.yml
+    env_file:
+      - .env
+    ports:
+      - '8085:8080'
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/ || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+  alertmanager:
+    image: prom/alertmanager:latest
+    volumes:
+      - ./services/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - /var/lib/docker/persist/alertmanager_data:/alertmanager
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    user: root
+    tmpfs:
+      - /tmp
+
+  analyzer:
+    image: mcr.microsoft.com/presidio-analyzer:latest
+    depends_on:
+      redis:
+        condition: service_healthy
+        required: true
+    volumes:
+      - ./services/analyzer/healthcheck.sh:/healthcheck.sh
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /healthcheck.sh
+      timeout: 10s
+      interval: 5s
+      retries: 12
+    tmpfs:
+      - /tmp
+
+  anonymizer:
+    image: mcr.microsoft.com/presidio-anonymizer:latest
+    depends_on:
+      analyzer:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  blackbox:
+    image: prom/blackbox-exporter:latest
+    volumes:
+      - ./services/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml
+    env_file:
+      - .env
+    networks:
+      - backend
+      - monitoring
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  caddy:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.caddy
+      cache_from:
+        - type=registry,ref=localhost:5001/cache
+      cache_to:
+        - type=registry,ref=localhost:5001/cache,mode=max
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    volumes:
+      - /var/log/caddy/:/var/log/caddy/
+      - ./services/caddy/Caddyfile:/etc/caddy/Caddyfile
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  cadence:
+    image: ubercadence/web:latest
+    env_file:
+      - .env
+    networks:
+      - backend
+    tmpfs:
+      - /tmp
+
+  cadence-server:
+    image: ubercadence/server:master-auto-setup
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+    volumes:
+      - ./services/cadence/config:/etc/cadence/config
+    environment:
+      POSTGRES_SEEDS: postgres
+      DB_PORT: 5432
+      POSTGRES_USER: cadence
+      POSTGRES_PWD: "${CADENCE_PASSWORD}"
+      POSTGRES_DB: cadence
+      DYNAMIC_CONFIG_FILE_PATH: /etc/cadence/config/dynamicconfig/development.yaml
+    env_file:
+      - .env
+    networks:
+      - backend
+    tmpfs:
+      - /tmp
+
+  collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    depends_on:
+      jaeger:
+        condition: service_started
+        required: true
+      opensearch:
+        condition: service_started
+        required: true
+      prometheus:
+        condition: service_started
+        required: true
+    volumes:
+      - ./services/collector/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    command:
+      - --config=/etc/otel-collector-config.yaml
+    restart: always
+    tmpfs:
+      - /tmp
+
+  docs:
+    image: squidfunk/mkdocs-material:latest
+    volumes:
+      - ./docs:/docs
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    command:
+      - serve
+      - --dev-addr=0.0.0.0:8005
+    working_dir: /docs
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  exporter:
+    image: prom/node-exporter:latest
+    volumes:
+      - type: bind
+        source: /
+        target: /host
+        read_only: true
+        bind:
+          propagation: rslave
+    env_file:
+      - .env
+    networks:
+      - backend
+      - monitoring
+    command:
+      - --path.rootfs=/host
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    pid: host
+    tmpfs:
+      - /tmp
+
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    volumes:
+      - /var/lib/docker/persist/gitlab_config:/etc/gitlab
+      - /var/lib/docker/persist/gitlab_logs:/var/log/gitlab
+      - /var/lib/docker/persist/gitlab_data:/var/opt/gitlab
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        puma['worker_processes'] = 2
+        postgresql['enable'] = false;
+        gitlab_rails['db_adapter'] = 'postgresql';
+        gitlab_rails['db_host'] = 'pgbouncer';
+        gitlab_rails['db_port'] = 5433;
+        gitlab_rails['db_database'] = 'gitlab';
+        gitlab_rails['db_username'] = 'gitlab';
+        gitlab_rails['db_password'] = "${GITLAB_ROOT_PASSWORD}";
+        redis['enable'] = false;
+        gitlab_rails['redis_host'] = 'redis';
+        gitlab_rails['redis_port'] = 6379;
+        gitlab_rails['redis_database'] = 0;
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -f http://localhost/-/readiness || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    shm_size: 256m
+    tmpfs:
+      - /tmp
+
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      mailhog:
+        condition: service_started
+        required: true
+      pgbouncer:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  kafka:
+    image: bitnami/kafka:latest
+    volumes:
+      - /var/lib/docker/persist/kafka_data:/bitnami
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/bitnami/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  kafka-configure:
+    image: bitnami/kafka:latest
+    depends_on:
+      kafka:
+        condition: service_healthy
+        required: true
+    volumes:
+      - ./services/kafka/configure.sh:/configure.sh
+    env_file:
+      - .env
+    networks:
+      - backend
+    command:
+      - /configure.sh
+    restart: no
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:latest
+    depends_on:
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8083/connectors || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    depends_on:
+      mailhog:
+        condition: service_healthy
+        required: true
+      pgbouncer:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    command:
+      - start
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  keycloak-configure:
+    image: badouralix/curl-jq:latest
+    depends_on:
+      keycloak:
+        condition: service_healthy
+        required: true
+    volumes:
+      - ./services/keycloak/configure.sh:/configure.sh
+    env_file:
+      - .env
+    networks:
+      - backend
+    command:
+      - /configure.sh
+    restart: no
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  kong:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.kong
+      tags:
+        - kong:latest
+      cache_from:
+        - type=registry,ref=localhost:5001/cache
+      cache_to:
+        - type=registry,ref=localhost:5001/cache,mode=max
+    depends_on:
+      kong-bootstrap:
+        condition: service_completed_successfully
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - frontend
+      - backend
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - kong health
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  kong-bootstrap:
+    image: kong:latest
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - backend
+    command: >
+      kong migrations bootstrap
+    restart: no
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  kong-configure:
+    image: badouralix/curl-jq:latest
+    depends_on:
+      kong:
+        condition: service_healthy
+        required: true
+    volumes:
+      - ./services/kong/configure.sh:/configure.sh
+    env_file:
+      - .env
+    networks:
+      - backend
+    command:
+      - /configure.sh
+    restart: no
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  kuma:
+    image: louislam/uptime-kuma:latest
+    volumes:
+      - /var/lib/docker/persist/kuma_data:/app/data
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  loki:
+    image: grafana/loki:latest
+    volumes:
+      - ./services/loki/local-config.yml:/etc/loki/local-config.yaml
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    command:
+      - -config.file=/etc/loki/local-config.yaml
+      - -config.expand-env=true
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    user: root
+    tmpfs:
+      - /tmp
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  minio:
+    image: minio/minio:latest
+    volumes:
+      - /var/lib/docker/persist/minio_data:/data
+    env_file:
+      - .env
+    networks:
+      - backend
+    command: >
+      server /data --console-address :9001
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -f http://localhost:9000/minio/health/live
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  nats:
+    image: nats:latest
+    volumes:
+      - /var/lib/docker/persist/nats_data:/data
+    env_file:
+      - .env
+    networks:
+      - backend
+    command:
+      - -js
+      - --store_dir=/data/jetstream
+    restart: always
+    tmpfs:
+      - /tmp
+
+  nui:
+    image: ghcr.io/nats-nui/nui:latest
+    volumes:
+      - /var/lib/docker/persist/nui_db:/db
+    env_file:
+      - .env
+    ports:
+      - '31311:31311'
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:31311/healthz || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  opensearch:
+    image: opensearchproject/opensearch:latest
+    volumes:
+      - /var/lib/docker/persist/opensearch_data:/usr/share/opensearch/data
+    environment:
+      bootstrap.memory_lock: "true"
+      cluster.name: opensearch-cluster
+      discovery.type: single-node
+      node.name: opensearch
+      plugins.security.disabled: true
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    volumes:
+      - ./services/pgbouncer:/etc/pgbouncer
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -h "${POSTGRES_HOST}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -p "5432"
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    user: root
+    tmpfs:
+      - /tmp
+
+  postgraphile:
+    image: graphile/postgraphile:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    command:
+      - --connection
+      - postgres://postgraphile:${POSTGRAPHILE_DB_PASSWORD}@pgbouncer:5433/${NAME}
+      - --schema
+      - public
+      - --watch
+      - --enhance-graphiql
+      - --dynamic-json
+      - --no-setof-functions-contain-nulls
+      - --no-ignore-rbac
+      - --show-error-stack=json
+      - --extended-errors
+      - hint,detail,errcode
+      - --export-schema-graphql
+      - /tmp/schema.graphql
+      - --graphiql
+      - /graphiql
+      - --port
+      - "5002"
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  postgres:
+    image: postgres:17-alpine
+    volumes:
+      - /var/lib/docker/persist/postgres_data:/var/lib/postgresql/data
+      - ./services/postgres/init:/docker-entrypoint-initdb.d
+    env_file:
+      - .env
+    networks:
+      - backend
+    command: >
+      postgres -c shared_buffers=256MB -c effective_cache_size=1GB -c maintenance_work_mem=64MB -c checkpoint_completion_target=0.9 -c wal_buffers=16MB -c default_statistics_target=100 -c random_page_cost=1.1 -c effective_io_concurrency=200 -c password_encryption=md5
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -h "${POSTGRES_HOST}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -p "5432"
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - /var/lib/docker/persist/prometheus_data:/prometheus
+      - ./services/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+      - monitoring
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.console.templates=/etc/prometheus/consoles
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./services/promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers
+    env_file:
+      - .env
+    networks:
+      - backend
+      - monitoring
+    command:
+      - -config.file=/etc/promtail/config.yml
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  redactor:
+    image: mcr.microsoft.com/presidio-image-redactor:latest
+    depends_on:
+      analyzer:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - /var/lib/docker/persist/redis_data:/data
+    env_file:
+      - .env
+    networks:
+      - backend
+    command: >
+      redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru --save 900 1 --save 300 10 --save 60 10000
+    restart: always
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli ping
+      timeout: 10s
+      interval: 5s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  redisinsight:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.redisinsight
+      cache_from:
+        - type=registry,ref=localhost:5001/cache
+      cache_to:
+        - type=registry,ref=localhost:5001/cache,mode=max
+    depends_on:
+      redis:
+        condition: service_healthy
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:latest
+    depends_on:
+      kafka:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8081/subjects || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  search:
+    image: opensearchproject/opensearch-dashboards:latest
+    depends_on:
+      opensearch:
+        condition: service_started
+        required: true
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp
+
+  sentry:
+    image: getsentry/sentry:latest
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      sentry-configure:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://${SENTRY_DB_USER}:${SENTRY_DB_PASSWORD}@${SENTRY_DB_HOST}:${SENTRY_DB_PORT}/${SENTRY_DB_NAME}
+    env_file:
+      - .env
+    networks: [ backend, frontend ]
+    restart: always
+    healthcheck:
+      test: [ "CMD", "true" ]
+    tmpfs:
+      - /tmp
+
+  sentry-configure:
+    image: getsentry/sentry:latest
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/sentry/configure.sh:/configure.sh
+    environment:
+      DATABASE_URL: postgresql://${SENTRY_DB_USER}:${SENTRY_DB_PASSWORD}@${SENTRY_DB_HOST}:${SENTRY_DB_PORT}/${SENTRY_DB_NAME}
+    env_file:
+      - .env
+    networks: [ backend ]
+    command:
+      - /configure.sh
+    restart: "no"
+    tmpfs:
+      - /tmp
+
+  sonarqube:
+    image: sonarqube:community
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+        required: true
+    volumes:
+      - /var/lib/docker/persist/sonarqube_data:/opt/sonarqube/data
+      - /var/lib/docker/persist/sonarqube_logs:/opt/sonarqube/logs
+      - /var/lib/docker/persist/sonarqube_extensions:/opt/sonarqube/extensions
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - "true"
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    tmpfs:
+      - /tmp

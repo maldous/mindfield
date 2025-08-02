@@ -1,0 +1,103 @@
+image:
+  repository: mindfield/kong-oidc
+  tag: "latest"
+  pullPolicy: Always
+deployment:
+  kong:
+    enabled: true
+env:
+  database: "off"
+  proxy_access_log: /dev/stdout
+  admin_access_log: /dev/stdout
+  admin_gui_access_log: /dev/stdout
+  portal_api_access_log: /dev/stdout
+  proxy_error_log: /dev/stderr
+  admin_error_log: /dev/stderr
+  admin_gui_error_log: /dev/stderr
+  portal_api_error_log: /dev/stderr
+  plugins: "bundled,oidcify,rate-limiting"
+  router_flavor: traditional
+proxy:
+  enabled: true
+  type: LoadBalancer
+  loadBalancerIP: "192.168.1.251"
+  http:
+    enabled: true
+    servicePort: 80
+    containerPort: 8000
+  tls:
+    enabled: true
+    servicePort: 443
+    containerPort: 8443
+    parameters:
+    - http2
+admin:
+  enabled: true
+  type: ClusterIP
+  http:
+    enabled: true
+    servicePort: 8001
+    containerPort: 8001
+manager:
+  enabled: false
+portal:
+  enabled: false
+enterprise:
+  enabled: false
+ingressController:
+  enabled: true
+  gatewayDiscovery:
+    enabled: false
+  env:
+    kong_admin_token: ""
+    publish_service: gateway/kong-proxy
+    kong_admin_tls_skip_verify: true
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  readOnlyRootFilesystem: true
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  fsGroup: 1000
+serviceAccount:
+  create: true
+  name: kong
+autoscaling:
+  enabled: false
+podDisruptionBudget:
+  enabled: false
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+readinessProbe:
+  httpGet:
+    path: "/status/ready"
+    port: status
+    scheme: HTTP
+  initialDelaySeconds: 5
+  timeoutSeconds: 5
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+livenessProbe:
+  httpGet:
+    path: "/status"
+    port: status
+    scheme: HTTP
+  initialDelaySeconds: 5
+  timeoutSeconds: 5
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3

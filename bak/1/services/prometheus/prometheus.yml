@@ -12,10 +12,149 @@ alerting:
             - alertmanager:9093
 
 scrape_configs:
-  - job_name: prometheus
-    static_configs: [{targets: ["localhost:9090"]}]
-  - job_name: otel-collector-internal
-    static_configs: [{targets: ["collector:8888"]}]
-  - job_name: otel-collector
-    honor_labels: true
-    static_configs: [{targets: ["collector:8889"]}]
+  # Prometheus itself
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # MindField API
+  - job_name: "api"
+    static_configs:
+      - targets: ["api:3000"]
+    metrics_path: "/metrics"
+    scrape_interval: 10s
+
+  # MindField Web App
+  - job_name: "web"
+    static_configs:
+      - targets: ["web:3000"]
+    metrics_path: "/metrics"
+    scrape_interval: 30s
+
+  # MindField Services
+  - job_name: "services"
+    static_configs:
+      - targets:
+          - "render:3000"
+          - "transform:3000"
+          - "submission:3000"
+          - "grapesjs:3000"
+          - "presidio-analyzer:5001"
+          - "presidio-anonymizer:5001"
+          - "presidio-image-redactor:5001"
+    metrics_path: "/metrics"
+    scrape_interval: 30s
+
+  # Infrastructure
+  - job_name: "postgres"
+    static_configs:
+      - targets: ["postgres:5432"]
+    scrape_interval: 30s
+
+  - job_name: "redis"
+    static_configs:
+      - targets: ["redis:6379"]
+    scrape_interval: 30s
+
+  - job_name: "minio"
+    static_configs:
+      - targets: ["minio:9000"]
+    metrics_path: "/minio/v2/metrics/cluster"
+    scrape_interval: 30s
+
+  # Caddy
+  - job_name: "caddy"
+    static_configs:
+      - targets: ["caddy:2019"]
+    metrics_path: "/metrics"
+    scrape_interval: 30s
+
+  # Node Exporter
+  - job_name: "node-exporter"
+    static_configs:
+      - targets: ["node-exporter:9100"]
+    scrape_interval: 15s
+
+  # Kong Gateway
+  - job_name: "kong"
+    static_configs:
+      - targets: ["kong:8001"]
+    metrics_path: "/metrics"
+    scrape_interval: 30s
+
+  # OpenSearch
+  - job_name: "opensearch"
+    static_configs:
+      - targets: ["opensearch:9200"]
+    metrics_path: "/_prometheus/metrics"
+    scrape_interval: 30s
+
+  # OpenTelemetry Collector
+  - job_name: "otel-collector"
+    static_configs:
+      - targets: ["otel-collector:8888"]
+    scrape_interval: 15s
+
+  # Blackbox Exporter - HTTP probes
+  - job_name: "blackbox-http"
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - http://web:3000
+          - http://api:3000/health
+          - http://grafana:3000
+          - http://opensearch-dashboards:5601
+          - http://uptime-kuma:3001
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # Blackbox Exporter - TCP probes
+  - job_name: "blackbox-tcp"
+    metrics_path: /probe
+    params:
+      module: [tcp_connect]
+    static_configs:
+      - targets:
+          - postgres:5432
+          - redis:6379
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: "sonarqube"
+    static_configs:
+      - targets: ["sonarqube:9000"]
+    metrics_path: "/api/monitoring/metrics"
+    scrape_interval: 60s
+
+  # Blackbox Exporter - HTTP probes for new services
+  - job_name: "blackbox-dev-tools"
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - http://postgraphile:5000/graphiql
+          - http://pgadmin:80
+          - http://swagger-ui:8080
+          - http://redoc:80
+          - http://storybook:6006
+          - http://sonarqube:9000
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

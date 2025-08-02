@@ -1,0 +1,11 @@
+# kong-values-oidcify.yaml
+image:
+  repository: localhost:32000/kong-oidcify
+  tag: "3.8"            # or "3.7" if you chose option B
+  pullPolicy: IfNotPresent
+
+env:
+  plugins: "bundled,oidcify"
+  PLUGINSERVER_NAMES: "oidcify"
+  PLUGINSERVER_OIDCIFY_QUERY_CMD: "/usr/local/bin/oidcify -dump"
+  PLUGINSERVER_OIDCIFY_START_CMD: "/usr/local/bin/oidcify"

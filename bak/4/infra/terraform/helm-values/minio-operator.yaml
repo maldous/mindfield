@@ -1,0 +1,34 @@
+operator:
+  image:
+    repository: quay.io/minio/operator
+    tag: v6.0.4
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+    fsGroup: 1000
+console:
+  image:
+    repository: quay.io/minio/console
+    tag: v1.7.0
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+prometheus:
+  namespace: monitoring
+serviceAccount:
+  create: true
+  name: minio-operator

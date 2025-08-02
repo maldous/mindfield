@@ -1,123 +1,268 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 set -euo pipefail
-set -x
 
-KONG_URL=http://kong:8001
+KONG_ADMIN_URL=http://kong:8001
 
-until curl -fs "${KONG_URL}/status" >/dev/null; do sleep 5; done
+until curl -s "$KONG_ADMIN_URL/status" >/dev/null; do sleep 2; done
 
-ensure_global_plugin() {
-  local name=$1   
-  local cfg=$2    
-  if curl -fs "${KONG_URL}/plugins?name=${name}" | jq -e '.data|length>0' >/dev/null; then
-    local pid
-    pid=$(curl -fs "${KONG_URL}/plugins?name=${name}" | jq -r '.data[0].id')
-    curl -fs -X PATCH "${KONG_URL}/plugins/${pid}" \
-    -H 'Content-Type: application/json' \
-    -d "{\"config\":${cfg}}"
-  else
-    curl -fs -X POST "${KONG_URL}/plugins" \
-    -H 'Content-Type: application/json' \
-    -d "{\"name\":\"${name}\",\"config\":${cfg}}"
-  fi
-}
+# Remove global OIDC plugin - apply per service instead
+# Global OIDC causes session_secret issues
 
-ensure_service_plugin() {
-  local svc_id=$1   
-  local cfg=$2      
-  local pid
-  pid=$(curl -fs "${KONG_URL}/services/${svc_id}/plugins" | jq -r '.data[]|select(.name=="oidcify")|.id' || true)
-  if [ -z "${pid}" ]; then
-    curl -fs -X POST "${KONG_URL}/services/${svc_id}/plugins" \
-    -H 'Content-Type: application/json' \
-    -d "{\"name\":\"oidcify\",\"config\":${cfg}}"
-  else
-    curl -fs -X PATCH "${KONG_URL}/plugins/${pid}" \
-    -H 'Content-Type: application/json' \
-    -d "{\"config\":${cfg}}"
-  fi
-}
+if ! curl -s "$KONG_ADMIN_URL/plugins" | grep -q '"name":"rate-limiting"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/plugins" -H "Content-Type: application/json" \
+    -d '{"name":"rate-limiting","config":{"minute":100,"hour":10000,"policy":"local"}}'
+fi
 
-create_stack() {
-  local svc="$1" host="$2" port="$3" fqdn="$4"
-  local client_id="$5" client_secret="$6" cookie="$7" hash="$8" block="$9"
-  local svc_json svc_id
-  svc_json=$(curl -fs -X PUT "${KONG_URL}/services/${svc}" \
-  -H 'Content-Type: application/json' \
-  -d "{\"name\":\"${svc}\",\"host\":\"${host}\",\"port\":${port},\"protocol\":\"http\"}")
-  svc_id=$(echo "${svc_json}" | jq -r '.id')
-  curl -fs -X PUT "${KONG_URL}/routes/${svc}-route" \
-  -H 'Content-Type: application/json' \
-  -d "{
-    \"name\":\"${svc}-route\",
-    \"hosts\":[\"${fqdn}\"],
-    \"methods\":[\"GET\",\"POST\",\"PUT\",\"DELETE\"],
-    \"preserve_host\":true,
-    \"service\":{\"id\":\"${svc_id}\"}
-  }"
-  local plugin_cfg
-  plugin_cfg="{\"issuer\":\"https://keycloak.${DOMAIN}/realms/${NAME}\",\
-  \"client_id\":\"${client_id}\",\"client_secret\":\"${client_secret}\",\
-  \"redirect_uri\":\"https://${fqdn}/callback\",\"consumer_name\":\"oidcuser\",\
-  \"scopes\":[\"openid\",\"email\",\"profile\"],\
-  \"cookie_name\":\"${cookie}_session\",\"cookie_hash_key_hex\":\"${hash}\",\
-  \"cookie_block_key_hex\":\"${block}\"}"
-  ensure_service_plugin "${svc_id}" "${plugin_cfg}"
-}
+if ! curl -s "$KONG_ADMIN_URL/plugins" | grep -q '"name":"cors"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/plugins" -H "Content-Type: application/json" \
+    -d "{\"name\":\"cors\",\"config\":{\"origins\":[\"https://$DOMAIN\",\"http://localhost:3000\"],\"methods\":[\"GET\",\"POST\",\"PUT\",\"DELETE\",\"OPTIONS\"],\"headers\":[\"Accept\",\"Authorization\",\"Content-Type\"],\"exposed_headers\":[\"X-Auth-Token\"],\"credentials\":true,\"max_age\":3600}}"
+fi
 
-ensure_global_plugin "rate-limiting" '{"minute":6000,"policy":"local","limit_by":"ip"}'
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"api-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"api-service","url":"http://api:3000"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/api-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"api-route","paths":["/api"],"strip_path":true}'
+  # Add oidcify protection to api service
+  curl -s -X POST "$KONG_ADMIN_URL/services/api-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://api.'"$DOMAIN"'/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "3f7a1c9d2b4e5f6a7b8c9d0e1f2a3b4c",
+        "cookie_block_key_hex": "4a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+      }
+    }'
+fi
 
-curl -fs -X PUT "${KONG_URL}/consumers/oidcuser" \
-  -H 'Content-Type: application/json' \
-  -d '{"username":"oidcuser","custom_id":"oidcuser"}'
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"submission-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"submission-service","url":"http://submission:3000"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/submission-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"submission-route","paths":["/services/submission"],"strip_path":true}'
+  # Add oidcify protection to submission service
+  curl -s -X POST "$KONG_ADMIN_URL/services/submission-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://'"$DOMAIN"'/services/submission/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "3f7a1c9d2b4e5f6a7b8c9d0e1f2a3b4c",
+        "cookie_block_key_hex": "4a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+      }
+    }'
+fi
 
-root_svc_json=$(curl -fs -X PUT "${KONG_URL}/services/root" \
-  -H 'Content-Type: application/json' \
-  -d '{"name":"root","host":"kong","port":8000,"protocol":"http"}')
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"transform-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"transform-service","url":"http://transform:3000"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/transform-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"transform-route","paths":["/services/transform"],"strip_path":true}'
+  # Add oidcify protection to transform service
+  curl -s -X POST "$KONG_ADMIN_URL/services/transform-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://'"$DOMAIN"'/services/transform/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "3f7a1c9d2b4e5f6a7b8c9d0e1f2a3b4c",
+        "cookie_block_key_hex": "4a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+      }
+    }'
+fi
 
-root_id=$(echo "${root_svc_json}" | jq -r '.id')
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"render-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"render-service","url":"http://render:3000"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/render-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"render-route","paths":["/services/render"],"strip_path":true}'
+  # Add oidcify protection to render service
+  curl -s -X POST "$KONG_ADMIN_URL/services/render-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://'"$DOMAIN"'/services/render/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "3f7a1c9d2b4e5f6a7b8c9d0e1f2a3b4c",
+        "cookie_block_key_hex": "4a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+      }
+    }'
+fi
 
-curl -fs -X PUT "${KONG_URL}/routes/root-route" \
-  -H 'Content-Type: application/json' \
-  -d "{
-  \"name\":\"root-route\",
-  \"hosts\":[\"${DOMAIN}\"],
-  \"paths\":[\"/\"],
-  \"strip_path\":false,
-  \"methods\":[\"GET\",\"POST\",\"PUT\",\"DELETE\"],
-  \"preserve_host\":true,
-  \"service\":{\"id\":\"${root_id}\"}
-}"
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"presidio-analyzer-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"presidio-analyzer-service","url":"http://presidio-analyzer:5001"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/presidio-analyzer-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"presidio-analyzer-route","paths":["/services/presidio/analyzer"],"strip_path":true}'
+fi
 
-root_cfg="{\"issuer\":\"https://keycloak.${DOMAIN}/realms/${NAME}\",\
-  \"client_id\":\"${CLIENT_ID_ROOT}\",\"client_secret\":\"${CLIENT_SECRET_ROOT}\",\
-  \"redirect_uri\":\"https://${DOMAIN}/callback\",\"consumer_name\":\"oidcuser\",\
-  \"scopes\":[\"openid\",\"email\",\"profile\"],\
-  \"cookie_name\":\"root_session\",\"cookie_hash_key_hex\":\"${KONG_COOKIE_HASH_ROOT}\",\
-  \"cookie_block_key_hex\":\"${KONG_COOKIE_BLOCK_ROOT}\"}"
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"presidio-anonymizer-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"presidio-anonymizer-service","url":"http://presidio-anonymizer:5001"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/presidio-anonymizer-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"presidio-anonymizer-route","paths":["/services/presidio/anonymizer"],"strip_path":true}'
+fi
 
-ensure_service_plugin "${root_id}" "${root_cfg}"
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"presidio-image-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"presidio-image-service","url":"http://presidio-image-redactor:5001"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/presidio-image-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"presidio-image-route","paths":["/services/presidio/image"],"strip_path":true}'
+fi
 
-create_stack pgadmin pgadmin 80 "pgadmin.${DOMAIN}" "${CLIENT_ID_PGADMIN}" "${CLIENT_SECRET_PGADMIN}" pgadmin "${KONG_COOKIE_HASH_PGADMIN}" "${KONG_COOKIE_BLOCK_PGADMIN}"
-create_stack mailhog mailhog 8025 "mailhog.${DOMAIN}" "${CLIENT_ID_MAILHOG}" "${CLIENT_SECRET_MAILHOG}" mailhog "${KONG_COOKIE_HASH_MAILHOG}" "${KONG_COOKIE_BLOCK_MAILHOG}"
-create_stack redisinsight redisinsight 5540 "redisinsight.${DOMAIN}" "${CLIENT_ID_REDISINSIGHT}" "${CLIENT_SECRET_REDISINSIGHT}" redisinsight "${KONG_COOKIE_HASH_REDISINSIGHT}" "${KONG_COOKIE_BLOCK_REDISINSIGHT}"
-create_stack minio minio 9001 "minio.${DOMAIN}" "${CLIENT_ID_MINIO}" "${CLIENT_SECRET_MINIO}" minio "${KONG_COOKIE_HASH_MINIO}" "${KONG_COOKIE_BLOCK_MINIO}"
-create_stack alertmanager alertmanager 9093 "alertmanager.${DOMAIN}" "${CLIENT_ID_ALERTMANAGER}" "${CLIENT_SECRET_ALERTMANAGER}" alertmanager "${KONG_COOKIE_HASH_ALERTMANAGER}" "${KONG_COOKIE_BLOCK_ALERTMANAGER}"
-create_stack blackbox blackbox 9115 "blackbox.${DOMAIN}" "${CLIENT_ID_BLACKBOX}" "${CLIENT_SECRET_BLACKBOX}" blackbox "${KONG_COOKIE_HASH_BLACKBOX}" "${KONG_COOKIE_BLOCK_BLACKBOX}"
-create_stack grafana grafana 3000 "grafana.${DOMAIN}" "${CLIENT_ID_GRAFANA}" "${CLIENT_SECRET_GRAFANA}" grafana "${KONG_COOKIE_HASH_GRAFANA}" "${KONG_COOKIE_BLOCK_GRAFANA}"
-create_stack jaeger jaeger 16686 "jaeger.${DOMAIN}" "${CLIENT_ID_JAEGER}" "${CLIENT_SECRET_JAEGER}" jaeger "${KONG_COOKIE_HASH_JAEGER}" "${KONG_COOKIE_BLOCK_JAEGER}"
-create_stack kuma kuma 3001 "kuma.${DOMAIN}" "${CLIENT_ID_KUMA}" "${CLIENT_SECRET_KUMA}" kuma "${KONG_COOKIE_HASH_KUMA}" "${KONG_COOKIE_BLOCK_KUMA}"
-create_stack promtail promtail 9080 "promtail.${DOMAIN}" "${CLIENT_ID_PROMTAIL}" "${CLIENT_SECRET_PROMTAIL}" promtail "${KONG_COOKIE_HASH_PROMTAIL}" "${KONG_COOKIE_BLOCK_PROMTAIL}"
-create_stack search search 5601 "search.${DOMAIN}" "${CLIENT_ID_SEARCH}" "${CLIENT_SECRET_SEARCH}" search "${KONG_COOKIE_HASH_SEARCH}" "${KONG_COOKIE_BLOCK_SEARCH}"
-create_stack sonarqube sonarqube 9000 "sonarqube.${DOMAIN}" "${CLIENT_ID_SONARQUBE}" "${CLIENT_SECRET_SONARQUBE}" sonarqube "${KONG_COOKIE_HASH_SONARQUBE}" "${KONG_COOKIE_BLOCK_SONARQUBE}"
-create_stack docs docs 8005 "docs.${DOMAIN}" "${CLIENT_ID_DOCS}" "${CLIENT_SECRET_DOCS}" docs "${KONG_COOKIE_HASH_DOCS}" "${KONG_COOKIE_BLOCK_DOCS}"
-create_stack postgraphile postgraphile 5002 "postgraphile.${DOMAIN}" "${CLIENT_ID_POSTGRAPHILE}" "${CLIENT_SECRET_POSTGRAPHILE}" postgraphile "${KONG_COOKIE_HASH_POSTGRAPHILE}" "${KONG_COOKIE_BLOCK_POSTGRAPHILE}"
-create_stack gitlab gitlab 80 "gitlab.${DOMAIN}" "${CLIENT_ID_GITLAB}" "${CLIENT_SECRET_GITLAB}" gitlab "${KONG_COOKIE_HASH_GITLAB}" "${KONG_COOKIE_BLOCK_GITLAB}"
-create_stack cadence cadence 8088 "cadence.${DOMAIN}" "${CLIENT_ID_CADENCE}" "${CLIENT_SECRET_CADENCE}" cadence "${KONG_COOKIE_HASH_CADENCE}" "${KONG_COOKIE_BLOCK_CADENCE}"
-create_stack sentry sentry 9000 "sentry.${DOMAIN}" "${CLIENT_ID_SENTRY}" "${CLIENT_SECRET_SENTRY}" sentry "${KONG_COOKIE_HASH_SENTRY}" "${KONG_COOKIE_BLOCK_SENTRY}"
-create_stack nui nui 31311 "nui.${DOMAIN}" "${CLIENT_ID_NUI}" "${CLIENT_SECRET_NUI}" nui "${KONG_COOKIE_HASH_NUI}" "${KONG_COOKIE_BLOCK_NUI}"
-create_stack akhq akhq 8080 "akhq.${DOMAIN}" "${CLIENT_ID_AKHQ}" "${CLIENT_SECRET_AKHQ}" akhq "${KONG_COOKIE_HASH_AKHQ}" "${KONG_COOKIE_BLOCK_AKHQ}"
-create_stack netdata netdata 19999 "netdata.${DOMAIN}" "${CLIENT_ID_NETDATA}" "${CLIENT_SECRET_NETDATA}" netdata "${KONG_COOKIE_HASH_NETDATA}" "${KONG_COOKIE_BLOCK_NETDATA}"
-create_stack kong kong 8002 "kong.${DOMAIN}" "${CLIENT_ID_KONG}" "${CLIENT_SECRET_KONG}" kong "${KONG_COOKIE_HASH_KONG}" "${KONG_COOKIE_BLOCK_KONG}"
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"grapesjs-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"grapesjs-service","url":"http://grapesjs:3000"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/grapesjs-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"grapesjs-route","paths":["/services/grapesjs"],"strip_path":true}'
+  # Add oidcify protection to grapesjs service
+  curl -s -X POST "$KONG_ADMIN_URL/services/grapesjs-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://grapesjs.'"$DOMAIN"'/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "3f7a1c9d2b4e5f6a7b8c9d0e1f2a3b4c",
+        "cookie_block_key_hex": "4a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+      }
+    }'
+fi
 
-echo -e "\nservices/kong/configure.sh"
+# Create Kong consumer for oidcify
+if ! curl -s "$KONG_ADMIN_URL/consumers" | grep -q '"username":"oidc-user"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/consumers" -H "Content-Type: application/json" \
+    -d '{"username":"oidc-user"}'
+fi
+
+# Add protected routes for all services
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"web-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"web-service","url":"http://web:3000"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/web-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"web-route","hosts":["'"$DOMAIN"'"],"strip_path":false}'
+  # Add oidcify protection to web service
+  curl -s -X POST "$KONG_ADMIN_URL/services/web-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://'"$DOMAIN"'/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "3f7a1c9d2b4e5f6a7b8c9d0e1f2a3b4c",
+        "cookie_block_key_hex": "4a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+      }
+    }'
+fi
+
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"grafana-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"grafana-service","url":"http://grafana:3000"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/grafana-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"grafana-route","hosts":["grafana.'"$DOMAIN"'"],"strip_path":false}'
+  # Add oidcify protection to grafana service
+  curl -s -X POST "$KONG_ADMIN_URL/services/grafana-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://grafana.'"$DOMAIN"'/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "3f7a1c9d2b4e5f6a7b8c9d0e1f2a3b4c",
+        "cookie_block_key_hex": "4a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+      }
+    }'
+fi
+
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"minio-console-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"minio-console-service","url":"http://minio:9001"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/minio-console-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"minio-console-route","hosts":["minio-console.'"$DOMAIN"'"],"strip_path":false}'
+  # Add oidcify protection to minio-console service
+  curl -s -X POST "$KONG_ADMIN_URL/services/minio-console-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://minio-console.'"$DOMAIN"'/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "3f7a1c9d2b4e5f6a7b8c9d0e1f2a3b4c",
+        "cookie_block_key_hex": "4a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+      }
+    }'
+fi
+
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"pgadmin-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"pgadmin-service","url":"http://pgadmin:80"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/pgadmin-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"pgadmin-route","hosts":["pgadmin.'"$DOMAIN"'"],"strip_path":false}'
+  # Add oidcify protection to pgadmin service
+  curl -s -X POST "$KONG_ADMIN_URL/services/pgadmin-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://pgadmin.'"$DOMAIN"'/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "3f7a1c9d2b4e5f6a7b8c9d0e1f2a3b4c",
+        "cookie_block_key_hex": "4a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+      }
+    }'
+fi
+
+if ! curl -s "$KONG_ADMIN_URL/services" | grep -q '"name":"prometheus-service"'; then
+  curl -s -X POST "$KONG_ADMIN_URL/services" -H "Content-Type: application/json" \
+    -d '{"name":"prometheus-service","url":"http://prometheus:9090"}'
+  curl -s -X POST "$KONG_ADMIN_URL/services/prometheus-service/routes" -H "Content-Type: application/json" \
+    -d '{"name":"prometheus-route","hosts":["prometheus.'"$DOMAIN"'"],"strip_path":false}'
+  # Add oidcify protection to prometheus service
+  curl -s -X POST "$KONG_ADMIN_URL/services/prometheus-service/plugins" -H "Content-Type: application/json" \
+    -d '{
+      "name": "oidcify",
+      "config": {
+        "issuer": "http://keycloak:8080/realms/mindfield",
+        "client_id": "'"$OIDC_CLIENT_ID"'",
+        "client_secret": "'"$OIDC_CLIENT_SECRET"'",
+        "redirect_uri": "https://prometheus.'"$DOMAIN"'/cb",
+        "consumer_name": "oidc-user",
+        "scopes": ["openid", "profile", "email"],
+        "cookie_hash_key_hex": "3f7a1c9d2b4e5f6a7b8c9d0e1f2a3b4c",
+        "cookie_block_key_hex": "4a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+      }
+    }'
+fi
+

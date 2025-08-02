@@ -1,7 +1,6 @@
 global:
   smtp_smarthost: "mailhog:1025"
-  smtp_from: "alerts@localhost"
-  smtp_require_tls: false
+  smtp_from: "alerts@mindfield.local"
 
 route:
   group_by: ["alertname"]
@@ -13,10 +12,9 @@ route:
 receivers:
   - name: "web.hook"
     email_configs:
-      - to: "admin@localhost"
-        require_tls: false
+      - to: "admin@mindfield.local"
         html: |
-          Alert: {{ .GroupLabels.alertname }}
+          MindField Alert: {{ .GroupLabels.alertname }}
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Description: {{ .Annotations.description }}

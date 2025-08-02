@@ -2,7 +2,6 @@ FROM caddy:2.10.0-builder AS builder
 
 RUN xcaddy build \
     --with github.com/RussellLuo/caddy-ext/ratelimit \
-    --with github.com/pberkel/caddy-storage-redis \
     --with github.com/greenpau/caddy-security
 
 FROM caddy:2.10.0
